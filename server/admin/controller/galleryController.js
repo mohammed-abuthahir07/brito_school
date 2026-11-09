@@ -24,7 +24,6 @@ const listGalleries = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -38,6 +37,9 @@ const addGallery = async (req, res) => {
     const file = req.file;
 
     if (!title || !file) {
+      if (file && file.path) {
+        await fs.promises.unlink(file.path).catch(() => {});
+      }
       return res.status(400).json({
         success: false,
         message: "Title and an image file are required via form-data",
@@ -54,11 +56,13 @@ const addGallery = async (req, res) => {
       gallery: newGallery,
     });
   } catch (error) {
+    if (req.file && req.file.path) {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+    }
     console.error("Upload Gallery Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -73,6 +77,9 @@ const editGallery = async (req, res) => {
     const file = req.file;
 
     if (!id) {
+      if (file && file.path) {
+        await fs.promises.unlink(file.path).catch(() => {});
+      }
       return res.status(400).json({
         success: false,
         message: "Gallery ID is required in query parameters",
@@ -81,6 +88,9 @@ const editGallery = async (req, res) => {
 
     const existing = await getGalleryById(id);
     if (!existing) {
+      if (file && file.path) {
+        await fs.promises.unlink(file.path).catch(() => {});
+      }
       return res.status(404).json({
         success: false,
         message: "Gallery item not found",
@@ -116,11 +126,13 @@ const editGallery = async (req, res) => {
       gallery: updatedGallery,
     });
   } catch (error) {
+    if (req.file && req.file.path) {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+    }
     console.error("Update Gallery Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -170,7 +182,6 @@ const removeGallery = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };

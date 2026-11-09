@@ -1,5 +1,6 @@
 require("dotenv").config();
 const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 const pool = require("./config/db");
@@ -69,7 +70,7 @@ app.use(
 app.use("/docs", express.static(path.join(__dirname, "docs")));
 
 // =====================================
-// Health Check Endpoint (Liveness & Readiness Probes)
+// Health Check Endpoint (Liveness, Readiness & Storage Probes)
 // =====================================
 app.get("/health", async (req, res) => {
   let dbStatus = "DISCONNECTED";
@@ -83,10 +84,31 @@ app.get("/health", async (req, res) => {
       dbLatencyMs = parseFloat((performance.now() - start).toFixed(2));
     }
   } catch (err) {
-    dbStatus = "ERROR: " + err.message;
+    dbStatus = "UNREACHABLE";
+    console.error("Health check database ping failure:", err.message);
   }
 
   const memory = process.memoryUsage();
+  let diskMetrics = null;
+
+  try {
+    const stat = await fs.promises.statfs(uploadsPath);
+    diskMetrics = {
+      freeGb: parseFloat(((stat.bfree * stat.bsize) / (1024 ** 3)).toFixed(2)),
+      totalGb: parseFloat(((stat.blocks * stat.bsize) / (1024 ** 3)).toFixed(2)),
+      usagePercent: parseFloat((((stat.blocks - stat.bfree) / stat.blocks) * 100).toFixed(1)),
+    };
+  } catch (diskErr) {
+    // Non-fatal if statfs is unsupported on host
+  }
+
+  const poolMetrics = pool.pool
+    ? {
+        totalConnections: pool.pool._allConnections ? pool.pool._allConnections.length : 0,
+        freeConnections: pool.pool._freeConnections ? pool.pool._freeConnections.length : 0,
+        waitingRequests: pool.pool._connectionQueue ? pool.pool._connectionQueue.length : 0,
+      }
+    : null;
 
   return res.status(dbStatus === "CONNECTED" ? 200 : 503).json({
     status: dbStatus === "CONNECTED" ? "UP" : "DEGRADED",
@@ -96,6 +118,8 @@ app.get("/health", async (req, res) => {
       status: dbStatus,
       latencyMs: dbLatencyMs,
     },
+    connectionPool: poolMetrics,
+    storage: diskMetrics,
     memory: {
       rssMb: parseFloat((memory.rss / (1024 * 1024)).toFixed(2)),
       heapUsedMb: parseFloat((memory.heapUsed / (1024 * 1024)).toFixed(2)),

@@ -108,7 +108,7 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(res.headers.get("x-frame-options"), "SAMEORIGIN");
     });
 
-    test("GET /health returns 200 with UP status and DB connectivity", async () => {
+    test("GET /health returns 200 with UP status, DB connectivity, pool, and storage metrics", async () => {
       const res = await request("/health");
       assert.equal(res.status, 200);
       assert.equal(res.data.status, "UP");
@@ -116,6 +116,10 @@ describe("Brito School Backend API Test Suite", () => {
       assert.ok(typeof res.data.database.latencyMs === "number");
       assert.ok(typeof res.data.uptimeSeconds === "number");
       assert.ok(res.data.memory.heapUsedMb > 0);
+      assert.ok(res.data.storage);
+      assert.ok(typeof res.data.storage.freeGb === "number");
+      assert.ok(res.data.connectionPool);
+      assert.ok(typeof res.data.connectionPool.totalConnections === "number");
     });
   });
 
@@ -432,6 +436,23 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(res.data.success, false);
     });
 
+    test("POST /api/admin/calendars rejects fake PDF without %PDF magic bytes", async () => {
+      const form = new FormData();
+      form.append("title", "Fake PDF");
+      const fakeBlob = new Blob(["PLAIN_TEXT_NOT_A_REAL_PDF"], { type: "application/pdf" });
+      form.append("file", fakeBlob, "fake.pdf");
+
+      const res = await request("/api/admin/calendars", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: form,
+      });
+
+      assert.equal(res.status, 400);
+      assert.equal(res.data.success, false);
+      assert.match(res.data.message, /Invalid file content/);
+    });
+
     test("DELETE /api/admin/calendars returns 400 when id is missing", async () => {
       const res = await request("/api/admin/calendars", {
         method: "DELETE",
@@ -477,6 +498,23 @@ describe("Brito School Backend API Test Suite", () => {
       });
       assert.equal(res.status, 400);
       assert.equal(res.data.success, false);
+    });
+
+    test("POST /api/admin/galleries rejects fake image without image magic bytes", async () => {
+      const form = new FormData();
+      form.append("title", "Fake Image");
+      const fakeBlob = new Blob(["PLAIN_TEXT_NOT_A_REAL_IMAGE"], { type: "image/png" });
+      form.append("image", fakeBlob, "fake.png");
+
+      const res = await request("/api/admin/galleries", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: form,
+      });
+
+      assert.equal(res.status, 400);
+      assert.equal(res.data.success, false);
+      assert.match(res.data.message, /Invalid file content/);
     });
 
     test("DELETE /api/admin/galleries returns 400 when id is missing", async () => {

@@ -15,7 +15,6 @@ const { verifyToken } = require("../middleware/authMiddleware");
 // =====================================
 const uploadDir = path.join(__dirname, "../../uploads/calendars");
 
-// Ensure directory exists synchronously on startup
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -26,12 +25,13 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "calendar-" + uniqueSuffix + path.extname(file.originalname));
+    cb(null, "calendar-" + uniqueSuffix + path.extname(file.originalname).toLowerCase());
   },
 });
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "application/pdf") {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (file.mimetype === "application/pdf" && ext === ".pdf") {
     cb(null, true);
   } else {
     cb(new Error("Only PDF files are allowed!"), false);
@@ -44,22 +44,60 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
+// Middleware: Validate Magic Bytes for PDF (%PDF)
+const validatePdfMagicBytes = async (req, res, next) => {
+  if (req.file) {
+    try {
+      const fd = await fs.promises.open(req.file.path, "r");
+      const buffer = Buffer.alloc(4);
+      await fd.read(buffer, 0, 4, 0);
+      await fd.close();
+
+      // Check for %PDF (0x25, 0x50, 0x44, 0x46)
+      if (buffer.toString("utf8", 0, 4) !== "%PDF") {
+        await fs.promises.unlink(req.file.path).catch(() => {});
+        return res.status(400).json({
+          success: false,
+          message: "Invalid file content: Uploaded file is not a valid PDF document.",
+        });
+      }
+    } catch (err) {
+      if (req.file && req.file.path) {
+        await fs.promises.unlink(req.file.path).catch(() => {});
+      }
+      return res.status(400).json({
+        success: false,
+        message: "Failed to verify file integrity",
+      });
+    }
+  }
+  next();
+};
+
 // =====================================
 // Calendar Routes (Protected)
 // =====================================
 router.get("/calendars", verifyToken, listCalendars);
-router.post("/calendars", verifyToken, (req, res, next) => {
-  upload.single("file")(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({
-        success: false,
-        message: "Multer Upload Error",
-        error: err.message,
-      });
-    }
-    next();
-  });
-}, addCalendar);
+
+router.post(
+  "/calendars",
+  verifyToken,
+  (req, res, next) => {
+    upload.single("file")(req, res, (err) => {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          message: "Multer Upload Error",
+          error: err.message,
+        });
+      }
+      next();
+    });
+  },
+  validatePdfMagicBytes,
+  addCalendar
+);
+
 router.delete("/calendars", verifyToken, removeCalendar);
 
 module.exports = router;

@@ -23,7 +23,6 @@ const listCalendars = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -37,6 +36,9 @@ const addCalendar = async (req, res) => {
     const file = req.file;
 
     if (!title || !file) {
+      if (file && file.path) {
+        await fs.promises.unlink(file.path).catch(() => {});
+      }
       return res.status(400).json({
         success: false,
         message: "Title and a PDF file are required via form-data",
@@ -53,11 +55,13 @@ const addCalendar = async (req, res) => {
       calendar: newCalendar,
     });
   } catch (error) {
+    if (req.file && req.file.path) {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+    }
     console.error("Upload Calendar Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -107,7 +111,6 @@ const removeCalendar = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };

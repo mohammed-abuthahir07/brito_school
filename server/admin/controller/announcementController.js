@@ -22,7 +22,6 @@ const listAnnouncements = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -58,7 +57,6 @@ const addAnnouncement = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -103,7 +101,6 @@ const editAnnouncement = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -141,7 +138,6 @@ const removeAnnouncement = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };

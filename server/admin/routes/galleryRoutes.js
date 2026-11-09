@@ -26,12 +26,15 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "gallery-" + uniqueSuffix + path.extname(file.originalname));
+    cb(null, "gallery-" + uniqueSuffix + path.extname(file.originalname).toLowerCase());
   },
 });
 
+const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (file.mimetype.startsWith("image/") && allowedExtensions.includes(ext)) {
     cb(null, true);
   } else {
     cb(new Error("Only image files are allowed for galleries!"), false);
@@ -43,6 +46,48 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: fileFilter,
 });
+
+// Middleware: Validate Magic Bytes for Images
+const validateImageMagicBytes = async (req, res, next) => {
+  if (req.file) {
+    try {
+      const fd = await fs.promises.open(req.file.path, "r");
+      const buffer = Buffer.alloc(12);
+      await fd.read(buffer, 0, 12, 0);
+      await fd.close();
+
+      const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+      const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
+      const isGif = buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46;
+      const isWebp =
+        buffer[0] === 0x52 &&
+        buffer[1] === 0x49 &&
+        buffer[2] === 0x46 &&
+        buffer[3] === 0x46 &&
+        buffer[8] === 0x57 &&
+        buffer[9] === 0x45 &&
+        buffer[10] === 0x42 &&
+        buffer[11] === 0x50;
+
+      if (!isJpeg && !isPng && !isGif && !isWebp) {
+        await fs.promises.unlink(req.file.path).catch(() => {});
+        return res.status(400).json({
+          success: false,
+          message: "Invalid file content: Uploaded file is not a valid image.",
+        });
+      }
+    } catch (err) {
+      if (req.file && req.file.path) {
+        await fs.promises.unlink(req.file.path).catch(() => {});
+      }
+      return res.status(400).json({
+        success: false,
+        message: "Failed to verify image integrity",
+      });
+    }
+  }
+  next();
+};
 
 // =====================================
 // Gallery Routes (Protected)
@@ -64,6 +109,7 @@ router.post(
       next();
     });
   },
+  validateImageMagicBytes,
   addGallery
 );
 
@@ -82,6 +128,7 @@ router.put(
       next();
     });
   },
+  validateImageMagicBytes,
   editGallery
 );
 

@@ -23,7 +23,6 @@ const listKurals = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -65,11 +64,17 @@ const addKural = async (req, res) => {
       kural: newKural,
     });
   } catch (error) {
+    // Handle concurrent duplicate key race condition safely
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(400).json({
+        success: false,
+        message: `Kural number ${req.body.kural_number} already exists`,
+      });
+    }
     console.error("Add Kural Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -118,11 +123,16 @@ const editKural = async (req, res) => {
       kural: updatedKural,
     });
   } catch (error) {
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(400).json({
+        success: false,
+        message: `Kural number ${req.body.kural_number} already exists`,
+      });
+    }
     console.error("Update Kural Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
@@ -160,7 +170,6 @@ const removeKural = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };
