@@ -91,14 +91,18 @@ const editGallery = async (req, res) => {
     const updatedDescription = description !== undefined ? description : existing.description;
     let updatedImagePath = existing.image_path;
 
-    // If a new image file is uploaded, delete the old physical file and use the new path
+    // If a new image file is uploaded, delete the old physical file asynchronously and use the new path
     if (file) {
       updatedImagePath = `/uploads/galleries/${file.filename}`;
 
       if (existing.image_path) {
         const oldServerFilePath = path.join(__dirname, "../../", existing.image_path);
-        if (fs.existsSync(oldServerFilePath)) {
-          fs.unlinkSync(oldServerFilePath);
+        try {
+          await fs.promises.unlink(oldServerFilePath);
+        } catch (fileErr) {
+          if (fileErr.code !== "ENOENT") {
+            console.warn("Notice: could not unlink old gallery file:", fileErr.message);
+          }
         }
       }
     }
@@ -143,11 +147,15 @@ const removeGallery = async (req, res) => {
       });
     }
 
-    // Remove physical image file from server folder safely
+    // Remove physical image file asynchronously to avoid event loop blocking
     if (existing.image_path) {
       const serverFilePath = path.join(__dirname, "../../", existing.image_path);
-      if (fs.existsSync(serverFilePath)) {
-        fs.unlinkSync(serverFilePath);
+      try {
+        await fs.promises.unlink(serverFilePath);
+      } catch (fileErr) {
+        if (fileErr.code !== "ENOENT") {
+          console.warn("Notice: could not unlink gallery file:", fileErr.message);
+        }
       }
     }
 

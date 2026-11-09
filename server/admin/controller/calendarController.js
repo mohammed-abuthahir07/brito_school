@@ -84,11 +84,15 @@ const removeCalendar = async (req, res) => {
       });
     }
 
-    // Remove physical PDF file from server folder safely
+    // Remove physical PDF file asynchronously to avoid event loop blocking
     if (existing.file_path) {
       const serverFilePath = path.join(__dirname, "../../", existing.file_path);
-      if (fs.existsSync(serverFilePath)) {
-        fs.unlinkSync(serverFilePath);
+      try {
+        await fs.promises.unlink(serverFilePath);
+      } catch (fileErr) {
+        if (fileErr.code !== "ENOENT") {
+          console.warn("Notice: could not unlink calendar file:", fileErr.message);
+        }
       }
     }
 

@@ -1,0 +1,614 @@
+{
+  "info": {
+    "name": "Brito School Backend API",
+    "_postman_id": "brito-school-api-collection-v1",
+    "description": "Comprehensive Postman Collection covering all 22 endpoints of the Brito School Express.js + MySQL backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. System Health",
+      "item": [
+        {
+          "name": "System Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Liveness and readiness health check returning database status and uptime."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.token) {",
+                  "        pm.environment.set('auth_token', json.token);",
+                  "        console.log('Saved auth_token to environment');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@britoschool.com\",\n  \"password\": \"adminPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "login"]
+            },
+            "description": "Authenticates admin credentials, saves JWT token to environment."
+          }
+        },
+        {
+          "name": "Forgot Password (Send OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@britoschool.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "forgot-password"]
+            },
+            "description": "Sends 6-digit OTP code to registered admin email (valid for 2 minutes)."
+          }
+        },
+        {
+          "name": "Reset Password with OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@britoschool.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"newSecurePass2026\",\n  \"confirmPassword\": \"newSecurePass2026\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/reset-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "reset-password"]
+            },
+            "description": "Verifies OTP and resets admin password using bcrypt."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Announcements",
+      "item": [
+        {
+          "name": "List All Announcements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/announcements",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "announcements"]
+            }
+          }
+        },
+        {
+          "name": "Create Announcement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Sports Day 2026\",\n  \"content\": \"Annual sports competitions commence next week.\",\n  \"category\": \"Events\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/announcements",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "announcements"]
+            }
+          }
+        },
+        {
+          "name": "Edit Announcement",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Sports Day 2026 - Venue Confirmed\",\n  \"content\": \"Events will take place at the Main Stadium.\",\n  \"category\": \"Events\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/announcements?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "announcements"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Announcement",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/announcements?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "announcements"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Academic Calendars",
+      "item": [
+        {
+          "name": "List All Calendars",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/calendars",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "calendars"]
+            }
+          }
+        },
+        {
+          "name": "Upload Calendar PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Academic Calendar 2026-2027",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Complete exam dates and vacation milestones",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/calendars",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "calendars"]
+            }
+          }
+        },
+        {
+          "name": "Delete Calendar",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/calendars?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "calendars"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Galleries",
+      "item": [
+        {
+          "name": "List All Galleries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/galleries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "galleries"]
+            }
+          }
+        },
+        {
+          "name": "Upload Gallery Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Science Lab Opening",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "State of the art robotics facility",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/galleries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "galleries"]
+            }
+          }
+        },
+        {
+          "name": "Edit Gallery Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Science Lab Opening - Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/galleries?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "galleries"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Gallery Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/galleries?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "galleries"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Thirukkural",
+      "item": [
+        {
+          "name": "List All Thirukkural Verses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/thirukkural",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "thirukkural"]
+            }
+          }
+        },
+        {
+          "name": "Add New Kural",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kural_number\": 1,\n  \"tamil_text\": \"அகர முதல எழுத்தெல்லாம் ஆதி\\nபகவன் முதற்றே உலகு.\",\n  \"english_meaning\": \"As the letter A is the first of all letters, so the eternal God is first in the world.\",\n  \"explanation\": \"Just as 'A' begins the alphabet, God is the source and origin of the universe.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/thirukkural",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "thirukkural"]
+            }
+          }
+        },
+        {
+          "name": "Edit Kural",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"explanation\": \"Updated philosophical explanation of the kural.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/thirukkural?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "thirukkural"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Kural",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/thirukkural?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "thirukkural"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Admin Profile",
+      "item": [
+        {
+          "name": "Get Admin Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Create Admin Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Headmaster Robert\",\n  \"alternative_email\": \"headmaster@britoschool.com\",\n  \"phone_primary\": \"+91 9876543210\",\n  \"phone_secondary\": \"+91 9876543211\",\n  \"School_location\": \"Main Campus, Chennai\",\n  \"bio\": \"Serving as educational leader for 15+ years.\",\n  \"emergency_contact_phone\": \"+91 9876543299\",\n  \"linkedin_url\": \"https://linkedin.com/in/brito-headmaster\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Admin Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Updated administrative bio and goals.\",\n  \"School_location\": \"New Campus Wing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Delete Admin Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "profile"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

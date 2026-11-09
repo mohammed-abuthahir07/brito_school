@@ -2,6 +2,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { findAdminByEmail } = require("../model/adminAuthmodel");
 
+// Pre-computed dummy hash to prevent timing-based email enumeration attacks
+const DUMMY_HASH = "$2b$10$1A2B3C4D5E6F7G8H9I0J1u1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6";
+
 // =====================================
 // Admin Login Controller
 // =====================================
@@ -20,17 +23,11 @@ const adminLogin = async (req, res) => {
     // Find Admin
     const admin = await findAdminByEmail(email);
 
-    if (!admin) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
+    // Constant-time comparison mitigating account enumeration timing attacks
+    const hashToCompare = admin ? admin.password : DUMMY_HASH;
+    const isMatch = await bcrypt.compare(password, hashToCompare);
 
-    // Compare Password
-    const isMatch = await bcrypt.compare(password, admin.password);
-
-    if (!isMatch) {
+    if (!admin || !isMatch) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",

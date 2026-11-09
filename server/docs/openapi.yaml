@@ -1,0 +1,901 @@
+openapi: 3.0.3
+info:
+  title: Brito School Backend API
+  description: Official OpenAPI 3.0.3 specification for Brito School Express.js + MySQL backend.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+    description: Local Development Server
+
+paths:
+  /health:
+    get:
+      summary: System & Database Health Check
+      description: Returns real-time application uptime, database ping latency, and memory consumption metrics for Docker, Kubernetes, and load balancers.
+      tags:
+        - Health
+      responses:
+        '200':
+          description: System is healthy and operational
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptimeSeconds:
+                    type: integer
+                    example: 3600
+                  database:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: "CONNECTED"
+                      latencyMs:
+                        type: number
+                        example: 1.25
+                  memory:
+                    type: object
+                    properties:
+                      rssMb:
+                        type: number
+                        example: 45.2
+                      heapUsedMb:
+                        type: number
+                        example: 28.4
+        '503':
+          description: System or Database is degraded / unreachable
+
+  /api/admin/login:
+    post:
+      summary: Admin Login
+      description: Authenticates admin credentials and returns a JWT Bearer token valid for 24 hours.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@britoschool.com
+                password:
+                  type: string
+                  format: password
+                  example: secureAdminPassword123
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/admin/forgot-password:
+    post:
+      summary: Forgot Password (Send OTP)
+      description: Sends a 6-digit OTP code to registered admin email (valid for 2 minutes).
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@britoschool.com
+      responses:
+        '200':
+          description: OTP dispatched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/admin/reset-password:
+    post:
+      summary: Reset Password with OTP Verification
+      description: Verifies OTP code and sets a new bcrypt-hashed password.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - otp
+                - newPassword
+                - confirmPassword
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@britoschool.com
+                otp:
+                  type: string
+                  example: "492018"
+                newPassword:
+                  type: string
+                  minLength: 6
+                  example: "NewSecurePassword2026"
+                confirmPassword:
+                  type: string
+                  example: "NewSecurePassword2026"
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /api/admin/announcements:
+    get:
+      summary: List Announcements
+      description: Retrieve all announcements ordered by publication date descending.
+      tags:
+        - Announcements
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of announcements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 2
+                  announcements:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Announcement'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      summary: Create Announcement
+      description: Creates a new school announcement.
+      tags:
+        - Announcements
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                  example: "Annual Sports Day 2026"
+                content:
+                  type: string
+                  example: "Competitions begin next week."
+                category:
+                  type: string
+                  default: "General"
+                  example: "Events"
+      responses:
+        '200':
+          description: Announcement created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Announcement created successfully!"
+                  announcement:
+                    $ref: '#/components/schemas/Announcement'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    put:
+      summary: Update Announcement
+      description: Updates an existing announcement by query ID.
+      tags:
+        - Announcements
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                category:
+                  type: string
+      responses:
+        '200':
+          description: Announcement updated
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Delete Announcement
+      description: Deletes an announcement by query ID.
+      tags:
+        - Announcements
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Announcement deleted
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /api/admin/calendars:
+    get:
+      summary: List Calendars
+      description: Retrieve academic calendar PDF records.
+      tags:
+        - Calendars
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of calendars
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 1
+                  calendars:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Calendar'
+
+    post:
+      summary: Upload Academic Calendar PDF
+      description: Uploads a PDF file (max 10MB) via multipart form-data.
+      tags:
+        - Calendars
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - file
+              properties:
+                title:
+                  type: string
+                  example: "Academic Calendar 2026-2027"
+                description:
+                  type: string
+                  example: "Key semester dates and holidays"
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Calendar uploaded successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+    delete:
+      summary: Delete Calendar Record & File
+      tags:
+        - Calendars
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Calendar deleted
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/admin/galleries:
+    get:
+      summary: List Galleries
+      tags:
+        - Galleries
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of gallery items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 1
+                  galleries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Gallery'
+
+    post:
+      summary: Upload Gallery Image
+      description: Uploads an image file (max 5MB) via multipart form-data.
+      tags:
+        - Galleries
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - image
+              properties:
+                title:
+                  type: string
+                  example: "Science Exhibition"
+                description:
+                  type: string
+                  example: "Robotics booth"
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Image uploaded successfully
+
+    put:
+      summary: Edit Gallery Item
+      tags:
+        - Galleries
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Gallery updated
+
+    delete:
+      summary: Delete Gallery Item
+      tags:
+        - Galleries
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gallery item deleted
+
+  /api/admin/thirukkural:
+    get:
+      summary: List Thirukkural Verses
+      tags:
+        - Thirukkural
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of kurals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 1
+                  kurals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kural'
+
+    post:
+      summary: Add Thirukkural Verse
+      tags:
+        - Thirukkural
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - kural_number
+                - tamil_text
+                - english_meaning
+              properties:
+                kural_number:
+                  type: integer
+                  example: 1
+                tamil_text:
+                  type: string
+                  example: "அகர முதல எழுத்தெல்லாம் ஆதி பகவன் முதற்றே உலகு."
+                english_meaning:
+                  type: string
+                  example: "As the letter A is the first of all letters, so the eternal God is first in the world."
+                explanation:
+                  type: string
+                  example: "Literary explanation."
+      responses:
+        '200':
+          description: Kural added successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+    put:
+      summary: Edit Thirukkural Verse
+      tags:
+        - Thirukkural
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kural_number:
+                  type: integer
+                tamil_text:
+                  type: string
+                english_meaning:
+                  type: string
+                explanation:
+                  type: string
+      responses:
+        '200':
+          description: Kural updated
+
+    delete:
+      summary: Delete Thirukkural Verse
+      tags:
+        - Thirukkural
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Kural deleted
+
+  /api/admin/profile:
+    get:
+      summary: Get Current Admin Profile
+      tags:
+        - Admin Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Admin profile record
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  profile:
+                    $ref: '#/components/schemas/Profile'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    post:
+      summary: Create Admin Profile
+      tags:
+        - Admin Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - full_name
+                - alternative_email
+              properties:
+                full_name:
+                  type: string
+                  example: "Headmaster Robert"
+                alternative_email:
+                  type: string
+                  format: email
+                  example: "headmaster@britoschool.com"
+                phone_primary:
+                  type: string
+                  example: "+91 9876543210"
+                phone_secondary:
+                  type: string
+                School_location:
+                  type: string
+                  example: "Main Campus"
+                bio:
+                  type: string
+                  example: "Administrator bio"
+                emergency_contact_phone:
+                  type: string
+                linkedin_url:
+                  type: string
+      responses:
+        '200':
+          description: Profile created
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+    put:
+      summary: Update Admin Profile
+      tags:
+        - Admin Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name:
+                  type: string
+                alternative_email:
+                  type: string
+                phone_primary:
+                  type: string
+                phone_secondary:
+                  type: string
+                School_location:
+                  type: string
+                  example: "Main Campus, Chennai"
+                bio:
+                  type: string
+                emergency_contact_phone:
+                  type: string
+                linkedin_url:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Delete Admin Profile
+      tags:
+        - Admin Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profile deleted
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequestError:
+      description: Bad Request / Validation Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnauthorizedError:
+      description: Unauthorized / Missing or Expired Token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: Resource Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Admin logged in successfully!"
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        admin:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            email:
+              type: string
+              example: "admin@britoschool.com"
+            mobile_number:
+              type: string
+              example: "9876543210"
+
+    SuccessMessageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Detailed error description"
+
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "School Reopening"
+        content:
+          type: string
+          example: "Term 2 classes begin on Monday."
+        category:
+          type: string
+          example: "General"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Calendar:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Academic Calendar 2026-2027"
+        description:
+          type: string
+          example: "Milestones and examinations"
+        file_path:
+          type: string
+          example: "/uploads/calendars/calendar-1794211361137-254226641.pdf"
+        file_url:
+          type: string
+          example: "/uploads/calendars/calendar-1794211361137-254226641.pdf"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Gallery:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Campus Event"
+        description:
+          type: string
+          example: "Photo description"
+        image_path:
+          type: string
+          example: "/uploads/galleries/gallery-1794211234567.jpg"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Kural:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        kural_number:
+          type: integer
+          example: 1
+        tamil_text:
+          type: string
+          example: "அகர முதல எழுத்தெல்லாம் ஆதி பகவன் முதற்றே உலகு."
+        english_meaning:
+          type: string
+          example: "As the letter A is the first of all letters, so the eternal God is first in the world."
+        explanation:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        admin_id:
+          type: integer
+          example: 1
+        full_name:
+          type: string
+          example: "Headmaster Robert"
+        alternative_email:
+          type: string
+          example: "headmaster@britoschool.com"
+        phone_primary:
+          type: string
+          example: "+91 9876543210"
+        phone_secondary:
+          type: string
+        School_location:
+          type: string
+          example: "Main Campus"
+        bio:
+          type: string
+        emergency_contact_phone:
+          type: string
+        linkedin_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time

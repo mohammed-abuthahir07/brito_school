@@ -1,3 +1,4 @@
+const crypto = require("node:crypto");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const {
@@ -36,8 +37,8 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    // Generate 6-digit OTP code
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate cryptographically secure 6-digit OTP code
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
 
     // Save OTP and let MySQL handle the 2-minute expiration timestamp
     await updateOtpByEmail(email, otpCode);
