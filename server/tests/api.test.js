@@ -295,12 +295,12 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(res.data.success, true);
     });
 
-    test("DELETE /api/admin/announcements returns 400 for non-existent id", async () => {
+    test("DELETE /api/admin/announcements returns 404 for non-existent id", async () => {
       const res = await request("/api/admin/announcements?id=999999", {
         method: "DELETE",
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      assert.equal(res.status, 400);
+      assert.equal(res.status, 404);
       assert.equal(res.data.success, false);
       assert.equal(res.data.message, "Announcement not found");
     });

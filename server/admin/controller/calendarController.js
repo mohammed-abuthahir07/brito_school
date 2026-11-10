@@ -29,6 +29,7 @@ const listCalendars = async (req, res) => {
 
 // =====================================
 // Add Calendar Record (FormData PDF Upload)
+// Performance: single INSERT — no post-insert SELECT
 // =====================================
 const addCalendar = async (req, res) => {
   try {
@@ -47,12 +48,17 @@ const addCalendar = async (req, res) => {
 
     const filePathUrl = `/uploads/calendars/${file.filename}`;
     const insertId = await createCalendar(title, description, filePathUrl);
-    const newCalendar = await getCalendarById(insertId);
 
     return res.status(200).json({
       success: true,
       message: "Calendar PDF uploaded successfully!",
-      calendar: newCalendar,
+      calendar: {
+        id: insertId,
+        title,
+        description: description || "",
+        file_path: filePathUrl,
+        file_url: filePathUrl,
+      },
     });
   } catch (error) {
     if (req.file && req.file.path) {

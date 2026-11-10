@@ -2,10 +2,11 @@ const pool = require("../../config/db");
 
 // =====================================
 // Find Admin By Email
+// Performance: select only columns needed for auth — avoids pulling otp fields
 // =====================================
 const findAdminByEmail = async (email) => {
   const query = `
-    SELECT *
+    SELECT id, email, password, mobile_number
     FROM admins
     WHERE email = ?
     LIMIT 1

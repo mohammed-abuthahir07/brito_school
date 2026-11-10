@@ -63,7 +63,6 @@ const adminLogin = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error",
-      error: error.message,
     });
   }
 };

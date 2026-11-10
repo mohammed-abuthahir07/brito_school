@@ -15,9 +15,8 @@ const { verifyToken } = require("../middleware/authMiddleware");
 // =====================================
 const uploadDir = path.join(__dirname, "../../uploads/calendars");
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// mkdirSync with recursive:true is safe — creates dir if missing, no-op if exists
+fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -87,8 +86,7 @@ router.post(
       if (err) {
         return res.status(400).json({
           success: false,
-          message: "Multer Upload Error",
-          error: err.message,
+          message: err.message || "File upload failed",
         });
       }
       next();

@@ -28,6 +28,7 @@ const listAnnouncements = async (req, res) => {
 
 // =====================================
 // Create Announcement
+// Performance: single INSERT returning insertId, no extra SELECT
 // =====================================
 const addAnnouncement = async (req, res) => {
   try {
@@ -40,17 +41,18 @@ const addAnnouncement = async (req, res) => {
       });
     }
 
-    const insertId = await createAnnouncement(
-      title,
-      content,
-      category || "General"
-    );
-    const newAnnouncement = await getAnnouncementById(insertId);
+    const resolvedCategory = category || "General";
+    const insertId = await createAnnouncement(title, content, resolvedCategory);
 
     return res.status(200).json({
       success: true,
       message: "Announcement created successfully!",
-      announcement: newAnnouncement,
+      announcement: {
+        id: insertId,
+        title,
+        content,
+        category: resolvedCategory,
+      },
     });
   } catch (error) {
     console.error("Create Announcement Error:", error);
@@ -63,6 +65,7 @@ const addAnnouncement = async (req, res) => {
 
 // =====================================
 // Update Announcement
+// Performance: fetch existing once, update, return merged data — no second SELECT
 // =====================================
 const editAnnouncement = async (req, res) => {
   try {
@@ -89,12 +92,16 @@ const editAnnouncement = async (req, res) => {
     const updatedCategory = category || existing.category;
 
     await updateAnnouncement(id, updatedTitle, updatedContent, updatedCategory);
-    const updatedAnnouncement = await getAnnouncementById(id);
 
     return res.status(200).json({
       success: true,
       message: `Announcement ID ${id} updated successfully!`,
-      announcement: updatedAnnouncement,
+      announcement: {
+        ...existing,
+        title: updatedTitle,
+        content: updatedContent,
+        category: updatedCategory,
+      },
     });
   } catch (error) {
     console.error("Update Announcement Error:", error);
@@ -107,6 +114,7 @@ const editAnnouncement = async (req, res) => {
 
 // =====================================
 // Delete Announcement
+// Fix: return 404 (not 400) for not-found — consistent with all other endpoints
 // =====================================
 const removeAnnouncement = async (req, res) => {
   try {
@@ -121,7 +129,7 @@ const removeAnnouncement = async (req, res) => {
 
     const existing = await getAnnouncementById(id);
     if (!existing) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "Announcement not found",
       });

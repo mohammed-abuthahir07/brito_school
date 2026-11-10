@@ -29,6 +29,7 @@ const listKurals = async (req, res) => {
 
 // =====================================
 // Add New Kural
+// Performance: check duplicate, insert, return constructed object — no post-insert SELECT
 // =====================================
 const addKural = async (req, res) => {
   try {
@@ -41,7 +42,7 @@ const addKural = async (req, res) => {
       });
     }
 
-    // Check if kural_number already exists
+    // Check if kural_number already exists before attempting insert
     const existing = await getKuralByNumber(kural_number);
     if (existing) {
       return res.status(400).json({
@@ -56,12 +57,17 @@ const addKural = async (req, res) => {
       english_meaning,
       explanation
     );
-    const newKural = await getKuralById(insertId);
 
     return res.status(200).json({
       success: true,
       message: "Thirukkural added successfully!",
-      kural: newKural,
+      kural: {
+        id: insertId,
+        kural_number,
+        tamil_text,
+        english_meaning,
+        explanation: explanation || null,
+      },
     });
   } catch (error) {
     // Handle concurrent duplicate key race condition safely
@@ -81,6 +87,7 @@ const addKural = async (req, res) => {
 
 // =====================================
 // Update Kural
+// Performance: fetch once, update, return merged data — no second SELECT
 // =====================================
 const editKural = async (req, res) => {
   try {
@@ -115,12 +122,17 @@ const editKural = async (req, res) => {
       updatedEnglish,
       updatedExplanation
     );
-    const updatedKural = await getKuralById(id);
 
     return res.status(200).json({
       success: true,
       message: `Thirukkural ID ${id} updated successfully!`,
-      kural: updatedKural,
+      kural: {
+        ...existing,
+        kural_number: updatedNumber,
+        tamil_text: updatedTamil,
+        english_meaning: updatedEnglish,
+        explanation: updatedExplanation,
+      },
     });
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {

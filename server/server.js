@@ -130,13 +130,17 @@ app.get("/health", async (req, res) => {
 
 // =====================================
 // Global Rate Limiting
+// Auth-specific limiters MUST be mounted BEFORE the general /api limiter
+// so auth routes only count against the stricter auth limit
 // =====================================
-app.use("/api", generalLimiter);
 
-// Specific Auth Rate Limiting for Login & Password Reset Endpoints
+// Specific Auth Rate Limiting for Login & Password Reset Endpoints (stricter: 30/15m)
 app.use("/api/admin/login", authLimiter);
 app.use("/api/admin/forgot-password", authLimiter);
 app.use("/api/admin/reset-password", authLimiter);
+
+// General API Rate Limiting — applied to all other /api/* routes (1000/15m)
+app.use("/api", generalLimiter);
 
 // =====================================
 // API Routes Mount

@@ -36,6 +36,7 @@ const getProfile = async (req, res) => {
 
 // =====================================
 // Create Admin Profile
+// Performance: single INSERT, return constructed object — no post-insert SELECT
 // =====================================
 const addProfile = async (req, res) => {
   try {
@@ -76,6 +77,7 @@ const addProfile = async (req, res) => {
 
 // =====================================
 // Update Admin Profile (Preserves Existing Unsent Fields)
+// Performance: fetch existing once, update, return merged — no second SELECT
 // =====================================
 const editProfile = async (req, res) => {
   try {
@@ -101,12 +103,14 @@ const editProfile = async (req, res) => {
     };
 
     await updateProfile(adminId, mergedData);
-    const updatedProfile = await getProfileByAdminId(adminId);
 
     return res.status(200).json({
       success: true,
       message: "Admin profile updated successfully!",
-      profile: updatedProfile,
+      profile: {
+        ...existing,
+        ...mergedData,
+      },
     });
   } catch (error) {
     console.error("Update Profile Error:", error);

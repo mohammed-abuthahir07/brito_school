@@ -63,7 +63,6 @@ const forgotPassword = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to send OTP email",
-      error: error.message,
     });
   }
 };
@@ -139,7 +138,6 @@ const resetPassword = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error during password reset",
-      error: error.message,
     });
   }
 };

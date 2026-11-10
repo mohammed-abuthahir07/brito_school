@@ -30,6 +30,7 @@ const listGalleries = async (req, res) => {
 
 // =====================================
 // Add New Gallery Image
+// Performance: single INSERT — no post-insert SELECT
 // =====================================
 const addGallery = async (req, res) => {
   try {
@@ -48,12 +49,16 @@ const addGallery = async (req, res) => {
 
     const imagePath = `/uploads/galleries/${file.filename}`;
     const insertId = await createGallery(title, description, imagePath);
-    const newGallery = await getGalleryById(insertId);
 
     return res.status(200).json({
       success: true,
       message: "Gallery image uploaded successfully!",
-      gallery: newGallery,
+      gallery: {
+        id: insertId,
+        title,
+        description: description || null,
+        image_path: imagePath,
+      },
     });
   } catch (error) {
     if (req.file && req.file.path) {
@@ -69,6 +74,7 @@ const addGallery = async (req, res) => {
 
 // =====================================
 // Update Gallery Item (Optional new image)
+// Performance: fetch once, update, return merged — no second SELECT
 // =====================================
 const editGallery = async (req, res) => {
   try {
@@ -101,7 +107,7 @@ const editGallery = async (req, res) => {
     const updatedDescription = description !== undefined ? description : existing.description;
     let updatedImagePath = existing.image_path;
 
-    // If a new image file is uploaded, delete the old physical file asynchronously and use the new path
+    // If a new image file is uploaded, delete the old physical file and use the new path
     if (file) {
       updatedImagePath = `/uploads/galleries/${file.filename}`;
 
@@ -118,12 +124,16 @@ const editGallery = async (req, res) => {
     }
 
     await updateGallery(id, updatedTitle, updatedDescription, updatedImagePath);
-    const updatedGallery = await getGalleryById(id);
 
     return res.status(200).json({
       success: true,
       message: `Gallery ID ${id} updated successfully!`,
-      gallery: updatedGallery,
+      gallery: {
+        ...existing,
+        title: updatedTitle,
+        description: updatedDescription,
+        image_path: updatedImagePath,
+      },
     });
   } catch (error) {
     if (req.file && req.file.path) {
@@ -166,7 +176,7 @@ const removeGallery = async (req, res) => {
         await fs.promises.unlink(serverFilePath);
       } catch (fileErr) {
         if (fileErr.code !== "ENOENT") {
-          console.warn("Notice: could not unlink gallery file:", fileErr.message);
+          console.warn("Notice: could not unlink gallery image file:", fileErr.message);
         }
       }
     }
