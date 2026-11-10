@@ -1214,3 +1214,6 @@ Static assets are served directly by Express with 1-day browser caching headers 
 - **URL:** `/uploads/galleries/:filename`
 - **Authentication:** None (Public)
 - **Response Headers:** `Content-Type: image/jpeg` (or `image/png`), `Cache-Control: public, max-age=86400`, `ETag: W/"..."`
+
+
+<!-- node scripts/db_cleanup.js -->
