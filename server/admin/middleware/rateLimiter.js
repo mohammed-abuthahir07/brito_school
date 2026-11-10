@@ -1,17 +1,11 @@
-// =====================================================================
-// High-Performance In-Memory Sliding-Window Rate Limiter
-// Zero External Dependencies, Memory-Safe with Automatic Expiry Pruning
-// =====================================================================
-
 const createRateLimiter = ({
-  windowMs = 15 * 60 * 1000, // 15 minutes default
-  max = 100, // max requests per window
+  windowMs = 15 * 60 * 1000,
+  max = 100,
   message = "Too many requests. Please try again later.",
-  skipSuccessfulRequests = false,
+  maxKeys = 20000,
 } = {}) => {
   const hits = new Map();
 
-  // Periodic cleanup every 60 seconds to prevent memory leaks
   const interval = setInterval(() => {
     const now = Date.now();
     for (const [key, record] of hits.entries()) {
@@ -21,19 +15,21 @@ const createRateLimiter = ({
     }
   }, 60 * 1000);
 
-  // Unref timer so it does not keep Node process alive
   if (interval.unref) {
     interval.unref();
   }
 
   return (req, res, next) => {
-    // Skip rate limiting during automated testing if disabled
     if (process.env.NODE_ENV === "test" && process.env.DISABLE_RATE_LIMIT === "true") {
       return next();
     }
 
-    const ip = req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
+    const ip = req.ip || req.socket.remoteAddress || "unknown";
     const now = Date.now();
+
+    if (hits.size > maxKeys) {
+      hits.clear();
+    }
 
     let record = hits.get(ip);
     if (!record || now > record.resetTime) {
@@ -63,16 +59,15 @@ const createRateLimiter = ({
   };
 };
 
-// Standard rate limiters
 const authLimiter = createRateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 mins
-  max: 30, // 30 attempts per 15 mins for auth/password reset
+  windowMs: 15 * 60 * 1000,
+  max: 30,
   message: "Too many authentication attempts. Please try again later.",
 });
 
 const generalLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 1000, // 1000 requests per 15 mins
+  max: 1000,
   message: "Rate limit exceeded. Please slow down your requests.",
 });
 

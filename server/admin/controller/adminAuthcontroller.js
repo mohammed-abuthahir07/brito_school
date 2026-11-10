@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { findAdminByEmail } = require("../model/adminAuthmodel");
+const { getJwtSecret } = require("../../config/jwt");
 
 // Pre-computed dummy hash to prevent timing-based email enumeration attacks
 const DUMMY_HASH = "$2b$10$1A2B3C4D5E6F7G8H9I0J1u1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6";
@@ -40,7 +41,7 @@ const adminLogin = async (req, res) => {
         id: admin.id,
         email: admin.email,
       },
-      process.env.JWT_SECRET || "your_super_secret_jwt_key_here_12345",
+      getJwtSecret(),
       {
         expiresIn: "1d",
       }

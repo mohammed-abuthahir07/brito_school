@@ -1,24 +1,27 @@
 const pool = require("../../config/db");
 
-// =====================================
-// Get All Announcements
-// =====================================
-const getAllAnnouncements = async () => {
-  const query = `
-    SELECT *
-    FROM announcements
-    ORDER BY created_at DESC
-  `;
+const ANNOUNCEMENT_COLUMNS =
+  "id, title, content, category, created_at, updated_at";
+
+const applyPagination = (query, pagination) => {
+  if (!pagination) {
+    return query;
+  }
+  return `${query} LIMIT ${pagination.limit} OFFSET ${pagination.offset}`;
+};
+
+const getAllAnnouncements = async (pagination = null) => {
+  const query = applyPagination(
+    `SELECT ${ANNOUNCEMENT_COLUMNS} FROM announcements ORDER BY created_at DESC`,
+    pagination
+  );
   const [rows] = await pool.execute(query);
   return rows;
 };
 
-// =====================================
-// Get Announcement By ID
-// =====================================
 const getAnnouncementById = async (id) => {
   const query = `
-    SELECT *
+    SELECT ${ANNOUNCEMENT_COLUMNS}
     FROM announcements
     WHERE id = ?
     LIMIT 1
@@ -27,9 +30,6 @@ const getAnnouncementById = async (id) => {
   return rows[0];
 };
 
-// =====================================
-// Create Announcement
-// =====================================
 const createAnnouncement = async (title, content, category) => {
   const query = `
     INSERT INTO announcements (title, content, category)
@@ -43,9 +43,6 @@ const createAnnouncement = async (title, content, category) => {
   return result.insertId;
 };
 
-// =====================================
-// Update Announcement
-// =====================================
 const updateAnnouncement = async (id, title, content, category) => {
   const query = `
     UPDATE announcements
@@ -61,9 +58,6 @@ const updateAnnouncement = async (id, title, content, category) => {
   return result.affectedRows;
 };
 
-// =====================================
-// Delete Announcement
-// =====================================
 const deleteAnnouncement = async (id) => {
   const query = `
     DELETE FROM announcements

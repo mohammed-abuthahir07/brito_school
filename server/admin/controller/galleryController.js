@@ -1,5 +1,3 @@
-const fs = require("fs");
-const path = require("path");
 const {
   getAllGalleries,
   getGalleryById,
@@ -7,13 +5,12 @@ const {
   updateGallery,
   deleteGallery,
 } = require("../model/galleryModel");
+const { parsePositiveInt, parseListPagination } = require("../utils/validate");
+const { unlinkUpload } = require("../utils/files");
 
-// =====================================
-// List All Galleries
-// =====================================
 const listGalleries = async (req, res) => {
   try {
-    const galleries = await getAllGalleries();
+    const galleries = await getAllGalleries(parseListPagination(req.query));
     return res.status(200).json({
       success: true,
       count: galleries.length,
@@ -28,10 +25,6 @@ const listGalleries = async (req, res) => {
   }
 };
 
-// =====================================
-// Add New Gallery Image
-// Performance: single INSERT — no post-insert SELECT
-// =====================================
 const addGallery = async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -39,7 +32,7 @@ const addGallery = async (req, res) => {
 
     if (!title || !file) {
       if (file && file.path) {
-        await fs.promises.unlink(file.path).catch(() => {});
+        await unlinkUpload(file.path);
       }
       return res.status(400).json({
         success: false,
@@ -62,7 +55,7 @@ const addGallery = async (req, res) => {
     });
   } catch (error) {
     if (req.file && req.file.path) {
-      await fs.promises.unlink(req.file.path).catch(() => {});
+      await unlinkUpload(req.file.path);
     }
     console.error("Upload Gallery Error:", error);
     return res.status(500).json({
@@ -72,19 +65,15 @@ const addGallery = async (req, res) => {
   }
 };
 
-// =====================================
-// Update Gallery Item (Optional new image)
-// Performance: fetch once, update, return merged — no second SELECT
-// =====================================
 const editGallery = async (req, res) => {
   try {
-    const { id } = req.query;
+    const id = parsePositiveInt(req.query.id);
     const { title, description } = req.body;
     const file = req.file;
 
     if (!id) {
       if (file && file.path) {
-        await fs.promises.unlink(file.path).catch(() => {});
+        await unlinkUpload(file.path);
       }
       return res.status(400).json({
         success: false,
@@ -95,7 +84,7 @@ const editGallery = async (req, res) => {
     const existing = await getGalleryById(id);
     if (!existing) {
       if (file && file.path) {
-        await fs.promises.unlink(file.path).catch(() => {});
+        await unlinkUpload(file.path);
       }
       return res.status(404).json({
         success: false,
@@ -107,19 +96,10 @@ const editGallery = async (req, res) => {
     const updatedDescription = description !== undefined ? description : existing.description;
     let updatedImagePath = existing.image_path;
 
-    // If a new image file is uploaded, delete the old physical file and use the new path
     if (file) {
       updatedImagePath = `/uploads/galleries/${file.filename}`;
-
       if (existing.image_path) {
-        const oldServerFilePath = path.join(__dirname, "../../", existing.image_path);
-        try {
-          await fs.promises.unlink(oldServerFilePath);
-        } catch (fileErr) {
-          if (fileErr.code !== "ENOENT") {
-            console.warn("Notice: could not unlink old gallery file:", fileErr.message);
-          }
-        }
+        await unlinkUpload(existing.image_path);
       }
     }
 
@@ -137,7 +117,7 @@ const editGallery = async (req, res) => {
     });
   } catch (error) {
     if (req.file && req.file.path) {
-      await fs.promises.unlink(req.file.path).catch(() => {});
+      await unlinkUpload(req.file.path);
     }
     console.error("Update Gallery Error:", error);
     return res.status(500).json({
@@ -147,12 +127,9 @@ const editGallery = async (req, res) => {
   }
 };
 
-// =====================================
-// Delete Gallery Record & Physical Image File
-// =====================================
 const removeGallery = async (req, res) => {
   try {
-    const { id } = req.query;
+    const id = parsePositiveInt(req.query.id);
 
     if (!id) {
       return res.status(400).json({
@@ -169,16 +146,8 @@ const removeGallery = async (req, res) => {
       });
     }
 
-    // Remove physical image file asynchronously to avoid event loop blocking
     if (existing.image_path) {
-      const serverFilePath = path.join(__dirname, "../../", existing.image_path);
-      try {
-        await fs.promises.unlink(serverFilePath);
-      } catch (fileErr) {
-        if (fileErr.code !== "ENOENT") {
-          console.warn("Notice: could not unlink gallery image file:", fileErr.message);
-        }
-      }
+      await unlinkUpload(existing.image_path);
     }
 
     await deleteGallery(id);

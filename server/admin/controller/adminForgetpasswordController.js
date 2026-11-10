@@ -121,9 +121,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // Hash new password using bcrypt
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Update password and clear OTP in DB
     await updatePasswordByEmail(email, hashedPassword);

@@ -1,12 +1,12 @@
 require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
+const zlib = require("zlib");
 const express = require("express");
 const cors = require("cors");
 const pool = require("./config/db");
 const { authLimiter, generalLimiter } = require("./admin/middleware/rateLimiter");
 
-// Route Handlers
 const adminRoutes = require("./admin/routes/adminAuthRoutes");
 const adminForgetpasswordRoutes = require("./admin/routes/adminForgetpasswordRoutes");
 const announcementRoutes = require("./admin/routes/announcementRoutes");
@@ -17,22 +17,28 @@ const profileRoutes = require("./admin/routes/profileRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const SHUTDOWN_TIMEOUT_MS = 10000;
+const DISK_METRICS_TTL_MS = 30000;
+const GZIP_MIN_BYTES = 1024;
 
-// =====================================
-// Process-Level Exception & Rejection Handlers
-// =====================================
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Critical: Unhandled Promise Rejection at:", promise, "reason:", reason);
+let serverInstance = null;
+let isShuttingDown = false;
+let diskMetricsCache = { value: null, expiresAt: 0 };
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Critical: Unhandled Promise Rejection:", reason);
 });
 
 process.on("uncaughtException", (error) => {
   console.error("Critical: Uncaught Exception thrown:", error);
+  handleGracefulShutdown("uncaughtException");
 });
 
-// =====================================
-// Security & Performance Headers
-// =====================================
 app.disable("x-powered-by");
+
+if (process.env.TRUST_PROXY === "true" || process.env.TRUST_PROXY === "1") {
+  app.set("trust proxy", 1);
+}
 
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -42,21 +48,42 @@ app.use((req, res, next) => {
   next();
 });
 
-// =====================================
-// CORS Configuration (Configurable & Backward-Compatible)
-// =====================================
 const corsOptions = process.env.CORS_ORIGIN
   ? { origin: process.env.CORS_ORIGIN.split(",").map((s) => s.trim()) }
   : {};
 app.use(cors(corsOptions));
 
-// =====================================
-// Request Parsers with DoS Protection
-// =====================================
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
-// Static Assets with Cache-Control and ETag for high performance
+app.use((req, res, next) => {
+  const acceptEncoding = req.headers["accept-encoding"] || "";
+  if (!/\bgzip\b/i.test(acceptEncoding)) {
+    return next();
+  }
+
+  const originalJson = res.json.bind(res);
+  res.json = (body) => {
+    const payload = JSON.stringify(body);
+    if (!payload || payload.length < GZIP_MIN_BYTES) {
+      return originalJson(body);
+    }
+
+    zlib.gzip(payload, (err, compressed) => {
+      if (err || res.headersSent) {
+        return originalJson(body);
+      }
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Content-Encoding", "gzip");
+      res.setHeader("Vary", "Accept-Encoding");
+      return res.send(compressed);
+    });
+    return res;
+  };
+
+  next();
+});
+
 const uploadsPath = path.join(__dirname, "uploads");
 app.use(
   "/uploads",
@@ -66,12 +93,28 @@ app.use(
   })
 );
 
-// Optional Swagger Documentation Route
 app.use("/docs", express.static(path.join(__dirname, "docs")));
 
-// =====================================
-// Health Check Endpoint (Liveness, Readiness & Storage Probes)
-// =====================================
+const readDiskMetrics = async () => {
+  const now = Date.now();
+  if (diskMetricsCache.value && now < diskMetricsCache.expiresAt) {
+    return diskMetricsCache.value;
+  }
+
+  try {
+    const stat = await fs.promises.statfs(uploadsPath);
+    const value = {
+      freeGb: parseFloat(((stat.bfree * stat.bsize) / 1024 ** 3).toFixed(2)),
+      totalGb: parseFloat(((stat.blocks * stat.bsize) / 1024 ** 3).toFixed(2)),
+      usagePercent: parseFloat((((stat.blocks - stat.bfree) / stat.blocks) * 100).toFixed(1)),
+    };
+    diskMetricsCache = { value, expiresAt: now + DISK_METRICS_TTL_MS };
+    return value;
+  } catch (diskErr) {
+    return null;
+  }
+};
+
 app.get("/health", async (req, res) => {
   let dbStatus = "DISCONNECTED";
   let dbLatencyMs = null;
@@ -89,18 +132,7 @@ app.get("/health", async (req, res) => {
   }
 
   const memory = process.memoryUsage();
-  let diskMetrics = null;
-
-  try {
-    const stat = await fs.promises.statfs(uploadsPath);
-    diskMetrics = {
-      freeGb: parseFloat(((stat.bfree * stat.bsize) / (1024 ** 3)).toFixed(2)),
-      totalGb: parseFloat(((stat.blocks * stat.bsize) / (1024 ** 3)).toFixed(2)),
-      usagePercent: parseFloat((((stat.blocks - stat.bfree) / stat.blocks) * 100).toFixed(1)),
-    };
-  } catch (diskErr) {
-    // Non-fatal if statfs is unsupported on host
-  }
+  const diskMetrics = await readDiskMetrics();
 
   const poolMetrics = pool.pool
     ? {
@@ -128,23 +160,11 @@ app.get("/health", async (req, res) => {
   });
 });
 
-// =====================================
-// Global Rate Limiting
-// Auth-specific limiters MUST be mounted BEFORE the general /api limiter
-// so auth routes only count against the stricter auth limit
-// =====================================
-
-// Specific Auth Rate Limiting for Login & Password Reset Endpoints (stricter: 30/15m)
 app.use("/api/admin/login", authLimiter);
 app.use("/api/admin/forgot-password", authLimiter);
 app.use("/api/admin/reset-password", authLimiter);
-
-// General API Rate Limiting — applied to all other /api/* routes (1000/15m)
 app.use("/api", generalLimiter);
 
-// =====================================
-// API Routes Mount
-// =====================================
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin", adminForgetpasswordRoutes);
 app.use("/api/admin", announcementRoutes);
@@ -153,9 +173,6 @@ app.use("/api/admin", thirukkuralRoutes);
 app.use("/api/admin", galleryRoutes);
 app.use("/api/admin", profileRoutes);
 
-// =====================================
-// 404 Route Handler
-// =====================================
 app.use((req, res, next) => {
   if (res.headersSent) {
     return next();
@@ -166,59 +183,99 @@ app.use((req, res, next) => {
   });
 });
 
-// =====================================
-// Centralized Error Handling Middleware
-// =====================================
 app.use((err, req, res, next) => {
-  console.error("Centralized Server Error:", err.stack || err.message || err);
   if (res.headersSent) {
     return next(err);
   }
+
+  const isBusy =
+    err.code === "ER_CON_COUNT_ERROR" ||
+    (typeof err.message === "string" && err.message.includes("Queue limit"));
+
+  if (isBusy) {
+    return res.status(503).json({
+      success: false,
+      message: "Server is busy. Please try again shortly.",
+    });
+  }
+
+  const isJsonParseError =
+    err.type === "entity.parse.failed" ||
+    err instanceof SyntaxError && err.status === 400 && "body" in err;
+
+  if (isJsonParseError) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid JSON payload",
+    });
+  }
+
+  console.error("Centralized Server Error:", err.stack || err.message || err);
+
+  const clientMessage =
+    process.env.NODE_ENV === "production"
+      ? "Internal Server Error"
+      : err.message || "Internal Server Error";
+
   return res.status(err.status || 500).json({
     success: false,
-    message: err.message || "Internal Server Error",
+    message: clientMessage,
   });
 });
 
-// =====================================
-// Server Startup and Graceful Shutdown
-// =====================================
-let serverInstance = null;
-
 const StartServer = () => {
   serverInstance = app.listen(PORT, async () => {
-    console.log(`🚀 Brito School Express Server running on port ${PORT}`);
+    console.log(`Brito School Express Server running on port ${PORT}`);
 
-    // Terminal DB Connection Verification
     try {
       const connection = await pool.getConnection();
-      console.log("✅ MySQL Database Connected Successfully!");
+      console.log("MySQL Database Connected Successfully!");
       connection.release();
     } catch (error) {
-      console.error("❌ MySQL Database Connection Failed:", error.message);
+      console.error("MySQL Database Connection Failed:", error.message);
     }
   });
+
+  serverInstance.keepAliveTimeout = 65000;
+  serverInstance.headersTimeout = 66000;
+  serverInstance.requestTimeout = 120000;
 
   return serverInstance;
 };
 
-// Graceful Shutdown Handlers
 const handleGracefulShutdown = async (signal) => {
+  if (isShuttingDown) {
+    return;
+  }
+  isShuttingDown = true;
   console.log(`\nReceived ${signal}. Initiating graceful shutdown...`);
+
+  const forceExit = setTimeout(() => {
+    console.error("Graceful shutdown timed out. Forcing exit.");
+    process.exit(1);
+  }, SHUTDOWN_TIMEOUT_MS);
+  if (forceExit.unref) {
+    forceExit.unref();
+  }
+
+  const closePoolAndExit = async () => {
+    try {
+      await pool.end();
+      console.log("MySQL connection pool closed.");
+      process.exit(0);
+    } catch (err) {
+      console.error("Error closing MySQL pool during shutdown:", err.message);
+      process.exit(1);
+    }
+  };
+
   if (serverInstance) {
-    serverInstance.close(async () => {
+    serverInstance.close(() => {
       console.log("Closed remaining HTTP connections.");
-      try {
-        await pool.end();
-        console.log("MySQL connection pool closed.");
-        process.exit(0);
-      } catch (err) {
-        console.error("Error closing MySQL pool during shutdown:", err.message);
-        process.exit(1);
-      }
+      closePoolAndExit();
     });
   } else {
-    process.exit(0);
+    await closePoolAndExit();
   }
 };
 

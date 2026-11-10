@@ -1,11 +1,13 @@
 const pool = require("../../config/db");
 
-// =====================================
-// Get Profile By Admin ID
-// =====================================
+const PROFILE_COLUMNS = `
+  id, admin_id, full_name, alternative_email, phone_primary, phone_secondary,
+  School_location, bio, emergency_contact_phone, linkedin_url, created_at, updated_at
+`;
+
 const getProfileByAdminId = async (adminId) => {
   const query = `
-    SELECT *
+    SELECT ${PROFILE_COLUMNS}
     FROM admin_profiles
     WHERE admin_id = ?
     LIMIT 1
@@ -14,12 +16,9 @@ const getProfileByAdminId = async (adminId) => {
   return rows[0];
 };
 
-// =====================================
-// Get Profile By Record ID
-// =====================================
 const getProfileById = async (id) => {
   const query = `
-    SELECT *
+    SELECT ${PROFILE_COLUMNS}
     FROM admin_profiles
     WHERE id = ?
     LIMIT 1
@@ -28,9 +27,6 @@ const getProfileById = async (id) => {
   return rows[0];
 };
 
-// =====================================
-// Create Profile Record
-// =====================================
 const createProfile = async (adminId, data) => {
   const {
     full_name,
@@ -65,9 +61,6 @@ const createProfile = async (adminId, data) => {
   return result.insertId;
 };
 
-// =====================================
-// Update Profile Record
-// =====================================
 const updateProfile = async (adminId, data) => {
   const {
     full_name,
@@ -82,7 +75,7 @@ const updateProfile = async (adminId, data) => {
 
   const query = `
     UPDATE admin_profiles
-    SET 
+    SET
       full_name = ?, alternative_email = ?, phone_primary = ?, phone_secondary = ?,
       School_location = ?, bio = ?, emergency_contact_phone = ?, linkedin_url = ?
     WHERE admin_id = ?
@@ -103,9 +96,6 @@ const updateProfile = async (adminId, data) => {
   return result.affectedRows;
 };
 
-// =====================================
-// Delete Profile Record
-// =====================================
 const deleteProfile = async (adminId) => {
   const query = `
     DELETE FROM admin_profiles

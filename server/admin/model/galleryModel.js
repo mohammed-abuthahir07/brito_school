@@ -1,24 +1,27 @@
 const pool = require("../../config/db");
 
-// =====================================
-// Get All Galleries
-// =====================================
-const getAllGalleries = async () => {
-  const query = `
-    SELECT *
-    FROM galleries
-    ORDER BY created_at DESC
-  `;
+const GALLERY_COLUMNS =
+  "id, title, description, image_path, created_at, updated_at";
+
+const applyPagination = (query, pagination) => {
+  if (!pagination) {
+    return query;
+  }
+  return `${query} LIMIT ${pagination.limit} OFFSET ${pagination.offset}`;
+};
+
+const getAllGalleries = async (pagination = null) => {
+  const query = applyPagination(
+    `SELECT ${GALLERY_COLUMNS} FROM galleries ORDER BY created_at DESC`,
+    pagination
+  );
   const [rows] = await pool.execute(query);
   return rows;
 };
 
-// =====================================
-// Get Gallery By ID
-// =====================================
 const getGalleryById = async (id) => {
   const query = `
-    SELECT *
+    SELECT ${GALLERY_COLUMNS}
     FROM galleries
     WHERE id = ?
     LIMIT 1
@@ -27,9 +30,6 @@ const getGalleryById = async (id) => {
   return rows[0];
 };
 
-// =====================================
-// Create Gallery Record
-// =====================================
 const createGallery = async (title, description, imagePath) => {
   const query = `
     INSERT INTO galleries (title, description, image_path)
@@ -43,9 +43,6 @@ const createGallery = async (title, description, imagePath) => {
   return result.insertId;
 };
 
-// =====================================
-// Update Gallery Record
-// =====================================
 const updateGallery = async (id, title, description, imagePath) => {
   const query = `
     UPDATE galleries
@@ -61,9 +58,6 @@ const updateGallery = async (id, title, description, imagePath) => {
   return result.affectedRows;
 };
 
-// =====================================
-// Delete Gallery Record
-// =====================================
 const deleteGallery = async (id) => {
   const query = `
     DELETE FROM galleries

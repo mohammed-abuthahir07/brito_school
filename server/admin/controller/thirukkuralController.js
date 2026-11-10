@@ -6,13 +6,11 @@ const {
   updateKural,
   deleteKural,
 } = require("../model/thirukkuralModel");
+const { parsePositiveInt, parseListPagination } = require("../utils/validate");
 
-// =====================================
-// List All Kurals
-// =====================================
 const listKurals = async (req, res) => {
   try {
-    const kurals = await getAllKurals();
+    const kurals = await getAllKurals(parseListPagination(req.query));
     return res.status(200).json({
       success: true,
       count: kurals.length,
@@ -27,10 +25,6 @@ const listKurals = async (req, res) => {
   }
 };
 
-// =====================================
-// Add New Kural
-// Performance: check duplicate, insert, return constructed object — no post-insert SELECT
-// =====================================
 const addKural = async (req, res) => {
   try {
     const { kural_number, tamil_text, english_meaning, explanation } = req.body;
@@ -42,7 +36,6 @@ const addKural = async (req, res) => {
       });
     }
 
-    // Check if kural_number already exists before attempting insert
     const existing = await getKuralByNumber(kural_number);
     if (existing) {
       return res.status(400).json({
@@ -70,7 +63,6 @@ const addKural = async (req, res) => {
       },
     });
   } catch (error) {
-    // Handle concurrent duplicate key race condition safely
     if (error.code === "ER_DUP_ENTRY") {
       return res.status(400).json({
         success: false,
@@ -85,13 +77,9 @@ const addKural = async (req, res) => {
   }
 };
 
-// =====================================
-// Update Kural
-// Performance: fetch once, update, return merged data — no second SELECT
-// =====================================
 const editKural = async (req, res) => {
   try {
-    const { id } = req.query;
+    const id = parsePositiveInt(req.query.id);
     const { kural_number, tamil_text, english_meaning, explanation } = req.body;
 
     if (!id) {
@@ -149,12 +137,9 @@ const editKural = async (req, res) => {
   }
 };
 
-// =====================================
-// Delete Kural
-// =====================================
 const removeKural = async (req, res) => {
   try {
-    const { id } = req.query;
+    const id = parsePositiveInt(req.query.id);
 
     if (!id) {
       return res.status(400).json({
@@ -163,15 +148,13 @@ const removeKural = async (req, res) => {
       });
     }
 
-    const existing = await getKuralById(id);
-    if (!existing) {
+    const affectedRows = await deleteKural(id);
+    if (!affectedRows) {
       return res.status(404).json({
         success: false,
         message: "Thirukkural not found",
       });
     }
-
-    await deleteKural(id);
 
     return res.status(200).json({
       success: true,

@@ -128,15 +128,13 @@ const removeProfile = async (req, res) => {
   try {
     const adminId = req.admin.id;
 
-    const existing = await getProfileByAdminId(adminId);
-    if (!existing) {
+    const affectedRows = await deleteProfile(adminId);
+    if (!affectedRows) {
       return res.status(404).json({
         success: false,
         message: "Profile not found",
       });
     }
-
-    await deleteProfile(adminId);
 
     return res.status(200).json({
       success: true,

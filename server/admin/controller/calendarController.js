@@ -1,18 +1,15 @@
-const fs = require("fs");
-const path = require("path");
 const {
   getAllCalendars,
   getCalendarById,
   createCalendar,
   deleteCalendar,
 } = require("../model/calendarModel");
+const { parsePositiveInt, parseListPagination } = require("../utils/validate");
+const { unlinkUpload } = require("../utils/files");
 
-// =====================================
-// List All Calendars
-// =====================================
 const listCalendars = async (req, res) => {
   try {
-    const calendars = await getAllCalendars();
+    const calendars = await getAllCalendars(parseListPagination(req.query));
     return res.status(200).json({
       success: true,
       count: calendars.length,
@@ -27,10 +24,6 @@ const listCalendars = async (req, res) => {
   }
 };
 
-// =====================================
-// Add Calendar Record (FormData PDF Upload)
-// Performance: single INSERT — no post-insert SELECT
-// =====================================
 const addCalendar = async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -38,7 +31,7 @@ const addCalendar = async (req, res) => {
 
     if (!title || !file) {
       if (file && file.path) {
-        await fs.promises.unlink(file.path).catch(() => {});
+        await unlinkUpload(file.path);
       }
       return res.status(400).json({
         success: false,
@@ -62,7 +55,7 @@ const addCalendar = async (req, res) => {
     });
   } catch (error) {
     if (req.file && req.file.path) {
-      await fs.promises.unlink(req.file.path).catch(() => {});
+      await unlinkUpload(req.file.path);
     }
     console.error("Upload Calendar Error:", error);
     return res.status(500).json({
@@ -72,12 +65,9 @@ const addCalendar = async (req, res) => {
   }
 };
 
-// =====================================
-// Delete Calendar Record & Physical File
-// =====================================
 const removeCalendar = async (req, res) => {
   try {
-    const { id } = req.query;
+    const id = parsePositiveInt(req.query.id);
 
     if (!id) {
       return res.status(400).json({
@@ -94,16 +84,8 @@ const removeCalendar = async (req, res) => {
       });
     }
 
-    // Remove physical PDF file asynchronously to avoid event loop blocking
     if (existing.file_path) {
-      const serverFilePath = path.join(__dirname, "../../", existing.file_path);
-      try {
-        await fs.promises.unlink(serverFilePath);
-      } catch (fileErr) {
-        if (fileErr.code !== "ENOENT") {
-          console.warn("Notice: could not unlink calendar file:", fileErr.message);
-        }
-      }
+      await unlinkUpload(existing.file_path);
     }
 
     await deleteCalendar(id);

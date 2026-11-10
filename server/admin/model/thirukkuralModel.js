@@ -1,24 +1,27 @@
 const pool = require("../../config/db");
 
-// =====================================
-// Get All Kurals
-// =====================================
-const getAllKurals = async () => {
-  const query = `
-    SELECT *
-    FROM thirukkural
-    ORDER BY kural_number ASC
-  `;
+const KURAL_COLUMNS =
+  "id, kural_number, tamil_text, english_meaning, explanation, created_at, updated_at";
+
+const applyPagination = (query, pagination) => {
+  if (!pagination) {
+    return query;
+  }
+  return `${query} LIMIT ${pagination.limit} OFFSET ${pagination.offset}`;
+};
+
+const getAllKurals = async (pagination = null) => {
+  const query = applyPagination(
+    `SELECT ${KURAL_COLUMNS} FROM thirukkural ORDER BY kural_number ASC`,
+    pagination
+  );
   const [rows] = await pool.execute(query);
   return rows;
 };
 
-// =====================================
-// Get Kural By ID
-// =====================================
 const getKuralById = async (id) => {
   const query = `
-    SELECT *
+    SELECT ${KURAL_COLUMNS}
     FROM thirukkural
     WHERE id = ?
     LIMIT 1
@@ -27,12 +30,9 @@ const getKuralById = async (id) => {
   return rows[0];
 };
 
-// =====================================
-// Get Kural By Kural Number
-// =====================================
 const getKuralByNumber = async (kuralNumber) => {
   const query = `
-    SELECT *
+    SELECT id
     FROM thirukkural
     WHERE kural_number = ?
     LIMIT 1
@@ -41,9 +41,6 @@ const getKuralByNumber = async (kuralNumber) => {
   return rows[0];
 };
 
-// =====================================
-// Create New Kural
-// =====================================
 const createKural = async (kuralNumber, tamilText, englishMeaning, explanation) => {
   const query = `
     INSERT INTO thirukkural (kural_number, tamil_text, english_meaning, explanation)
@@ -58,9 +55,6 @@ const createKural = async (kuralNumber, tamilText, englishMeaning, explanation) 
   return result.insertId;
 };
 
-// =====================================
-// Update Kural
-// =====================================
 const updateKural = async (id, kuralNumber, tamilText, englishMeaning, explanation) => {
   const query = `
     UPDATE thirukkural
@@ -77,9 +71,6 @@ const updateKural = async (id, kuralNumber, tamilText, englishMeaning, explanati
   return result.affectedRows;
 };
 
-// =====================================
-// Delete Kural
-// =====================================
 const deleteKural = async (id) => {
   const query = `
     DELETE FROM thirukkural

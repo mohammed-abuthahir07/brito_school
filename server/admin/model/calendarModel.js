@@ -1,24 +1,27 @@
 const pool = require("../../config/db");
 
-// =====================================
-// Get All Calendars
-// =====================================
-const getAllCalendars = async () => {
-  const query = `
-    SELECT *
-    FROM calendars
-    ORDER BY created_at DESC
-  `;
+const CALENDAR_COLUMNS =
+  "id, title, description, file_path, file_url, created_at, updated_at";
+
+const applyPagination = (query, pagination) => {
+  if (!pagination) {
+    return query;
+  }
+  return `${query} LIMIT ${pagination.limit} OFFSET ${pagination.offset}`;
+};
+
+const getAllCalendars = async (pagination = null) => {
+  const query = applyPagination(
+    `SELECT ${CALENDAR_COLUMNS} FROM calendars ORDER BY created_at DESC`,
+    pagination
+  );
   const [rows] = await pool.execute(query);
   return rows;
 };
 
-// =====================================
-// Get Calendar By ID
-// =====================================
 const getCalendarById = async (id) => {
   const query = `
-    SELECT *
+    SELECT ${CALENDAR_COLUMNS}
     FROM calendars
     WHERE id = ?
     LIMIT 1
@@ -27,9 +30,6 @@ const getCalendarById = async (id) => {
   return rows[0];
 };
 
-// =====================================
-// Create Calendar Record (Populating file_path & file_url)
-// =====================================
 const createCalendar = async (title, description, filePath) => {
   const query = `
     INSERT INTO calendars (title, description, file_path, file_url)
@@ -44,9 +44,6 @@ const createCalendar = async (title, description, filePath) => {
   return result.insertId;
 };
 
-// =====================================
-// Delete Calendar Record
-// =====================================
 const deleteCalendar = async (id) => {
   const query = `
     DELETE FROM calendars

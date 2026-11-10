@@ -5,13 +5,11 @@ const {
   updateAnnouncement,
   deleteAnnouncement,
 } = require("../model/announcementModel");
+const { parsePositiveInt, parseListPagination } = require("../utils/validate");
 
-// =====================================
-// List All Announcements
-// =====================================
 const listAnnouncements = async (req, res) => {
   try {
-    const announcements = await getAllAnnouncements();
+    const announcements = await getAllAnnouncements(parseListPagination(req.query));
     return res.status(200).json({
       success: true,
       count: announcements.length,
@@ -26,10 +24,6 @@ const listAnnouncements = async (req, res) => {
   }
 };
 
-// =====================================
-// Create Announcement
-// Performance: single INSERT returning insertId, no extra SELECT
-// =====================================
 const addAnnouncement = async (req, res) => {
   try {
     const { title, content, category } = req.body;
@@ -63,13 +57,9 @@ const addAnnouncement = async (req, res) => {
   }
 };
 
-// =====================================
-// Update Announcement
-// Performance: fetch existing once, update, return merged data — no second SELECT
-// =====================================
 const editAnnouncement = async (req, res) => {
   try {
-    const { id } = req.query;
+    const id = parsePositiveInt(req.query.id);
     const { title, content, category } = req.body;
 
     if (!id) {
@@ -112,13 +102,9 @@ const editAnnouncement = async (req, res) => {
   }
 };
 
-// =====================================
-// Delete Announcement
-// Fix: return 404 (not 400) for not-found — consistent with all other endpoints
-// =====================================
 const removeAnnouncement = async (req, res) => {
   try {
-    const { id } = req.query;
+    const id = parsePositiveInt(req.query.id);
 
     if (!id) {
       return res.status(400).json({
@@ -127,15 +113,13 @@ const removeAnnouncement = async (req, res) => {
       });
     }
 
-    const existing = await getAnnouncementById(id);
-    if (!existing) {
+    const affectedRows = await deleteAnnouncement(id);
+    if (!affectedRows) {
       return res.status(404).json({
         success: false,
         message: "Announcement not found",
       });
     }
-
-    await deleteAnnouncement(id);
 
     return res.status(200).json({
       success: true,
