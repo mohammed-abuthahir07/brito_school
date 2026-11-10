@@ -500,6 +500,55 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(res.data.success, false);
     });
 
+    test("POST /api/admin/galleries rejects images that are 30 MB or larger", async () => {
+      const form = new FormData();
+      form.append("title", "Oversized Image");
+      const oversized = new Uint8Array(30 * 1024 * 1024);
+      oversized[0] = 0xff;
+      oversized[1] = 0xd8;
+      oversized[2] = 0xff;
+      form.append("image", new Blob([oversized], { type: "image/jpeg" }), "big.jpg");
+
+      const res = await request("/api/admin/galleries", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: form,
+      });
+
+      assert.equal(res.status, 400);
+      assert.equal(res.data.success, false);
+      assert.equal(
+        res.data.message,
+        "Image size must be below 30 MB. Please select a smaller image."
+      );
+    });
+
+    test("POST /api/admin/galleries rejects if any selected image is 30 MB or larger", async () => {
+      const form = new FormData();
+      form.append("title", "Mixed Images");
+      const smallFake = new Blob(["PLAIN_TEXT_NOT_A_REAL_IMAGE"], { type: "image/png" });
+      form.append("image", smallFake, "small.png");
+      const oversized = new Uint8Array(30 * 1024 * 1024);
+      oversized[0] = 0x89;
+      oversized[1] = 0x50;
+      oversized[2] = 0x4e;
+      oversized[3] = 0x47;
+      form.append("image", new Blob([oversized], { type: "image/png" }), "big.png");
+
+      const res = await request("/api/admin/galleries", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: form,
+      });
+
+      assert.equal(res.status, 400);
+      assert.equal(res.data.success, false);
+      assert.equal(
+        res.data.message,
+        "Image size must be below 30 MB. Please select a smaller image."
+      );
+    });
+
     test("POST /api/admin/galleries rejects fake image without image magic bytes", async () => {
       const form = new FormData();
       form.append("title", "Fake Image");

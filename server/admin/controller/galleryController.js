@@ -8,6 +8,35 @@ const {
 const { parsePositiveInt, parseListPagination } = require("../utils/validate");
 const { unlinkUpload } = require("../utils/files");
 
+const GALLERY_IMAGE_LIMIT_BYTES = 30 * 1024 * 1024;
+const GALLERY_IMAGE_SIZE_ERROR =
+  "Image size must be below 30 MB. Please select a smaller image.";
+
+const collectUploadedImages = (req) => {
+  const files = [];
+  if (req.file) {
+    files.push(req.file);
+  }
+  if (Array.isArray(req.files)) {
+    files.push(...req.files);
+  }
+  return [...new Map(files.filter(Boolean).map((file) => [file.path, file])).values()];
+};
+
+const rejectOversizedGalleryImages = async (req, res) => {
+  const files = collectUploadedImages(req);
+  const hasOversized = files.some((file) => file.size >= GALLERY_IMAGE_LIMIT_BYTES);
+  if (!hasOversized) {
+    return false;
+  }
+  await Promise.all(files.map((file) => unlinkUpload(file.path)));
+  res.status(400).json({
+    success: false,
+    message: GALLERY_IMAGE_SIZE_ERROR,
+  });
+  return true;
+};
+
 const listGalleries = async (req, res) => {
   try {
     const galleries = await getAllGalleries(parseListPagination(req.query));
@@ -27,6 +56,10 @@ const listGalleries = async (req, res) => {
 
 const addGallery = async (req, res) => {
   try {
+    if (await rejectOversizedGalleryImages(req, res)) {
+      return;
+    }
+
     const { title, description } = req.body;
     const file = req.file;
 
@@ -67,6 +100,10 @@ const addGallery = async (req, res) => {
 
 const editGallery = async (req, res) => {
   try {
+    if (await rejectOversizedGalleryImages(req, res)) {
+      return;
+    }
+
     const id = parsePositiveInt(req.query.id);
     const { title, description } = req.body;
     const file = req.file;

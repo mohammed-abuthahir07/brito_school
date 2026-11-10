@@ -11,12 +11,12 @@ const {
 } = require("../controller/galleryController");
 const { verifyToken } = require("../middleware/authMiddleware");
 
-// =====================================
-// Multer Configuration for Image Uploads
-// =====================================
+const GALLERY_IMAGE_LIMIT_BYTES = 30 * 1024 * 1024;
+const GALLERY_IMAGE_SIZE_ERROR =
+  "Image size must be below 30 MB. Please select a smaller image.";
+
 const uploadDir = path.join(__dirname, "../../uploads/galleries");
 
-// mkdirSync with recursive:true is safe — creates dir if missing, no-op if exists
 fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -42,15 +42,84 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: GALLERY_IMAGE_LIMIT_BYTES - 1 },
   fileFilter: fileFilter,
 });
 
-// Middleware: Validate Magic Bytes for Images
-const validateImageMagicBytes = async (req, res, next) => {
+const collectGalleryFiles = (req) => {
+  const files = [];
   if (req.file) {
-    try {
-      const fd = await fs.promises.open(req.file.path, "r");
+    files.push(req.file);
+  }
+  if (Array.isArray(req.files)) {
+    files.push(...req.files);
+  } else if (req.files && typeof req.files === "object") {
+    for (const value of Object.values(req.files)) {
+      if (Array.isArray(value)) {
+        files.push(...value);
+      } else if (value) {
+        files.push(value);
+      }
+    }
+  }
+  return [...new Map(files.filter(Boolean).map((file) => [file.path, file])).values()];
+};
+
+const unlinkGalleryFiles = async (files) => {
+  await Promise.all(
+    files.map((file) =>
+      file && file.path ? fs.promises.unlink(file.path).catch(() => {}) : Promise.resolve()
+    )
+  );
+};
+
+const handleGalleryUpload = (req, res, next) => {
+  upload.fields([
+    { name: "image", maxCount: 20 },
+    { name: "images", maxCount: 20 },
+  ])(req, res, async (err) => {
+    const files = collectGalleryFiles(req);
+    if (files.length && !req.file) {
+      req.file = files[0];
+    }
+    req.files = files;
+
+    if (err) {
+      await unlinkGalleryFiles(files);
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({
+          success: false,
+          message: GALLERY_IMAGE_SIZE_ERROR,
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: err.message || "File upload failed",
+      });
+    }
+
+    const oversized = files.filter((file) => file.size >= GALLERY_IMAGE_LIMIT_BYTES);
+    if (oversized.length > 0) {
+      await unlinkGalleryFiles(files);
+      return res.status(400).json({
+        success: false,
+        message: GALLERY_IMAGE_SIZE_ERROR,
+      });
+    }
+
+    next();
+  });
+};
+
+const validateImageMagicBytes = async (req, res, next) => {
+  const files = collectGalleryFiles(req);
+  if (!files.length) {
+    return next();
+  }
+
+  try {
+    for (const file of files) {
+      const fd = await fs.promises.open(file.path, "r");
       const buffer = Buffer.alloc(12);
       await fd.read(buffer, 0, 12, 0);
       await fd.close();
@@ -69,44 +138,30 @@ const validateImageMagicBytes = async (req, res, next) => {
         buffer[11] === 0x50;
 
       if (!isJpeg && !isPng && !isGif && !isWebp) {
-        await fs.promises.unlink(req.file.path).catch(() => {});
+        await unlinkGalleryFiles(files);
         return res.status(400).json({
           success: false,
           message: "Invalid file content: Uploaded file is not a valid image.",
         });
       }
-    } catch (err) {
-      if (req.file && req.file.path) {
-        await fs.promises.unlink(req.file.path).catch(() => {});
-      }
-      return res.status(400).json({
-        success: false,
-        message: "Failed to verify image integrity",
-      });
     }
+  } catch (err) {
+    await unlinkGalleryFiles(files);
+    return res.status(400).json({
+      success: false,
+      message: "Failed to verify image integrity",
+    });
   }
+
   next();
 };
 
-// =====================================
-// Gallery Routes (Protected)
-// =====================================
 router.get("/galleries", verifyToken, listGalleries);
 
 router.post(
   "/galleries",
   verifyToken,
-  (req, res, next) => {
-    upload.single("image")(req, res, (err) => {
-      if (err) {
-        return res.status(400).json({
-          success: false,
-          message: err.message || "File upload failed",
-        });
-      }
-      next();
-    });
-  },
+  handleGalleryUpload,
   validateImageMagicBytes,
   addGallery
 );
@@ -114,17 +169,7 @@ router.post(
 router.put(
   "/galleries",
   verifyToken,
-  (req, res, next) => {
-    upload.single("image")(req, res, (err) => {
-      if (err) {
-        return res.status(400).json({
-          success: false,
-          message: err.message || "File upload failed",
-        });
-      }
-      next();
-    });
-  },
+  handleGalleryUpload,
   validateImageMagicBytes,
   editGallery
 );
