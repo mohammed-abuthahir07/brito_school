@@ -1,7 +1,7 @@
 const { getAllAnnouncements } = require("../../admin/model/announcementModel");
 const { getAllCalendars } = require("../../admin/model/calendarModel");
 const { getAllGalleries } = require("../../admin/model/galleryModel");
-const { getAllKurals, getDailyKural } = require("../../admin/model/thirukkuralModel");
+const { getAllKurals } = require("../../admin/model/thirukkuralModel");
 const { parseListPagination } = require("../../admin/utils/validate");
 const { contentCache } = require("../../admin/utils/cache");
 
@@ -106,25 +106,10 @@ const getPublicKurals = async (req, res) => {
   });
 };
 
-// =====================================
-// Public Daily / Current Thirukkural
-// =====================================
-const getPublicDailyKural = async (req, res) => {
-  const cacheKey = "thirukkural:daily";
-
-  return sendCachedPublicResponse(req, res, cacheKey, "thirukkural", async () => {
-    const kural = await getDailyKural();
-    return {
-      success: true,
-      kural,
-    };
-  });
-};
 
 module.exports = {
   getPublicAnnouncements,
   getPublicCalendars,
   getPublicGalleries,
   getPublicKurals,
-  getPublicDailyKural,
 };
