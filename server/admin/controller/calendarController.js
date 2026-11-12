@@ -6,6 +6,7 @@ const {
 } = require("../model/calendarModel");
 const { parsePositiveInt, parseListPagination } = require("../utils/validate");
 const { unlinkUpload } = require("../utils/files");
+const { contentCache } = require("../utils/cache");
 
 const listCalendars = async (req, res) => {
   try {
@@ -35,16 +36,17 @@ const addCalendar = async (req, res) => {
       }
       return res.status(400).json({
         success: false,
-        message: "Title and a PDF file are required via form-data",
+        message: "Title and a file are required via form-data",
       });
     }
 
     const filePathUrl = `/uploads/calendars/${file.filename}`;
     const insertId = await createCalendar(title, description, filePathUrl);
+    contentCache.invalidate("calendars");
 
     return res.status(200).json({
       success: true,
-      message: "Calendar PDF uploaded successfully!",
+      message: "Calendar file uploaded successfully!",
       calendar: {
         id: insertId,
         title,
@@ -89,6 +91,7 @@ const removeCalendar = async (req, res) => {
     }
 
     await deleteCalendar(id);
+    contentCache.invalidate("calendars");
 
     return res.status(200).json({
       success: true,

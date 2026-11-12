@@ -1,12 +1,8 @@
-
+import React from 'react'
 
 const App = () => {
   return (
-    <>
-      <div>
-          <h1>brito</h1>
-      </div>
-    </>
+    <div>App</div>
   )
 }
 

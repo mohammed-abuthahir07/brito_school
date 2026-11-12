@@ -1,312 +1,367 @@
-# Brito School Management — Complete Backend API Document
-
-**Base URL:** `http://localhost:5000` (or production domain)  
-**Standard Auth Header:** `Authorization: Bearer <JWT_TOKEN>`  
-**Content-Type:** `application/json` (or `multipart/form-data` for file uploads)  
-
----
+# Brito School Management System — API Documentation
 
 ## Table of Contents
-1. [System Health Check](#0-system-health-check)
-2. [Authentication & Password Management](#1-authentication--password-management)
-   - [1.1 Admin Login](#11-admin-login)
-   - [1.2 Forgot Password (Send OTP)](#12-forgot-password-send-otp)
-   - [1.3 Reset Password (Verify OTP)](#13-reset-password-verify-otp)
-3. [Functionality 1: Announcements Management](#2-functionality-1-announcements-management)
-   - [2.1 List All Announcements](#21-list-all-announcements)
-   - [2.2 Create Announcement](#22-create-announcement)
-   - [2.3 Edit Announcement](#23-edit-announcement)
-   - [2.4 Delete Announcement](#24-delete-announcement)
-4. [Functionality 2: Academic Calendars Management](#3-functionality-2-academic-calendars-management)
-   - [3.1 List All Calendars](#31-list-all-calendars)
-   - [3.2 Upload Calendar PDF](#32-upload-calendar-pdf)
-   - [3.3 Delete Calendar](#33-delete-calendar)
-5. [Functionality 3: Media Galleries Management](#4-functionality-3-media-galleries-management)
-   - [4.1 List All Galleries](#41-list-all-galleries)
-   - [4.2 Upload Gallery Image](#42-upload-gallery-image)
-   - [4.3 Edit Gallery Item](#43-edit-gallery-item)
-   - [4.4 Delete Gallery Item](#44-delete-gallery-item)
-6. [Functionality 4: Thirukkural Couplets](#5-functionality-4-thirukkural-couplets)
-   - [5.1 List All Thirukkural Verses](#51-list-all-thirukkural-verses)
-   - [5.2 Add New Thirukkural Verse](#52-add-new-thirukkural-verse)
-   - [5.3 Edit Thirukkural Verse](#53-edit-thirukkural-verse)
-   - [5.4 Delete Thirukkural Verse](#54-delete-thirukkural-verse)
-7. [Functionality 5: Admin Profile Management](#6-functionality-5-admin-profile-management)
-   - [6.1 Get Admin Profile](#61-get-admin-profile)
-   - [6.2 Create Admin Profile](#62-create-admin-profile)
-   - [6.3 Update Admin Profile](#63-update-admin-profile)
-   - [6.4 Delete Admin Profile](#64-delete-admin-profile)
-8. [Static Upload File Serving](#7-static-upload-file-serving)
+
+1. [Project Overview](#1-project-overview)
+2. [Authentication](#2-authentication)
+3. [Standard Response Format](#3-standard-response-format)
+4. [Error Codes](#4-error-codes)
+5. [Rate Limiting](#5-rate-limiting)
+6. [Security Headers](#6-security-headers)
+7. [API Endpoints](#7-api-endpoints)
+   - [System](#system)
+   - [Authentication](#auth-endpoints)
+   - [Dashboard](#dashboard)
+   - [Announcements](#announcements)
+   - [Calendars](#calendars)
+   - [Galleries](#galleries)
+   - [Thirukkural](#thirukkural)
+   - [Admin Profile](#admin-profile)
+   - [Static Files](#static-files)
+8. [Postman Testing Guide](#8-postman-testing-guide)
+9. [Database Schema](#9-database-schema)
+10. [Postman Collection JSON](#10-postman-collection-json)
 
 ---
 
-## 0. System Health Check
+## 1. Project Overview
 
-### 0.1 Health Check (Liveness & Readiness)
-- **Method:** `GET`
-- **URL:** `/health`
-- **Authentication:** None (Public)
-- **Description:** Returns server uptime, MySQL ping latency, connection pool state, and disk storage metrics.
+**Brito School Management System** is a RESTful backend API for managing school administration operations including announcements, academic calendars, photo galleries, Thirukkural literature, and admin profile management.
 
-#### Request Example
+| Item | Detail |
+|------|--------|
+| **Runtime** | Node.js 18+ |
+| **Framework** | Express.js |
+| **Database** | MySQL 8+ |
+| **Auth** | JWT (Bearer token) |
+| **Base URL** | `http://localhost:5000` |
+| **User Role** | Admin only |
+
+---
+
+## 2. Authentication
+
+The API uses **JWT Bearer Token** authentication.
+
+### Getting a Token
+
 ```http
-GET /health HTTP/1.1
-Host: localhost:5000
+POST /api/admin/login
 ```
 
-#### Success Response (`200 OK`)
-```json
-{
-  "status": "UP",
-  "timestamp": "2026-11-09T11:00:00.000Z",
-  "uptimeSeconds": 1420,
-  "database": {
-    "status": "CONNECTED",
-    "latencyMs": 0.85
-  },
-  "connectionPool": {
-    "totalConnections": 3,
-    "freeConnections": 3,
-    "waitingRequests": 0
-  },
-  "storage": {
-    "freeGb": 251.81,
-    "totalGb": 474.53,
-    "usagePercent": 46.9
-  },
-  "memory": {
-    "rssMb": 42.15,
-    "heapUsedMb": 24.32,
-    "heapTotalMb": 38.50
-  }
-}
-```
-
-#### Error Response (`503 Service Unavailable`)
-```json
-{
-  "status": "DEGRADED",
-  "timestamp": "2026-11-09T11:00:00.000Z",
-  "uptimeSeconds": 1420,
-  "database": {
-    "status": "UNREACHABLE",
-    "latencyMs": null
-  }
-}
-```
-
----
-
-## 1. Authentication & Password Management
-
-### 1.1 Admin Login
-- **Method:** `POST`
-- **URL:** `/api/admin/login`
-- **Authentication:** None (Public)
-- **Rate Limit:** 30 requests / 15 minutes
-- **Headers:** `Content-Type: application/json`
-
-#### Request Parameters (Body)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `email` | `string` | Yes | Registered admin email address |
-| `password` | `string` | Yes | Administrator password |
-
-#### Request Example
 ```json
 {
   "email": "admin@britoschool.com",
-  "password": "Password1234"
+  "password": "admin@123"
 }
 ```
 
-#### Success Response (`200 OK`)
-```json
-{
-  "success": true,
-  "message": "Admin logged in successfully!",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBicml0b3NjaG9vbC5jb20iLCJpYXQiOjE3OTQyMTYwMDAsImV4cCI6MTc5NDMwMjQwMH0.signature",
-  "admin": {
-    "id": 1,
-    "email": "admin@britoschool.com",
-    "mobile_number": "9876543210"
-  }
-}
+Response includes a `token` field. Use it in subsequent requests:
+
+```http
+Authorization: Bearer <your-token-here>
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing fields):
-  ```json
-  {
-    "success": false,
-    "message": "Email and password are required"
-  }
-  ```
-- **`401 Unauthorized`** (Invalid credentials / timing-safe):
-  ```json
-  {
-    "success": false,
-    "message": "Invalid email or password"
-  }
-  ```
-- **`429 Too Many Requests`** (Rate limited):
-  ```json
-  {
-    "success": false,
-    "message": "Too many authentication attempts. Please try again later.",
-    "retryAfterSeconds": 780
-  }
-  ```
+- Token expiry: **1 day**
+- All endpoints except `POST /api/admin/login`, `POST /api/admin/forgot-password`, `POST /api/admin/reset-password`, and `GET /health` require a valid token.
 
 ---
 
-### 1.2 Forgot Password (Send OTP)
-- **Method:** `POST`
-- **URL:** `/api/admin/forgot-password`
-- **Authentication:** None (Public)
-- **Rate Limit:** 30 requests / 15 minutes
-- **Headers:** `Content-Type: application/json`
+## 3. Standard Response Format
 
-#### Request Parameters (Body)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `email` | `string` | Yes | Registered admin email address |
+### Success
 
-#### Request Example
+```json
+{
+  "success": true,
+  "message": "Operation completed successfully",
+  "data": { ... }
+}
+```
+
+### Failure
+
+```json
+{
+  "success": false,
+  "message": "Description of what went wrong"
+}
+```
+
+---
+
+## 4. Error Codes
+
+| Code | Meaning |
+|------|---------|
+| `400` | Bad Request — missing or invalid input fields |
+| `401` | Unauthorized — missing, invalid, or expired token |
+| `404` | Not Found — resource does not exist |
+| `429` | Too Many Requests — rate limit exceeded |
+| `500` | Internal Server Error — unexpected server failure |
+| `503` | Service Unavailable — DB unreachable or server busy |
+
+---
+
+## 5. Rate Limiting
+
+| Route Group | Limit |
+|-------------|-------|
+| Auth routes (`/login`, `/forgot-password`, `/reset-password`) | 30 requests / 15 minutes |
+| All other `/api/*` routes | 1000 requests / 15 minutes |
+
+When exceeded, the API returns HTTP `429` with:
+
+```json
+{
+  "success": false,
+  "message": "Too many requests, please try again later."
+}
+```
+
+---
+
+## 6. Security Headers
+
+Every response includes these security headers:
+
+| Header | Value |
+|--------|-------|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `SAMEORIGIN` |
+| `X-XSS-Protection` | `0` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `X-Powered-By` | *(removed)* |
+
+---
+
+## 7. API Endpoints
+
+---
+
+### System
+
+#### `GET /health`
+
+Returns the server health status including database connectivity, memory usage, connection pool, and disk storage metrics.
+
+**Auth:** Not required
+
+**Success Response (200):**
+```json
+{
+  "status": "UP",
+  "timestamp": "2026-11-12T05:22:00.000Z",
+  "uptimeSeconds": 3600,
+  "database": {
+    "status": "CONNECTED",
+    "latencyMs": 1.23
+  },
+  "connectionPool": {
+    "totalConnections": 2,
+    "freeConnections": 2,
+    "waitingRequests": 0
+  },
+  "storage": {
+    "freeGb": 45.60,
+    "totalGb": 100.00,
+    "usagePercent": 54.4
+  },
+  "memory": {
+    "rssMb": 55.21,
+    "heapUsedMb": 22.10,
+    "heapTotalMb": 35.00
+  }
+}
+```
+
+**Degraded Response (503):** when DB is unreachable, `status` = `"DEGRADED"`.
+
+---
+
+### Auth Endpoints
+
+#### `POST /api/admin/login`
+
+Authenticates the admin and returns a JWT token.
+
+**Auth:** Not required
+
+**Request Body:**
+```json
+{
+  "email": "admin@britoschool.com",
+  "password": "admin@123"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Email and password are required"` |
+| `401` | `"Invalid email or password"` |
+
+---
+
+#### `POST /api/admin/forgot-password`
+
+Sends a one-time password (OTP) to the admin's registered email for password reset.
+
+**Auth:** Not required
+
+**Request Body:**
 ```json
 {
   "email": "admin@britoschool.com"
 }
 ```
 
-#### Success Response (`200 OK`)
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "OTP sent successfully to your email. Valid for 2 minutes."
+  "message": "OTP sent to your email address"
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing email):
-  ```json
-  {
-    "success": false,
-    "message": "Email address is required"
-  }
-  ```
-- **`404 Not Found`** (Email not found):
-  ```json
-  {
-    "success": false,
-    "message": "Admin account not found with this email"
-  }
-  ```
-- **`500 Internal Server Error`** (SMTP delivery failure):
-  ```json
-  {
-    "success": false,
-    "message": "Failed to send OTP email"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Email address is required"` |
+| `404` | `"Admin account not found with this email"` |
 
 ---
 
-### 1.3 Reset Password (Verify OTP)
-- **Method:** `POST`
-- **URL:** `/api/admin/reset-password`
-- **Authentication:** None (Public)
-- **Headers:** `Content-Type: application/json`
+#### `POST /api/admin/reset-password`
 
-#### Request Parameters (Body)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `email` | `string` | Yes | Registered admin email address |
-| `otp` | `string` | Yes | 6-digit OTP code received in email |
-| `newPassword` | `string` | Yes | New password (minimum 6 characters) |
-| `confirmPassword` | `string` | Yes | Must match `newPassword` exactly |
+Resets the admin password using the OTP received by email.
 
-#### Request Example
+**Auth:** Not required
+
+**Request Body:**
 ```json
 {
   "email": "admin@britoschool.com",
-  "otp": "492018",
-  "newPassword": "brandNewSecurePassword2026",
-  "confirmPassword": "brandNewSecurePassword2026"
+  "otp": "123456",
+  "newPassword": "newSecurePass123",
+  "confirmPassword": "newSecurePass123"
 }
 ```
 
-#### Success Response (`200 OK`)
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Password reset successful! You can now log in."
+  "message": "Password reset successfully"
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing fields):
-  ```json
-  {
-    "success": false,
-    "message": "All fields are required"
-  }
-  ```
-- **`400 Bad Request`** (Passwords mismatch):
-  ```json
-  {
-    "success": false,
-    "message": "New password and confirm password do not match"
-  }
-  ```
-- **`400 Bad Request`** (Password too short):
-  ```json
-  {
-    "success": false,
-    "message": "Password must be at least 6 characters long"
-  }
-  ```
-- **`400 Bad Request`** (Invalid OTP code):
-  ```json
-  {
-    "success": false,
-    "message": "Invalid OTP code."
-  }
-  ```
-- **`400 Bad Request`** (Expired OTP code > 2 minutes):
-  ```json
-  {
-    "success": false,
-    "message": "OTP has expired! Please request a new one."
-  }
-  ```
-- **`404 Not Found`** (Admin account not found):
-  ```json
-  {
-    "success": false,
-    "message": "Admin account not found"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"All fields are required"` |
+| `400` | `"New password and confirm password do not match"` |
+| `400` | `"Password must be at least 6 characters long"` |
+| `400` | `"Invalid or expired OTP"` |
+| `404` | `"Admin account not found with this email"` |
 
 ---
 
-## 2. Functionality 1: Announcements Management
+### Dashboard
 
-### 2.1 List All Announcements
-- **Method:** `GET`
-- **URL:** `/api/admin/announcements`
-- **Authentication:** Bearer Token required
-- **Headers:** `Authorization: Bearer <TOKEN>`
-- **Sorting:** Newest to oldest (`created_at DESC`)
+#### `GET /api/admin/dashboard`
 
-#### Request Example
-```http
-GET /api/admin/announcements HTTP/1.1
-Host: localhost:5000
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Returns aggregated real-time statistics from all content tables. All queries are executed in parallel using `Promise.all` for efficiency.
+
+**Auth:** Required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "dashboard": {
+    "announcements": {
+      "total": 12,
+      "byCategory": [
+        { "category": "Academic", "count": 5 },
+        { "category": "Events", "count": 4 },
+        { "category": "General", "count": 3 }
+      ],
+      "latest": {
+        "id": 12,
+        "title": "Annual Day Celebration",
+        "category": "Events",
+        "created_at": "2026-11-10T08:30:00.000Z"
+      }
+    },
+    "calendars": {
+      "total": 3,
+      "latest": {
+        "id": 3,
+        "title": "Academic Calendar 2026-27",
+        "created_at": "2026-10-01T10:00:00.000Z"
+      }
+    },
+    "galleries": {
+      "total": 25,
+      "latest": {
+        "id": 25,
+        "title": "Sports Day 2026",
+        "created_at": "2026-11-05T14:00:00.000Z"
+      }
+    },
+    "thirukkural": {
+      "total": 1330,
+      "latest": {
+        "id": 1330,
+        "kural_number": 1330,
+        "created_at": "2026-09-01T09:00:00.000Z"
+      }
+    },
+    "generatedAt": "2026-11-12T10:50:00.000Z"
+  }
+}
 ```
 
-#### Success Response (`200 OK`)
+When a table is empty, `latest` will be `null` and `total` will be `0`.
+
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `401` | `"Unauthorized: No token provided"` |
+| `500` | `"Server Error"` |
+
+---
+
+### Announcements
+
+#### `GET /api/admin/announcements`
+
+Returns all announcements ordered by most recent first.
+
+**Auth:** Required
+
+**Query Parameters (optional):**
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `limit` | integer | Max records to return (default: all) |
+| `offset` | integer | Pagination offset |
+
+**Success Response (200):**
 ```json
 {
   "success": true,
@@ -314,204 +369,142 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "announcements": [
     {
       "id": 2,
-      "title": "Annual Sports Day 2026",
-      "content": "Competitions and track events commence from next Monday.",
+      "title": "Annual Day Celebration",
+      "content": "Annual day will be celebrated on November 20th.",
       "category": "Events",
-      "created_at": "2026-11-09T09:30:00.000Z",
-      "updated_at": "2026-11-09T09:30:00.000Z"
+      "created_at": "2026-11-10T08:30:00.000Z",
+      "updated_at": "2026-11-10T08:30:00.000Z"
     },
     {
       "id": 1,
-      "title": "School Reopening Circular",
-      "content": "Term 2 classes begin as per standard schedule.",
+      "title": "School Reopens",
+      "content": "School will reopen after Diwali holidays on November 5th.",
       "category": "General",
-      "created_at": "2026-11-01T08:00:00.000Z",
-      "updated_at": "2026-11-01T08:00:00.000Z"
+      "created_at": "2026-10-28T09:00:00.000Z",
+      "updated_at": "2026-10-28T09:00:00.000Z"
     }
   ]
 }
 ```
 
-#### Error Responses
-- **`401 Unauthorized`** (No token):
-  ```json
-  {
-    "success": false,
-    "message": "Unauthorized: No token provided"
-  }
-  ```
-- **`401 Unauthorized`** (Invalid / Expired token):
-  ```json
-  {
-    "success": false,
-    "message": "Unauthorized: Invalid or expired token"
-  }
-  ```
-
 ---
 
-### 2.2 Create Announcement
-- **Method:** `POST`
-- **URL:** `/api/admin/announcements`
-- **Authentication:** Bearer Token required
-- **Headers:** `Authorization: Bearer <TOKEN>`, `Content-Type: application/json`
+#### `POST /api/admin/announcements`
 
-#### Request Parameters (Body)
-| Field | Type | Required | Default | Description |
-| :--- | :--- | :---: | :--- | :--- |
-| `title` | `string` | Yes | - | Announcement headline |
-| `content` | `string` | Yes | - | Full body text |
-| `category` | `string` | No | `'General'` | Category tag (e.g., General, Events, Academic) |
+Creates a new announcement.
 
-#### Request Example
+**Auth:** Required
+
+**Request Body:**
 ```json
 {
-  "title": "Science Exhibition 2026",
-  "content": "All students from classes 6 to 12 must submit project proposals.",
-  "category": "Academic"
+  "title": "School Reopens",
+  "content": "School will reopen after Diwali holidays on November 5th.",
+  "category": "General"
 }
 ```
 
-#### Success Response (`200 OK`)
+> `category` is optional. Defaults to `"General"` if not provided.
+
+**Success Response (200):**
 ```json
 {
   "success": true,
   "message": "Announcement created successfully!",
   "announcement": {
-    "id": 3,
-    "title": "Science Exhibition 2026",
-    "content": "All students from classes 6 to 12 must submit project proposals.",
-    "category": "Academic",
-    "created_at": "2026-11-09T11:15:00.000Z",
-    "updated_at": "2026-11-09T11:15:00.000Z"
+    "id": 1,
+    "title": "School Reopens",
+    "content": "School will reopen after Diwali holidays on November 5th.",
+    "category": "General"
   }
 }
 ```
 
-#### Error Response (`400 Bad Request`)
-```json
-{
-  "success": false,
-  "message": "Title and content are required"
-}
-```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Title and content are required"` |
+| `401` | `"Unauthorized: No token provided"` |
 
 ---
 
-### 2.3 Edit Announcement
-- **Method:** `PUT`
-- **URL:** `/api/admin/announcements?id=:id`
-- **Authentication:** Bearer Token required
-- **Headers:** `Authorization: Bearer <TOKEN>`, `Content-Type: application/json`
+#### `PUT /api/admin/announcements?id=:id`
 
-#### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | `integer` | Yes | Announcement ID |
+Updates an existing announcement by ID.
 
-#### Request Parameters (Body)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `title` | `string` | No | Updated title (preserves existing if omitted) |
-| `content` | `string` | No | Updated content (preserves existing if omitted) |
-| `category` | `string` | No | Updated category (preserves existing if omitted) |
+**Auth:** Required
 
-#### Request Example
+**Query Params:** `id` (integer, required)
+
+**Request Body:** *(all fields optional — omitted fields retain current value)*
 ```json
 {
-  "title": "Science Exhibition 2026 - Venue Confirmed",
-  "content": "Exhibition will now be conducted in the Main Auditorium."
+  "title": "Updated Title",
+  "content": "Updated content text.",
+  "category": "Academic"
 }
 ```
 
-#### Success Response (`200 OK`)
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Announcement ID 3 updated successfully!",
+  "message": "Announcement ID 1 updated successfully!",
   "announcement": {
-    "id": 3,
-    "title": "Science Exhibition 2026 - Venue Confirmed",
-    "content": "Exhibition will now be conducted in the Main Auditorium.",
+    "id": 1,
+    "title": "Updated Title",
+    "content": "Updated content text.",
     "category": "Academic",
-    "created_at": "2026-11-09T11:15:00.000Z",
-    "updated_at": "2026-11-09T11:20:00.000Z"
+    "created_at": "2026-10-28T09:00:00.000Z",
+    "updated_at": "2026-10-28T09:00:00.000Z"
   }
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing query ID):
-  ```json
-  {
-    "success": false,
-    "message": "Announcement ID is required in query parameters"
-  }
-  ```
-- **`404 Not Found`** (ID does not exist):
-  ```json
-  {
-    "success": false,
-    "message": "Announcement not found"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Announcement ID is required in query parameters"` |
+| `404` | `"Announcement not found"` |
 
 ---
 
-### 2.4 Delete Announcement
-- **Method:** `DELETE`
-- **URL:** `/api/admin/announcements?id=:id`
-- **Authentication:** Bearer Token required
-- **Headers:** `Authorization: Bearer <TOKEN>`
+#### `DELETE /api/admin/announcements?id=:id`
 
-#### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | `integer` | Yes | Announcement ID to delete |
+Deletes an announcement by ID.
 
-#### Request Example
-```http
-DELETE /api/admin/announcements?id=3 HTTP/1.1
-Host: localhost:5000
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+**Auth:** Required
 
-#### Success Response (`200 OK`)
+**Query Params:** `id` (integer, required)
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Announcement ID 3 deleted successfully!"
+  "message": "Announcement ID 1 deleted successfully!"
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing query ID or record not found):
-  ```json
-  {
-    "success": false,
-    "message": "Announcement not found"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Announcement ID is required in query parameters"` |
+| `404` | `"Announcement not found"` |
 
 ---
 
-## 3. Functionality 2: Academic Calendars Management
+### Calendars
 
-### 3.1 List All Calendars
-- **Method:** `GET`
-- **URL:** `/api/admin/calendars`
-- **Authentication:** Bearer Token required
-- **Headers:** `Authorization: Bearer <TOKEN>`
-- **Sorting:** Newest to oldest (`created_at DESC`)
+#### `GET /api/admin/calendars`
 
-#### Request Example
-```http
-GET /api/admin/calendars HTTP/1.1
-Host: localhost:5000
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+Returns all academic calendar entries.
 
-#### Success Response (`200 OK`)
+**Auth:** Required
+
+**Success Response (200):**
 ```json
 {
   "success": true,
@@ -519,12 +512,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "calendars": [
     {
       "id": 1,
-      "title": "Academic Calendar 2026-2027",
-      "description": "Annual academic milestones and examination dates",
-      "file_path": "/uploads/calendars/calendar-1794211361137-254226641.pdf",
-      "file_url": "/uploads/calendars/calendar-1794211361137-254226641.pdf",
-      "created_at": "2026-11-09T08:02:41.000Z",
-      "updated_at": "2026-11-09T08:02:41.000Z"
+      "title": "Academic Calendar 2026-27",
+      "description": "Full academic year schedule",
+      "file_path": "uploads/calendars/1699789200000-calendar.pdf",
+      "file_url": "/uploads/calendars/1699789200000-calendar.pdf",
+      "created_at": "2026-10-01T10:00:00.000Z",
+      "updated_at": "2026-10-01T10:00:00.000Z"
     }
   ]
 }
@@ -532,137 +525,92 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-### 3.2 Upload Calendar PDF
-- **Method:** `POST`
-- **URL:** `/api/admin/calendars`
-- **Authentication:** Bearer Token required
-- **Content-Type:** `multipart/form-data`
-- **Max File Size:** 10 MB
-- **Allowed MIME / Ext:** `application/pdf`, `.pdf` (Enforces `%PDF` binary magic bytes)
+#### `POST /api/admin/calendars`
 
-#### Form-Data Parameters
+Uploads a new academic calendar file. Accepts any file type (PDF, JPG, PNG, WEBP, DOC, DOCX, etc., max 30 MB). Uses `multipart/form-data`.
+
+**Auth:** Required
+
+**Content-Type:** `multipart/form-data`
+
+**Form Fields:**
+
 | Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `title` | `text` | Yes | Calendar title |
-| `description` | `text` | No | Additional notes or description |
-| `file` | `file` | Yes | PDF file document (Max 10MB) |
+|-------|------|----------|-------------|
+| `title` | string | Yes | Calendar title |
+| `description` | string | No | Optional description |
+| `file` (or `image`) | file | Yes | Any calendar file (PDF, JPG, PNG, etc., max 30 MB) |
 
-#### Success Response (`200 OK`)
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Calendar PDF uploaded successfully!",
+  "message": "Calendar file uploaded successfully!",
   "calendar": {
-    "id": 2,
-    "title": "Primary Section Exam Calendar",
-    "description": "Mid-term examination milestones",
-    "file_path": "/uploads/calendars/calendar-1794211459271-767900982.pdf",
-    "file_url": "/uploads/calendars/calendar-1794211459271-767900982.pdf",
-    "created_at": "2026-11-09T11:30:00.000Z",
-    "updated_at": "2026-11-09T11:30:00.000Z"
+    "id": 1,
+    "title": "Academic Calendar 2026-27",
+    "description": "Full academic year schedule",
+    "file_url": "/uploads/calendars/calendar-1699789200000-123456789.jpg"
   }
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing title or file):
-  ```json
-  {
-    "success": false,
-    "message": "Title and a PDF file are required via form-data"
-  }
-  ```
-- **`400 Bad Request`** (Non-PDF file selected):
-  ```json
-  {
-    "success": false,
-    "message": "Multer Upload Error",
-    "error": "Only PDF files are allowed!"
-  }
-  ```
-- **`400 Bad Request`** (File exceeds 10MB):
-  ```json
-  {
-    "success": false,
-    "message": "Multer Upload Error",
-    "error": "File too large"
-  }
-  ```
-- **`400 Bad Request`** (Fake PDF with invalid magic bytes):
-  ```json
-  {
-    "success": false,
-    "message": "Invalid file content: Uploaded file is not a valid PDF document."
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Title and a file are required via form-data"` |
+| `400` | `"File size must be below 30 MB. Please select a smaller file."` |
+| `400` | `"Invalid file content: Uploaded file is not a valid PDF document."` (if claimed extension is .pdf but content is corrupt) |
 
 ---
 
-### 3.3 Delete Calendar
-- **Method:** `DELETE`
-- **URL:** `/api/admin/calendars?id=:id`
-- **Authentication:** Bearer Token required
-- **Behavior:** Unlinks the physical PDF file asynchronously, then deletes the database row.
+#### `DELETE /api/admin/calendars?id=:id`
 
-#### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | `integer` | Yes | Calendar ID to delete |
+Deletes a calendar entry and its associated file.
 
-#### Success Response (`200 OK`)
+**Auth:** Required
+
+**Query Params:** `id` (integer, required)
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Calendar ID 2 deleted successfully!"
+  "message": "Calendar ID 1 deleted successfully!"
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing query ID):
-  ```json
-  {
-    "success": false,
-    "message": "Calendar ID is required in query parameters"
-  }
-  ```
-- **`404 Not Found`** (Record not found):
-  ```json
-  {
-    "success": false,
-    "message": "Calendar not found"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Calendar ID is required in query parameters"` |
+| `404` | `"Calendar not found"` |
 
 ---
 
-## 4. Functionality 3: Media Galleries Management
+### Galleries
 
-### 4.1 List All Galleries
-- **Method:** `GET`
-- **URL:** `/api/admin/galleries`
-- **Authentication:** Bearer Token required
-- **Sorting:** Newest to oldest (`created_at DESC`)
+#### `GET /api/admin/galleries`
 
-#### Request Example
-```http
-GET /api/admin/galleries HTTP/1.1
-Host: localhost:5000
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+Returns all gallery images.
 
-#### Success Response (`200 OK`)
+**Auth:** Required
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "count": 1,
+  "count": 2,
   "galleries": [
     {
-      "id": 1,
-      "title": "Independence Day Celebrations",
-      "description": "Flag hoisting ceremony and student cultural events",
-      "image_path": "/uploads/galleries/gallery-1794211234567-891011121.jpg",
-      "created_at": "2026-11-09T08:00:00.000Z",
-      "updated_at": "2026-11-09T08:00:00.000Z"
+      "id": 2,
+      "title": "Sports Day 2026",
+      "description": "Annual sports event highlights",
+      "image_path": "uploads/galleries/1699789200000-sports.jpg",
+      "created_at": "2026-11-05T14:00:00.000Z",
+      "updated_at": "2026-11-05T14:00:00.000Z"
     }
   ]
 }
@@ -670,176 +618,121 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-### 4.2 Upload Gallery Image
-- **Method:** `POST`
-- **URL:** `/api/admin/galleries`
-- **Authentication:** Bearer Token required
-- **Content-Type:** `multipart/form-data`
-- **Max File Size:** 5 MB
-- **Allowed MIME / Ext:** Images only (`.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`) (Enforces binary image headers)
+#### `POST /api/admin/galleries`
 
-#### Form-Data Parameters
+Uploads a new gallery image or media file. Accepts any field name (`file`, `image`, `images`, `photo`, etc.) and any image/file type (JPEG, PNG, GIF, WebP, etc., max 30 MB). Uses `multipart/form-data`.
+
+**Auth:** Required
+
+**Content-Type:** `multipart/form-data`
+
+**Form Fields:**
+
 | Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `title` | `text` | Yes | Image title |
-| `description` | `text` | No | Image caption or description |
-| `image` | `file` | Yes | Image file (Max 5MB) |
+|-------|------|----------|-------------|
+| `title` | string | Yes | Image title |
+| `description` | string | No | Optional description |
+| `file` (or `image`) | file | Yes | Image file (JPEG/PNG/GIF/WebP, max 30 MB; field key can be `file` or `image`) |
 
-#### Success Response (`200 OK`)
+**Success Response (200):**
 ```json
 {
   "success": true,
   "message": "Gallery image uploaded successfully!",
   "gallery": {
-    "id": 2,
-    "title": "Science Lab Inauguration",
-    "description": "Opening of state-of-the-art robotics wing",
-    "image_path": "/uploads/galleries/gallery-1794212987654-123456789.png",
-    "created_at": "2026-11-09T11:45:00.000Z",
-    "updated_at": "2026-11-09T11:45:00.000Z"
+    "id": 1,
+    "title": "Academic Calendar 2026-27",
+    "description": "Full academic year schedule",
+    "image_path": "/uploads/galleries/gallery-1699789200000-123456789.jpg"
   }
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing title or image):
-  ```json
-  {
-    "success": false,
-    "message": "Title and an image file are required via form-data"
-  }
-  ```
-- **`400 Bad Request`** (Non-image file selected):
-  ```json
-  {
-    "success": false,
-    "message": "Multer Upload Error",
-    "error": "Only image files are allowed for galleries!"
-  }
-  ```
-- **`400 Bad Request`** (File exceeds 5MB):
-  ```json
-  {
-    "success": false,
-    "message": "Multer Upload Error",
-    "error": "File too large"
-  }
-  ```
-- **`400 Bad Request`** (Fake image with invalid magic bytes):
-  ```json
-  {
-    "success": false,
-    "message": "Invalid file content: Uploaded file is not a valid image."
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Title and an image file are required via form-data"` |
+| `400` | `"Image size must be below 30 MB. Please select a smaller image."` |
+| `400` | `"Invalid file content: Uploaded file is not a valid image."` |
 
 ---
 
-### 4.3 Edit Gallery Item
-- **Method:** `PUT`
-- **URL:** `/api/admin/galleries?id=:id`
-- **Authentication:** Bearer Token required
-- **Content-Type:** `multipart/form-data`
+#### `PUT /api/admin/galleries?id=:id`
 
-#### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | `integer` | Yes | Gallery item ID |
+Updates the title or description of a gallery item (does not replace the image file).
 
-#### Form-Data Parameters
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `title` | `text` | No | Updated title |
-| `description` | `text` | No | Updated description |
-| `image` | `file` | No | Replacement image file (deletes old image automatically) |
+**Auth:** Required
 
-#### Success Response (`200 OK`)
+**Query Params:** `id` (integer, required)
+
+**Request Body:**
+```json
+{
+  "title": "Updated Gallery Title",
+  "description": "Updated description"
+}
+```
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Gallery ID 2 updated successfully!",
+  "message": "Gallery ID 1 updated successfully!",
   "gallery": {
-    "id": 2,
-    "title": "Science Lab Inauguration - Revised",
+    "id": 1,
+    "title": "Updated Gallery Title",
     "description": "Updated description",
-    "image_path": "/uploads/galleries/gallery-1794213000000-987654321.png",
-    "created_at": "2026-11-09T11:45:00.000Z",
-    "updated_at": "2026-11-09T11:50:00.000Z"
+    "image_path": "uploads/galleries/1699789200000-sports.jpg",
+    "created_at": "2026-11-05T14:00:00.000Z",
+    "updated_at": "2026-11-12T10:00:00.000Z"
   }
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing query ID):
-  ```json
-  {
-    "success": false,
-    "message": "Gallery ID is required in query parameters"
-  }
-  ```
-- **`404 Not Found`** (Item not found):
-  ```json
-  {
-    "success": false,
-    "message": "Gallery item not found"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Gallery ID is required in query parameters"` |
+| `404` | `"Gallery item not found"` |
 
 ---
 
-### 4.4 Delete Gallery Item
-- **Method:** `DELETE`
-- **URL:** `/api/admin/galleries?id=:id`
-- **Authentication:** Bearer Token required
-- **Behavior:** Unlinks the physical image file asynchronously, then deletes the database row.
+#### `DELETE /api/admin/galleries?id=:id`
 
-#### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | `integer` | Yes | Gallery item ID to delete |
+Deletes a gallery entry and its associated image file.
 
-#### Success Response (`200 OK`)
+**Auth:** Required
+
+**Query Params:** `id` (integer, required)
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Gallery ID 2 deleted successfully!"
+  "message": "Gallery ID 1 deleted successfully!"
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing query ID):
-  ```json
-  {
-    "success": false,
-    "message": "Gallery ID is required in query parameters"
-  }
-  ```
-- **`404 Not Found`** (Item not found):
-  ```json
-  {
-    "success": false,
-    "message": "Gallery item not found"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Gallery ID is required in query parameters"` |
+| `404` | `"Gallery item not found"` |
 
 ---
 
-## 5. Functionality 4: Thirukkural Couplets
+### Thirukkural
 
-### 5.1 List All Thirukkural Verses
-- **Method:** `GET`
-- **URL:** `/api/admin/thirukkural`
-- **Authentication:** Bearer Token required
-- **Sorting:** Ascending by verse number (`kural_number ASC`)
+#### `GET /api/admin/thirukkural`
 
-#### Request Example
-```http
-GET /api/admin/thirukkural HTTP/1.1
-Host: localhost:5000
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+Returns all Thirukkural entries.
 
-#### Success Response (`200 OK`)
+**Auth:** Required
+
+**Success Response (200):**
 ```json
 {
   "success": true,
@@ -848,11 +741,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     {
       "id": 1,
       "kural_number": 1,
-      "tamil_text": "அகர முதல எழுத்தெல்லாம் ஆதி\nபகவன் முதற்றே உலகு.",
+      "tamil_text": "அகர முதல எழுத்தெல்லாம் ஆதி பகவன் முதற்றே உலகு.",
       "english_meaning": "As the letter A is the first of all letters, so the eternal God is first in the world.",
-      "explanation": "As the letter 'A' is the beginning of the alphabet, so the primordial God is the beginning of the universe.",
-      "created_at": "2026-11-09T07:45:00.000Z",
-      "updated_at": "2026-11-09T07:45:00.000Z"
+      "explanation": "Just as 'A' begins the alphabet, God is the source and origin of the cosmos.",
+      "created_at": "2026-09-01T09:00:00.000Z",
+      "updated_at": "2026-09-01T09:00:00.000Z"
     }
   ]
 }
@@ -860,360 +753,439 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-### 5.2 Add New Thirukkural Verse
-- **Method:** `POST`
-- **URL:** `/api/admin/thirukkural`
-- **Authentication:** Bearer Token required
-- **Headers:** `Authorization: Bearer <TOKEN>`, `Content-Type: application/json`
+#### `POST /api/admin/thirukkural`
 
-#### Request Parameters (Body)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `kural_number` | `integer` | Yes | Unique verse number (1 to 1330) |
-| `tamil_text` | `string` | Yes | Tamil couplet text |
-| `english_meaning` | `string` | Yes | English translation |
-| `explanation` | `string` | No | Philosophical or literary explanation |
+Creates a new Thirukkural entry.
 
-#### Request Example
+**Auth:** Required
+
+**Request Body:**
 ```json
 {
-  "kural_number": 2,
-  "tamil_text": "கற்றதனா லாய பயனென்கொல் வாலறிவன்\nநற்றாள் தொழாஅர் எனின்.",
-  "english_meaning": "What does learning profit a man, if he doesn't worship the sacred feet of Him who is pure intelligence?",
-  "explanation": "True wisdom finds its completion in revering the divine."
+  "kural_number": 1,
+  "tamil_text": "அகர முதல எழுத்தெல்லாம் ஆதி பகவன் முதற்றே உலகு.",
+  "english_meaning": "As the letter A is the first of all letters, so the eternal God is first in the world.",
+  "explanation": "Just as 'A' begins the alphabet, God is the source and origin of the cosmos."
 }
 ```
 
-#### Success Response (`200 OK`)
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Thirukkural added successfully!",
+  "message": "Kural created successfully!",
   "kural": {
-    "id": 2,
-    "kural_number": 2,
-    "tamil_text": "கற்றதனா லாய பயனென்கொல் வாலறிவன்\nநற்றாள் தொழாஅர் எனின்.",
-    "english_meaning": "What does learning profit a man, if he doesn't worship the sacred feet of Him who is pure intelligence?",
-    "explanation": "True wisdom finds its completion in revering the divine.",
-    "created_at": "2026-11-09T12:00:00.000Z",
-    "updated_at": "2026-11-09T12:00:00.000Z"
+    "id": 1,
+    "kural_number": 1,
+    "tamil_text": "அகர முதல எழுத்தெல்லாம் ஆதி பகவன் முதற்றே உலகு.",
+    "english_meaning": "As the letter A is the first of all letters, so the eternal God is first in the world.",
+    "explanation": "Just as 'A' begins the alphabet, God is the source and origin of the cosmos."
   }
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing required fields):
-  ```json
-  {
-    "success": false,
-    "message": "kural_number, tamil_text, and english_meaning are required"
-  }
-  ```
-- **`400 Bad Request`** (Duplicate kural number):
-  ```json
-  {
-    "success": false,
-    "message": "Kural number 2 already exists"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"kural_number, tamil_text, and english_meaning are required"` |
+| `400` | `"Kural number 1 already exists"` |
 
 ---
 
-### 5.3 Edit Thirukkural Verse
-- **Method:** `PUT`
-- **URL:** `/api/admin/thirukkural?id=:id`
-- **Authentication:** Bearer Token required
-- **Headers:** `Authorization: Bearer <TOKEN>`, `Content-Type: application/json`
+#### `PUT /api/admin/thirukkural?id=:id`
 
-#### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | `integer` | Yes | Thirukkural database ID |
+Updates an existing Thirukkural entry.
 
-#### Request Parameters (Body)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `kural_number` | `integer` | No | Updated verse number |
-| `tamil_text` | `string` | No | Updated Tamil couplet |
-| `english_meaning` | `string` | No | Updated English translation |
-| `explanation` | `string` | No | Updated explanation text |
+**Auth:** Required
 
-#### Success Response (`200 OK`)
+**Query Params:** `id` (integer, required)
+
+**Request Body:** *(all fields optional)*
+```json
+{
+  "explanation": "Updated explanation text."
+}
+```
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Thirukkural ID 2 updated successfully!",
+  "message": "Kural ID 1 updated successfully!",
   "kural": {
-    "id": 2,
-    "kural_number": 2,
-    "tamil_text": "கற்றதனா லாய பயனென்கொல் வாலறிவன்\nநற்றாள் தொழாஅர் எனின்.",
-    "english_meaning": "What fruit from all your knowledge will you gain, if you adore not His auspicious feet?",
-    "explanation": "Revised explanation.",
-    "created_at": "2026-11-09T12:00:00.000Z",
-    "updated_at": "2026-11-09T12:05:00.000Z"
+    "id": 1,
+    "kural_number": 1,
+    "tamil_text": "அகர முதல எழுத்தெல்லாம் ஆதி பகவன் முதற்றே உலகு.",
+    "english_meaning": "As the letter A is the first of all letters, so the eternal God is first in the world.",
+    "explanation": "Updated explanation text."
   }
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing query ID):
-  ```json
-  {
-    "success": false,
-    "message": "Kural ID is required in query parameters"
-  }
-  ```
-- **`404 Not Found`** (Verse ID does not exist):
-  ```json
-  {
-    "success": false,
-    "message": "Thirukkural not found"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Kural ID is required in query parameters"` |
+| `404` | `"Kural not found"` |
 
 ---
 
-### 5.4 Delete Thirukkural Verse
-- **Method:** `DELETE`
-- **URL:** `/api/admin/thirukkural?id=:id`
-- **Authentication:** Bearer Token required
+#### `DELETE /api/admin/thirukkural?id=:id`
 
-#### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | `integer` | Yes | Thirukkural ID to delete |
+Deletes a Thirukkural entry.
 
-#### Success Response (`200 OK`)
+**Auth:** Required
+
+**Query Params:** `id` (integer, required)
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Thirukkural ID 2 deleted successfully!"
+  "message": "Kural ID 1 deleted successfully!"
 }
 ```
 
-#### Error Responses
-- **`400 Bad Request`** (Missing query ID):
-  ```json
-  {
-    "success": false,
-    "message": "Kural ID is required in query parameters"
-  }
-  ```
-- **`404 Not Found`** (ID does not exist):
-  ```json
-  {
-    "success": false,
-    "message": "Thirukkural not found"
-  }
-  ```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"Kural ID is required in query parameters"` |
+| `404` | `"Kural not found"` |
 
 ---
 
-## 6. Functionality 5: Admin Profile Management
+### Admin Profile
 
-### 6.1 Get Admin Profile
-- **Method:** `GET`
-- **URL:** `/api/admin/profile`
-- **Authentication:** Bearer Token required
-- **Description:** Returns the profile of the currently authenticated administrator (`req.admin.id`).
+> **Note:** The admin profile data is stored directly in the `admins` table. There is no separate profile table. The profile endpoints read and write columns on the admin's own account row.
 
-#### Request Example
-```http
-GET /api/admin/profile HTTP/1.1
-Host: localhost:5000
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+#### `GET /api/admin/profile`
 
-#### Success Response (`200 OK`)
+Returns the logged-in admin's profile data.
+
+**Auth:** Required
+
+**Success Response (200):**
 ```json
 {
   "success": true,
   "profile": {
     "id": 1,
-    "admin_id": 1,
-    "full_name": "Headmaster Robert",
-    "alternative_email": "headmaster@britoschool.com",
-    "phone_primary": "+91 9876543210",
-    "phone_secondary": "+91 9876543211",
-    "School_location": "Main Campus, Chennai",
-    "bio": "Serving as educational leader for 15+ years.",
-    "emergency_contact_phone": "+91 9876543299",
-    "linkedin_url": "https://linkedin.com/in/brito-headmaster",
-    "created_at": "2026-11-09T08:15:00.000Z",
-    "updated_at": "2026-11-09T08:15:00.000Z"
+    "email": "admin@britoschool.com",
+    "mobile_number": "9876543210",
+    "full_name": "School Administrator",
+    "alternative_email": "altadmin@britoschool.com",
+    "phone_primary": "9876543210",
+    "phone_secondary": "9876543211",
+    "School_location": "Chennai, Tamil Nadu",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-11-12T10:00:00.000Z"
   }
 }
 ```
 
-#### Error Response (`404 Not Found`)
-```json
-{
-  "success": false,
-  "message": "Profile not found for this admin"
-}
-```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `401` | `"Unauthorized: No token provided"` |
+| `404` | `"Admin not found"` |
 
 ---
 
-### 6.2 Create Admin Profile
-- **Method:** `POST`
-- **URL:** `/api/admin/profile`
-- **Authentication:** Bearer Token required
-- **Headers:** `Authorization: Bearer <TOKEN>`, `Content-Type: application/json`
+#### `POST /api/admin/profile`
 
-#### Request Parameters (Body)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `full_name` | `string` | Yes | Administrator full name |
-| `alternative_email` | `string` | Yes | Secondary contact email |
-| `phone_primary` | `string` | No | Primary phone number |
-| `phone_secondary` | `string` | No | Secondary phone number |
-| `School_location` | `string` | No | Campus or school branch |
-| `bio` | `string` | No | Biography text |
-| `emergency_contact_phone` | `string` | No | Emergency phone contact |
-| `linkedin_url` | `string` | No | LinkedIn profile URL |
+Upsert-style update — sets profile fields on the admin's account. Requires `full_name` and `alternative_email`.
 
-#### Request Example
+**Auth:** Required
+
+**Request Body:**
 ```json
 {
-  "full_name": "Headmaster Robert",
-  "alternative_email": "headmaster@britoschool.com",
-  "phone_primary": "+91 9876543210",
-  "phone_secondary": "+91 9876543211",
-  "School_location": "Main Campus, Chennai",
-  "bio": "Educational leader dedicated to student growth.",
-  "emergency_contact_phone": "+91 9876543299",
-  "linkedin_url": "https://linkedin.com/in/brito-headmaster"
+  "full_name": "School Administrator",
+  "alternative_email": "altadmin@britoschool.com",
+  "phone_primary": "9876543210",
+  "phone_secondary": "9876543211",
+  "School_location": "Chennai, Tamil Nadu"
 }
 ```
 
-#### Success Response (`200 OK`)
-```json
-{
-  "success": true,
-  "message": "Admin profile created successfully!",
-  "profile": {
-    "id": 1,
-    "admin_id": 1,
-    "full_name": "Headmaster Robert",
-    "alternative_email": "headmaster@britoschool.com",
-    "phone_primary": "+91 9876543210",
-    "phone_secondary": "+91 9876543211",
-    "School_location": "Main Campus, Chennai",
-    "bio": "Educational leader dedicated to student growth.",
-    "emergency_contact_phone": "+91 9876543299",
-    "linkedin_url": "https://linkedin.com/in/brito-headmaster",
-    "created_at": "2026-11-09T12:15:00.000Z",
-    "updated_at": "2026-11-09T12:15:00.000Z"
-  }
-}
-```
-
-#### Error Responses
-- **`400 Bad Request`** (Missing required fields):
-  ```json
-  {
-    "success": false,
-    "message": "full_name and alternative_email are required fields"
-  }
-  ```
-- **`400 Bad Request`** (Profile already exists):
-  ```json
-  {
-    "success": false,
-    "message": "Profile already exists. Use PUT to update your details."
-  }
-  ```
-
----
-
-### 6.3 Update Admin Profile
-- **Method:** `PUT`
-- **URL:** `/api/admin/profile`
-- **Authentication:** Bearer Token required
-- **Behavior:** Merges received fields with existing database values; omitted fields retain their existing values.
-
-#### Request Parameters (Body)
-Any subset of profile fields (`full_name`, `alternative_email`, `phone_primary`, `phone_secondary`, `School_location`, `bio`, `emergency_contact_phone`, `linkedin_url`).
-
-#### Request Example
-```json
-{
-  "bio": "Updated vision for school academic year 2026-2027.",
-  "School_location": "North Wing, Chennai"
-}
-```
-
-#### Success Response (`200 OK`)
+**Success Response (200):**
 ```json
 {
   "success": true,
   "message": "Admin profile updated successfully!",
   "profile": {
     "id": 1,
-    "admin_id": 1,
-    "full_name": "Headmaster Robert",
-    "alternative_email": "headmaster@britoschool.com",
-    "phone_primary": "+91 9876543210",
-    "phone_secondary": "+91 9876543211",
-    "School_location": "North Wing, Chennai",
-    "bio": "Updated vision for school academic year 2026-2027.",
-    "emergency_contact_phone": "+91 9876543299",
-    "linkedin_url": "https://linkedin.com/in/brito-headmaster",
-    "created_at": "2026-11-09T12:15:00.000Z",
-    "updated_at": "2026-11-09T12:20:00.000Z"
+    "email": "admin@britoschool.com",
+    "mobile_number": "9876543210",
+    "full_name": "School Administrator",
+    "alternative_email": "altadmin@britoschool.com",
+    "phone_primary": "9876543210",
+    "phone_secondary": "9876543211",
+    "School_location": "Chennai, Tamil Nadu",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-11-12T10:05:00.000Z"
   }
 }
 ```
 
-#### Error Response (`404 Not Found`)
-```json
-{
-  "success": false,
-  "message": "Profile not found. Please create one first."
-}
-```
+**Error Responses:**
+
+| Status | Message |
+|--------|---------|
+| `400` | `"full_name and alternative_email are required fields"` |
+| `401` | `"Unauthorized: No token provided"` |
+| `404` | `"Admin not found"` |
 
 ---
 
-### 6.4 Delete Admin Profile
-- **Method:** `DELETE`
-- **URL:** `/api/admin/profile`
-- **Authentication:** Bearer Token required
+#### `PUT /api/admin/profile`
 
-#### Success Response (`200 OK`)
+Partially updates profile data. Only the fields sent in the body are changed; omitted fields retain their current values.
+
+**Auth:** Required
+
+**Request Body:** *(all fields optional)*
+```json
+{
+  "full_name": "Updated Admin Name",
+  "School_location": "Coimbatore, Tamil Nadu"
+}
+```
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "Admin profile deleted successfully!"
-}
-```
-
-#### Error Response (`404 Not Found`)
-```json
-{
-  "success": false,
-  "message": "Profile not found"
+  "message": "Admin profile updated successfully!",
+  "profile": {
+    "id": 1,
+    "email": "admin@britoschool.com",
+    "mobile_number": "9876543210",
+    "full_name": "Updated Admin Name",
+    "alternative_email": "altadmin@britoschool.com",
+    "phone_primary": "9876543210",
+    "phone_secondary": "9876543211",
+    "School_location": "Coimbatore, Tamil Nadu",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-11-12T10:10:00.000Z"
+  }
 }
 ```
 
 ---
 
-## 7. Static Upload File Serving
+### Static Files
 
-Static assets are served directly by Express with 1-day browser caching headers (`maxAge: '1d'`, `etag: true`).
+Uploaded files are served as static assets from the `/uploads` directory.
 
-### 7.1 Download / View Calendar PDF
-- **Method:** `GET`
-- **URL:** `/uploads/calendars/:filename`
-- **Authentication:** None (Public)
-- **Response Headers:** `Content-Type: application/pdf`, `Cache-Control: public, max-age=86400`, `ETag: W/"..."`
+#### `GET /uploads/calendars/:filename`
 
-### 7.2 Download / View Gallery Image
-- **Method:** `GET`
-- **URL:** `/uploads/galleries/:filename`
-- **Authentication:** None (Public)
-- **Response Headers:** `Content-Type: image/jpeg` (or `image/png`), `Cache-Control: public, max-age=86400`, `ETag: W/"..."`
+Serves a calendar PDF file.
 
+**Example:** `GET /uploads/calendars/1699789200000-calendar.pdf`
 
-<!-- node scripts/db_cleanup.js -->
+#### `GET /uploads/galleries/:filename`
+
+Serves a gallery image file.
+
+**Example:** `GET /uploads/galleries/1699789200000-sports.jpg`
+
+---
+
+## 8. Postman Testing Guide
+
+### Phase 1: Setup
+
+1. Download and install [Postman](https://www.postman.com/downloads/)
+2. Import the collection from [Section 10](#10-postman-collection-json) or the file `server/docs/brito_school_postman_collection.json`
+3. Set the `base_url` variable to `http://localhost:5000`
+4. Start the server: `npm start` from the `server/` directory
+
+### Phase 2: Login & Token
+
+1. Run `POST /api/admin/login` with credentials:
+   - Email: `admin@britoschool.com`
+   - Password: `admin@123`
+2. The pre-request script auto-saves the token to the `admin_token` variable
+3. All subsequent requests use `{{admin_token}}` automatically
+
+### Phase 3: Dashboard
+
+1. Run `GET /api/admin/dashboard`
+2. Verify the response contains `announcements`, `calendars`, `galleries`, `thirukkural`, and `generatedAt`
+3. All `total` fields should be numbers (may be 0 on fresh install)
+
+### Phase 4: Features Walkthrough
+
+**Announcements:**
+1. `POST /api/admin/announcements` — create with title, content, category
+2. `GET /api/admin/announcements` — verify it appears in list
+3. `PUT /api/admin/announcements?id=<id>` — update title
+4. `DELETE /api/admin/announcements?id=<id>` — delete it
+
+**Calendars:**
+1. `POST /api/admin/calendars` — upload a real PDF file (use form-data, field name: `file`)
+2. `GET /api/admin/calendars` — verify file_url is present
+3. Visit `http://localhost:5000<file_url>` in browser to verify PDF is accessible
+4. `DELETE /api/admin/calendars?id=<id>` — delete it
+
+**Galleries:**
+1. `POST /api/admin/galleries` — upload a JPEG/PNG image (form-data, field name: `image`)
+2. `GET /api/admin/galleries` — verify upload worked
+3. `PUT /api/admin/galleries?id=<id>` — update description
+4. `DELETE /api/admin/galleries?id=<id>` — delete it
+
+**Thirukkural:**
+1. `POST /api/admin/thirukkural` — create with kural_number, tamil_text, english_meaning
+2. `GET /api/admin/thirukkural` — verify list
+3. `PUT /api/admin/thirukkural?id=<id>` — update explanation
+4. `DELETE /api/admin/thirukkural?id=<id>` — delete it
+
+**Admin Profile:**
+1. `GET /api/admin/profile` — view current profile
+2. `POST /api/admin/profile` — set full_name and alternative_email
+3. `PUT /api/admin/profile` — partial update (e.g., School_location only)
+4. `GET /api/admin/profile` — verify changes persisted
+
+### Phase 5: Negative Tests
+
+| Test | Expected |
+|------|----------|
+| `GET /api/admin/announcements` without token | `401` |
+| `GET /api/admin/announcements` with `Bearer invalid_token` | `401` |
+| `POST /api/admin/login` with wrong password | `401` |
+| `POST /api/admin/announcements` without `content` | `400` |
+| `PUT /api/admin/announcements?id=999999` | `404` |
+| `DELETE /api/admin/calendars` (no id) | `400` |
+| `POST /api/admin/thirukkural` with duplicate `kural_number` | `400` |
+| `GET /api/admin/non-existent-route` | `404` |
+
+### Phase 6: End-to-End
+
+1. Login → get token → run dashboard → create an announcement → verify it shows in dashboard total → delete it → verify dashboard total decrements
+
+---
+
+## 9. Database Schema
+
+### `admins`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INT, PK, AUTO_INCREMENT | |
+| `email` | VARCHAR(255), UNIQUE | Login email |
+| `password` | VARCHAR(255) | Bcrypt hashed |
+| `mobile_number` | VARCHAR(20) | |
+| `full_name` | VARCHAR(255), NULL | Profile field |
+| `alternative_email` | VARCHAR(255), NULL | Profile field |
+| `phone_primary` | VARCHAR(20), NULL | Profile field |
+| `phone_secondary` | VARCHAR(20), NULL | Profile field |
+| `School_location` | VARCHAR(255), NULL | Profile field |
+| `otp_code` | VARCHAR(10), NULL | For password reset |
+| `otp_expires_at` | DATETIME, NULL | OTP expiry |
+| `created_at` | DATETIME | Auto set |
+| `updated_at` | DATETIME | Auto updated |
+
+### `announcements`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INT, PK, AUTO_INCREMENT | |
+| `title` | VARCHAR(255) | |
+| `content` | TEXT | |
+| `category` | VARCHAR(100) | Default: "General" |
+| `created_at` | DATETIME | |
+| `updated_at` | DATETIME | |
+
+### `calendars`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INT, PK, AUTO_INCREMENT | |
+| `title` | VARCHAR(255) | |
+| `description` | TEXT, NULL | |
+| `file_path` | VARCHAR(500) | Relative path on disk |
+| `file_url` | VARCHAR(500) | Served URL path |
+| `created_at` | DATETIME | |
+| `updated_at` | DATETIME | |
+
+### `galleries`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INT, PK, AUTO_INCREMENT | |
+| `title` | VARCHAR(255) | |
+| `description` | TEXT, NULL | |
+| `image_path` | VARCHAR(500) | Relative path on disk |
+| `created_at` | DATETIME | |
+| `updated_at` | DATETIME | |
+
+### `thirukkural`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INT, PK, AUTO_INCREMENT | |
+| `kural_number` | INT, UNIQUE | 1–1330 |
+| `tamil_text` | TEXT | Tamil verse |
+| `english_meaning` | TEXT | Translation |
+| `explanation` | TEXT, NULL | Commentary |
+| `created_at` | DATETIME | |
+| `updated_at` | DATETIME | |
+
+---
+
+## 10. Postman Collection JSON
+
+Copy the JSON below and save as a `.json` file, then import into Postman via **File → Import**.
+
+> Alternatively, import the ready-made collection file from `server/docs/brito_school_postman_collection.json`.
+
+```json
+{
+  "info": {
+    "name": "Brito School Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000" },
+    { "key": "admin_token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) { pm.collectionVariables.set('admin_token', pm.response.json().token); }"], "type": "text/javascript" } }],
+          "request": { "method": "POST", "url": "{{base_url}}/api/admin/login", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"email\": \"admin@britoschool.com\", \"password\": \"admin@123\"}" } }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": { "method": "GET", "url": "{{base_url}}/api/admin/dashboard", "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "Announcements",
+      "item": [
+        { "name": "List Announcements", "request": { "method": "GET", "url": "{{base_url}}/api/admin/announcements", "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }] } },
+        { "name": "Create Announcement", "request": { "method": "POST", "url": "{{base_url}}/api/admin/announcements", "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"title\": \"School Event\", \"content\": \"Annual Day on Nov 20\", \"category\": \"Events\"}" } } },
+        { "name": "Update Announcement", "request": { "method": "PUT", "url": { "raw": "{{base_url}}/api/admin/announcements?id=1", "host": ["{{base_url}}"], "path": ["api", "admin", "announcements"], "query": [{ "key": "id", "value": "1" }] }, "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"title\": \"Updated Event\"}" } } },
+        { "name": "Delete Announcement", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/api/admin/announcements?id=1", "host": ["{{base_url}}"], "path": ["api", "admin", "announcements"], "query": [{ "key": "id", "value": "1" }] }, "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }] } }
+      ]
+    },
+    {
+      "name": "Admin Profile",
+      "item": [
+        { "name": "Get Profile", "request": { "method": "GET", "url": "{{base_url}}/api/admin/profile", "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }] } },
+        { "name": "Set Profile", "request": { "method": "POST", "url": "{{base_url}}/api/admin/profile", "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"full_name\": \"School Admin\", \"alternative_email\": \"alt@britoschool.com\", \"School_location\": \"Chennai\"}" } } },
+        { "name": "Update Profile", "request": { "method": "PUT", "url": "{{base_url}}/api/admin/profile", "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"School_location\": \"Coimbatore\"}" } } }
+      ]
+    }
+  ]
+}
+```

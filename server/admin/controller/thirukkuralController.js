@@ -7,6 +7,7 @@ const {
   deleteKural,
 } = require("../model/thirukkuralModel");
 const { parsePositiveInt, parseListPagination } = require("../utils/validate");
+const { contentCache } = require("../utils/cache");
 
 const listKurals = async (req, res) => {
   try {
@@ -50,6 +51,7 @@ const addKural = async (req, res) => {
       english_meaning,
       explanation
     );
+    contentCache.invalidate("thirukkural");
 
     return res.status(200).json({
       success: true,
@@ -110,6 +112,7 @@ const editKural = async (req, res) => {
       updatedEnglish,
       updatedExplanation
     );
+    contentCache.invalidate("thirukkural");
 
     return res.status(200).json({
       success: true,
@@ -155,6 +158,8 @@ const removeKural = async (req, res) => {
         message: "Thirukkural not found",
       });
     }
+
+    contentCache.invalidate("thirukkural");
 
     return res.status(200).json({
       success: true,

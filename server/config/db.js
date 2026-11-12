@@ -1,9 +1,11 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
-const connectionLimit = parseInt(process.env.DB_CONNECTION_LIMIT, 10) || 20;
-const maxIdle = parseInt(process.env.DB_MAX_IDLE, 10) || 10;
-const queueLimit = parseInt(process.env.DB_QUEUE_LIMIT, 10) || 200;
+const connectionLimit = parseInt(process.env.DB_CONNECTION_LIMIT, 10) || 25;
+const maxIdle = parseInt(process.env.DB_MAX_IDLE, 10) || 15;
+const queueLimit = process.env.DB_QUEUE_LIMIT !== undefined
+  ? parseInt(process.env.DB_QUEUE_LIMIT, 10)
+  : 0; // 0 = unlimited queue (standard production MySQL pool practice)
 
 // =====================================================================
 // Optimized MySQL Connection Pool

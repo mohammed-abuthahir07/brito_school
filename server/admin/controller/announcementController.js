@@ -6,6 +6,7 @@ const {
   deleteAnnouncement,
 } = require("../model/announcementModel");
 const { parsePositiveInt, parseListPagination } = require("../utils/validate");
+const { contentCache } = require("../utils/cache");
 
 const listAnnouncements = async (req, res) => {
   try {
@@ -37,6 +38,7 @@ const addAnnouncement = async (req, res) => {
 
     const resolvedCategory = category || "General";
     const insertId = await createAnnouncement(title, content, resolvedCategory);
+    contentCache.invalidate("announcements");
 
     return res.status(200).json({
       success: true,
@@ -82,6 +84,7 @@ const editAnnouncement = async (req, res) => {
     const updatedCategory = category || existing.category;
 
     await updateAnnouncement(id, updatedTitle, updatedContent, updatedCategory);
+    contentCache.invalidate("announcements");
 
     return res.status(200).json({
       success: true,
@@ -120,6 +123,8 @@ const removeAnnouncement = async (req, res) => {
         message: "Announcement not found",
       });
     }
+
+    contentCache.invalidate("announcements");
 
     return res.status(200).json({
       success: true,

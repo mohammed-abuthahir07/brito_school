@@ -1,13 +1,11 @@
 const {
   getProfileByAdminId,
-  getProfileById,
-  createProfile,
-  updateProfile,
-  deleteProfile,
+  updateProfileByAdminId,
 } = require("../model/profileModel");
 
 // =====================================
-// Get Logged-in Admin Profile
+// GET /api/admin/profile
+// Returns the logged-in admin's profile data from admins table
 // =====================================
 const getProfile = async (req, res) => {
   try {
@@ -17,7 +15,7 @@ const getProfile = async (req, res) => {
     if (!profile) {
       return res.status(404).json({
         success: false,
-        message: "Profile not found for this admin",
+        message: "Admin not found",
       });
     }
 
@@ -35,13 +33,14 @@ const getProfile = async (req, res) => {
 };
 
 // =====================================
-// Create Admin Profile
-// Performance: single INSERT, return constructed object — no post-insert SELECT
+// POST /api/admin/profile
+// Upsert-style: updates profile data since profile IS the admin record
+// Requires full_name and alternative_email
 // =====================================
-const addProfile = async (req, res) => {
+const createProfile = async (req, res) => {
   try {
     const adminId = req.admin.id;
-    const { full_name, alternative_email } = req.body;
+    const { full_name, alternative_email, phone_primary, phone_secondary, School_location } = req.body;
 
     if (!full_name || !alternative_email) {
       return res.status(400).json({
@@ -51,20 +50,29 @@ const addProfile = async (req, res) => {
     }
 
     const existing = await getProfileByAdminId(adminId);
-    if (existing) {
-      return res.status(400).json({
+    if (!existing) {
+      return res.status(404).json({
         success: false,
-        message: "Profile already exists. Use PUT to update your details.",
+        message: "Admin not found",
       });
     }
 
-    const insertId = await createProfile(adminId, req.body);
-    const newProfile = await getProfileById(insertId);
+    const data = {
+      full_name,
+      alternative_email,
+      phone_primary: phone_primary !== undefined ? phone_primary : existing.phone_primary,
+      phone_secondary: phone_secondary !== undefined ? phone_secondary : existing.phone_secondary,
+      School_location: School_location !== undefined ? School_location : existing.School_location,
+    };
+
+    await updateProfileByAdminId(adminId, data);
+
+    const updated = await getProfileByAdminId(adminId);
 
     return res.status(200).json({
       success: true,
-      message: "Admin profile created successfully!",
-      profile: newProfile,
+      message: "Admin profile updated successfully!",
+      profile: updated,
     });
   } catch (error) {
     console.error("Create Profile Error:", error);
@@ -76,8 +84,8 @@ const addProfile = async (req, res) => {
 };
 
 // =====================================
-// Update Admin Profile (Preserves Existing Unsent Fields)
-// Performance: fetch existing once, update, return merged — no second SELECT
+// PUT /api/admin/profile
+// Update profile data (partial update — preserves existing values for omitted fields)
 // =====================================
 const editProfile = async (req, res) => {
   try {
@@ -87,30 +95,26 @@ const editProfile = async (req, res) => {
     if (!existing) {
       return res.status(404).json({
         success: false,
-        message: "Profile not found. Please create one first.",
+        message: "Admin not found",
       });
     }
 
     const mergedData = {
-      full_name: req.body.full_name || existing.full_name,
-      alternative_email: req.body.alternative_email || existing.alternative_email,
+      full_name: req.body.full_name !== undefined ? req.body.full_name : existing.full_name,
+      alternative_email: req.body.alternative_email !== undefined ? req.body.alternative_email : existing.alternative_email,
       phone_primary: req.body.phone_primary !== undefined ? req.body.phone_primary : existing.phone_primary,
       phone_secondary: req.body.phone_secondary !== undefined ? req.body.phone_secondary : existing.phone_secondary,
       School_location: req.body.School_location !== undefined ? req.body.School_location : existing.School_location,
-      bio: req.body.bio !== undefined ? req.body.bio : existing.bio,
-      emergency_contact_phone: req.body.emergency_contact_phone !== undefined ? req.body.emergency_contact_phone : existing.emergency_contact_phone,
-      linkedin_url: req.body.linkedin_url !== undefined ? req.body.linkedin_url : existing.linkedin_url,
     };
 
-    await updateProfile(adminId, mergedData);
+    await updateProfileByAdminId(adminId, mergedData);
+
+    const updated = await getProfileByAdminId(adminId);
 
     return res.status(200).json({
       success: true,
       message: "Admin profile updated successfully!",
-      profile: {
-        ...existing,
-        ...mergedData,
-      },
+      profile: updated,
     });
   } catch (error) {
     console.error("Update Profile Error:", error);
@@ -121,37 +125,8 @@ const editProfile = async (req, res) => {
   }
 };
 
-// =====================================
-// Delete Admin Profile
-// =====================================
-const removeProfile = async (req, res) => {
-  try {
-    const adminId = req.admin.id;
-
-    const affectedRows = await deleteProfile(adminId);
-    if (!affectedRows) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Admin profile deleted successfully!",
-    });
-  } catch (error) {
-    console.error("Delete Profile Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
-};
-
 module.exports = {
   getProfile,
-  addProfile,
+  createProfile,
   editProfile,
-  removeProfile,
 };

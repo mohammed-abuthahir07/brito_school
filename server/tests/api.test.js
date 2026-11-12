@@ -453,6 +453,33 @@ describe("Brito School Backend API Test Suite", () => {
       assert.match(res.data.message, /Invalid file content/);
     });
 
+    test("POST /api/admin/calendars accepts any file type including image files", async () => {
+      const form = new FormData();
+      form.append("title", "Academic Calendar Image");
+      form.append("description", "Full year schedule");
+      const fakeJpg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]);
+      form.append("file", new Blob([fakeJpg], { type: "image/jpeg" }), "calendar.jpg");
+
+      const res = await request("/api/admin/calendars", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: form,
+      });
+
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(res.data.calendar);
+      assert.equal(res.data.calendar.title, "Academic Calendar Image");
+
+      // Cleanup created calendar
+      if (res.data.calendar.id) {
+        await request(`/api/admin/calendars?id=${res.data.calendar.id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+      }
+    });
+
     test("DELETE /api/admin/calendars returns 400 when id is missing", async () => {
       const res = await request("/api/admin/calendars", {
         method: "DELETE",
@@ -566,6 +593,34 @@ describe("Brito School Backend API Test Suite", () => {
       assert.match(res.data.message, /Invalid file content/);
     });
 
+    test("POST /api/admin/galleries accepts file upload with field name 'file' (abuthahir1.jpg scenario)", async () => {
+      const form = new FormData();
+      form.append("title", "Academic Calendar Gallery");
+      form.append("description", "Full academic year schedulee");
+      const fakeJpg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]);
+      // Use field name 'file' exactly like user did in Postman
+      form.append("file", new Blob([fakeJpg], { type: "image/jpeg" }), "abuthahir1.jpg");
+
+      const res = await request("/api/admin/galleries", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: form,
+      });
+
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(res.data.gallery);
+      assert.equal(res.data.gallery.title, "Academic Calendar Gallery");
+
+      // Cleanup created gallery
+      if (res.data.gallery.id) {
+        await request(`/api/admin/galleries?id=${res.data.gallery.id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+      }
+    });
+
     test("DELETE /api/admin/galleries returns 400 when id is missing", async () => {
       const res = await request("/api/admin/galleries", {
         method: "DELETE",
@@ -591,16 +646,20 @@ describe("Brito School Backend API Test Suite", () => {
   // 7. Profile Controller
   // ==========================================
   describe("Admin Profile Controller", () => {
-    test("GET /api/admin/profile returns profile", async () => {
+    test("GET /api/admin/profile without token returns 401", async () => {
+      const res = await request("/api/admin/profile");
+      assert.equal(res.status, 401);
+      assert.equal(res.data.success, false);
+    });
+
+    test("GET /api/admin/profile returns 200 with valid token", async () => {
       const res = await request("/api/admin/profile", {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      // Admin may or may not have a profile yet
-      assert.ok(res.status === 200 || res.status === 404);
-      if (res.status === 200) {
-        assert.equal(res.data.success, true);
-        assert.ok(res.data.profile);
-      }
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(res.data.profile);
+      assert.ok(res.data.profile.email);
     });
 
     test("POST /api/admin/profile validates required fields", async () => {
@@ -614,21 +673,272 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(res.data.message, "full_name and alternative_email are required fields");
     });
 
-    test("PUT /api/admin/profile updates profile or returns 404 if not found", async () => {
+    test("POST /api/admin/profile updates profile data", async () => {
+      const res = await request("/api/admin/profile", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: {
+          full_name: "Test Admin",
+          alternative_email: "testadmin@britoschool.com",
+          phone_primary: "9876543210",
+          School_location: "Chennai",
+        },
+      });
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(res.data.profile);
+      assert.equal(res.data.profile.full_name, "Test Admin");
+    });
+
+    test("PUT /api/admin/profile updates profile and returns 200", async () => {
       const res = await request("/api/admin/profile", {
         method: "PUT",
         headers: { Authorization: `Bearer ${authToken}` },
-        body: { bio: "Updated test bio from test suite" },
+        body: { full_name: "Updated Admin Name", School_location: "Updated Location" },
       });
-      assert.ok(res.status === 200 || res.status === 404);
-      if (res.status === 200) {
-        assert.equal(res.data.success, true);
-      }
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(res.data.profile);
+      assert.equal(res.data.profile.full_name, "Updated Admin Name");
+    });
+
+    test("DELETE /api/admin/profile returns 404 (endpoint removed)", async () => {
+      const res = await request("/api/admin/profile", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      assert.equal(res.status, 404);
+      assert.equal(res.data.success, false);
+      assert.equal(res.data.message, "Endpoint not found");
     });
   });
 
   // ==========================================
-  // 8. 404 Route Handling
+  // 8. Dashboard Controller
+  // ==========================================
+  describe("Dashboard Controller", () => {
+    test("GET /api/admin/dashboard without token returns 401", async () => {
+      const res = await request("/api/admin/dashboard");
+      assert.equal(res.status, 401);
+      assert.equal(res.data.success, false);
+    });
+
+    test("GET /api/admin/dashboard with valid token returns 200", async () => {
+      const res = await request("/api/admin/dashboard", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(res.data.dashboard);
+    });
+
+    test("GET /api/admin/dashboard has correct structure", async () => {
+      const res = await request("/api/admin/dashboard", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      assert.equal(res.status, 200);
+      const { dashboard } = res.data;
+      assert.ok(dashboard.announcements);
+      assert.ok(dashboard.calendars);
+      assert.ok(dashboard.galleries);
+      assert.ok(dashboard.thirukkural);
+      assert.ok(dashboard.generatedAt);
+    });
+
+    test("GET /api/admin/dashboard counts are numbers", async () => {
+      const res = await request("/api/admin/dashboard", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      assert.equal(res.status, 200);
+      const { dashboard } = res.data;
+      assert.ok(typeof dashboard.announcements.total === "number");
+      assert.ok(typeof dashboard.calendars.total === "number");
+      assert.ok(typeof dashboard.galleries.total === "number");
+      assert.ok(typeof dashboard.thirukkural.total === "number");
+    });
+
+    test("GET /api/admin/dashboard announcements has byCategory array", async () => {
+      const res = await request("/api/admin/dashboard", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.dashboard.announcements.byCategory));
+    });
+  });
+
+  // ==========================================
+  // 9. Public Content APIs & Conditional ETag Caching
+  // ==========================================
+  describe("Public Content APIs & Caching", () => {
+    test("GET /api/public/announcements returns 200 without token and includes ETag header", async () => {
+      const res = await request("/api/public/announcements");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(Array.isArray(res.data.announcements));
+      assert.ok(res.headers.get("etag"));
+      assert.ok(res.headers.get("cache-control").includes("public"));
+    });
+
+    test("GET /api/public/announcements returns 304 Not Modified when If-None-Match matches ETag", async () => {
+      const first = await request("/api/public/announcements");
+      const etag = first.headers.get("etag");
+      assert.ok(etag);
+
+      const second = await request("/api/public/announcements", {
+        headers: { "If-None-Match": etag },
+      });
+      assert.equal(second.status, 304);
+    });
+
+    test("GET /api/public/calendars returns 200 without token", async () => {
+      const res = await request("/api/public/calendars");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(Array.isArray(res.data.calendars));
+    });
+
+    test("GET /api/public/galleries returns 200 without token", async () => {
+      const res = await request("/api/public/galleries");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(Array.isArray(res.data.galleries));
+    });
+
+    test("GET /api/public/thirukkural returns 200 without token", async () => {
+      const res = await request("/api/public/thirukkural");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.ok(Array.isArray(res.data.kurals));
+    });
+
+    test("GET /api/public/thirukkural/daily returns 200 without token", async () => {
+      const res = await request("/api/public/thirukkural/daily");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+    });
+
+    test("Aliased route GET /api/announcements works publicly without token", async () => {
+      const res = await request("/api/announcements");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+    });
+  });
+
+  // ==========================================
+  // 10. Admin Write + Public Read Consistency & Cache Invalidation
+  // ==========================================
+  describe("Admin Write + Public Read Consistency (Mandatory Workflow)", () => {
+    test("Thirukkural Workflow: Admin Create -> Public Read -> Admin Update -> Public Read -> Admin Delete -> Public Verify", async () => {
+      const testKuralNumber = 9988;
+
+      // 1. Admin adds new Thirukkural
+      const createRes = await request("/api/admin/thirukkural", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: {
+          kural_number: testKuralNumber,
+          tamil_text: "அகர முதல எழுத்தெல்லாம் ஆதி பகவன் முதற்றே உலகு",
+          english_meaning: "As the letter A is the first of all letters, so the eternal God is first in the world.",
+          explanation: "Initial test explanation",
+        },
+      });
+      assert.equal(createRes.status, 200);
+      assert.equal(createRes.data.success, true);
+      const kuralId = createRes.data.kural.id;
+
+      // 2. Public visitor retrieves Thirukkural
+      const publicRead1 = await request("/api/public/thirukkural");
+      assert.equal(publicRead1.status, 200);
+      const foundInPublic = publicRead1.data.kurals.find((k) => k.kural_number === testKuralNumber);
+      assert.ok(foundInPublic, "Public visitor must see the newly created Thirukkural");
+      assert.equal(foundInPublic.explanation, "Initial test explanation");
+
+      // 3. Admin updates the Thirukkural
+      const updateRes = await request(`/api/admin/thirukkural?id=${kuralId}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: {
+          explanation: "Updated explanation by admin",
+        },
+      });
+      assert.equal(updateRes.status, 200);
+
+      // 4. Public visitor retrieves the updated Thirukkural (verifying instant cache invalidation)
+      const publicRead2 = await request("/api/public/thirukkural");
+      assert.equal(publicRead2.status, 200);
+      const foundUpdated = publicRead2.data.kurals.find((k) => k.kural_number === testKuralNumber);
+      assert.ok(foundUpdated);
+      assert.equal(foundUpdated.explanation, "Updated explanation by admin", "Cache must invalidate and return updated explanation");
+
+      // 5. Admin deletes the isolated test entry
+      const deleteRes = await request(`/api/admin/thirukkural?id=${kuralId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      assert.equal(deleteRes.status, 200);
+
+      // 6. Public visitor receives the correct updated result without the deleted entry
+      const publicRead3 = await request("/api/public/thirukkural");
+      assert.equal(publicRead3.status, 200);
+      const foundDeleted = publicRead3.data.kurals.find((k) => k.kural_number === testKuralNumber);
+      assert.equal(foundDeleted, undefined, "Deleted Thirukkural must not appear in public read");
+    });
+
+    test("Announcements Workflow: Admin Create -> Public Read -> Admin Update -> Public Read -> Admin Delete -> Public Verify", async () => {
+      // 1. Admin adds announcement
+      const createRes = await request("/api/admin/announcements", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: {
+          title: "Public Read Consistency Test",
+          content: "Initial announcement content",
+          category: "Exam",
+        },
+      });
+      assert.equal(createRes.status, 200);
+      const announcementId = createRes.data.announcement.id;
+
+      // 2. Public visitor reads
+      const read1 = await request("/api/public/announcements");
+      assert.equal(read1.status, 200);
+      const item1 = read1.data.announcements.find((a) => a.id === announcementId);
+      assert.ok(item1);
+      assert.equal(item1.title, "Public Read Consistency Test");
+
+      // 3. Admin updates announcement
+      const updateRes = await request(`/api/admin/announcements?id=${announcementId}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: {
+          title: "Public Read Consistency Test - UPDATED",
+        },
+      });
+      assert.equal(updateRes.status, 200);
+
+      // 4. Public visitor verifies updated title (cache invalidation check)
+      const read2 = await request("/api/public/announcements");
+      assert.equal(read2.status, 200);
+      const item2 = read2.data.announcements.find((a) => a.id === announcementId);
+      assert.ok(item2);
+      assert.equal(item2.title, "Public Read Consistency Test - UPDATED");
+
+      // 5. Admin deletes announcement
+      const deleteRes = await request(`/api/admin/announcements?id=${announcementId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      assert.equal(deleteRes.status, 200);
+
+      // 6. Public visitor verifies item is gone
+      const read3 = await request("/api/public/announcements");
+      assert.equal(read3.status, 200);
+      const item3 = read3.data.announcements.find((a) => a.id === announcementId);
+      assert.equal(item3, undefined);
+    });
+  });
+
+  // ==========================================
+  // 11. 404 Route Handling
   // ==========================================
   describe("Route Fallback", () => {
     test("Unknown route returns 404 JSON", async () => {

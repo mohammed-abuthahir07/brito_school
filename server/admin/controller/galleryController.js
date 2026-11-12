@@ -7,6 +7,7 @@ const {
 } = require("../model/galleryModel");
 const { parsePositiveInt, parseListPagination } = require("../utils/validate");
 const { unlinkUpload } = require("../utils/files");
+const { contentCache } = require("../utils/cache");
 
 const GALLERY_IMAGE_LIMIT_BYTES = 30 * 1024 * 1024;
 const GALLERY_IMAGE_SIZE_ERROR =
@@ -75,6 +76,7 @@ const addGallery = async (req, res) => {
 
     const imagePath = `/uploads/galleries/${file.filename}`;
     const insertId = await createGallery(title, description, imagePath);
+    contentCache.invalidate("galleries");
 
     return res.status(200).json({
       success: true,
@@ -141,6 +143,7 @@ const editGallery = async (req, res) => {
     }
 
     await updateGallery(id, updatedTitle, updatedDescription, updatedImagePath);
+    contentCache.invalidate("galleries");
 
     return res.status(200).json({
       success: true,
@@ -188,6 +191,7 @@ const removeGallery = async (req, res) => {
     }
 
     await deleteGallery(id);
+    contentCache.invalidate("galleries");
 
     return res.status(200).json({
       success: true,

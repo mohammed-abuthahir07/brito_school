@@ -10,6 +10,10 @@ const {
 } = require("../controller/calendarController");
 const { verifyToken } = require("../middleware/authMiddleware");
 
+const CALENDAR_FILE_LIMIT_BYTES = 30 * 1024 * 1024;
+const CALENDAR_FILE_SIZE_ERROR =
+  "File size must be below 30 MB. Please select a smaller file.";
+
 // =====================================
 // Multer Configuration with Absolute Path
 // =====================================
@@ -28,46 +32,71 @@ const storage = multer.diskStorage({
   },
 });
 
+// Accept any file type (PDF, JPG, PNG, DOC, etc.)
 const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (file.mimetype === "application/pdf" && ext === ".pdf") {
-    cb(null, true);
-  } else {
-    cb(new Error("Only PDF files are allowed!"), false);
-  }
+  cb(null, true);
 };
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: CALENDAR_FILE_LIMIT_BYTES - 1 },
   fileFilter: fileFilter,
 });
 
-// Middleware: Validate Magic Bytes for PDF (%PDF)
-const validatePdfMagicBytes = async (req, res, next) => {
-  if (req.file) {
-    try {
-      const fd = await fs.promises.open(req.file.path, "r");
-      const buffer = Buffer.alloc(4);
-      await fd.read(buffer, 0, 4, 0);
-      await fd.close();
-
-      // Check for %PDF (0x25, 0x50, 0x44, 0x46)
-      if (buffer.toString("utf8", 0, 4) !== "%PDF") {
-        await fs.promises.unlink(req.file.path).catch(() => {});
+// Accept any field name (e.g. "file", "image", "calendar", "document", etc.)
+const handleCalendarUpload = (req, res, next) => {
+  upload.any()(req, res, async (err) => {
+    if (err) {
+      if (err.code === "LIMIT_FILE_SIZE") {
         return res.status(400).json({
           success: false,
-          message: "Invalid file content: Uploaded file is not a valid PDF document.",
+          message: CALENDAR_FILE_SIZE_ERROR,
         });
-      }
-    } catch (err) {
-      if (req.file && req.file.path) {
-        await fs.promises.unlink(req.file.path).catch(() => {});
       }
       return res.status(400).json({
         success: false,
-        message: "Failed to verify file integrity",
+        message: err.message || "File upload failed",
       });
+    }
+
+    if (Array.isArray(req.files) && req.files.length > 0 && !req.file) {
+      req.file = req.files[0];
+    }
+    next();
+  });
+};
+
+// Middleware: Validate Magic Bytes for PDF (%PDF) only if the file claims to be a PDF
+const validatePdfMagicBytes = async (req, res, next) => {
+  if (req.file) {
+    const ext = path.extname(req.file.originalname || "").toLowerCase();
+    const mime = (req.file.mimetype || "").toLowerCase();
+
+    // Check %PDF header only if file claims to be a PDF
+    if (ext === ".pdf" || mime === "application/pdf") {
+      try {
+        const fd = await fs.promises.open(req.file.path, "r");
+        const buffer = Buffer.alloc(4);
+        await fd.read(buffer, 0, 4, 0);
+        await fd.close();
+
+        // Check for %PDF (0x25, 0x50, 0x44, 0x46)
+        if (buffer.toString("utf8", 0, 4) !== "%PDF") {
+          await fs.promises.unlink(req.file.path).catch(() => {});
+          return res.status(400).json({
+            success: false,
+            message: "Invalid file content: Uploaded file is not a valid PDF document.",
+          });
+        }
+      } catch (err) {
+        if (req.file && req.file.path) {
+          await fs.promises.unlink(req.file.path).catch(() => {});
+        }
+        return res.status(400).json({
+          success: false,
+          message: "Failed to verify file integrity",
+        });
+      }
     }
   }
   next();
@@ -81,17 +110,7 @@ router.get("/calendars", verifyToken, listCalendars);
 router.post(
   "/calendars",
   verifyToken,
-  (req, res, next) => {
-    upload.single("file")(req, res, (err) => {
-      if (err) {
-        return res.status(400).json({
-          success: false,
-          message: err.message || "File upload failed",
-        });
-      }
-      next();
-    });
-  },
+  handleCalendarUpload,
   validatePdfMagicBytes,
   addCalendar
 );

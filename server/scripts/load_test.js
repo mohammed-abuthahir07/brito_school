@@ -186,6 +186,24 @@ async function main() {
     })
   );
 
+  // Scenario 6: Real-time Multi-table Aggregation (Dashboard)
+  summary.push(
+    await runBenchmark("50 Concurrent Users on Dashboard Aggregation", {
+      concurrency: 50,
+      totalRequests: 1000,
+      endpoint: "/api/admin/dashboard",
+    })
+  );
+
+  // Scenario 7: Public Health Check Probe
+  summary.push(
+    await runBenchmark("100 Concurrent Users on Health Probe", {
+      concurrency: 100,
+      totalRequests: 2000,
+      endpoint: "/health",
+    })
+  );
+
   console.log("\n=========================================================================");
   console.log("FINAL LOAD TEST SUMMARY TABLE");
   console.log("=========================================================================");

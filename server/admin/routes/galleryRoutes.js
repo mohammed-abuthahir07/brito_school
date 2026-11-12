@@ -29,15 +29,9 @@ const storage = multer.diskStorage({
   },
 });
 
-const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
-
+// Accept any file type (images, documents, etc.)
 const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (file.mimetype.startsWith("image/") && allowedExtensions.includes(ext)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only image files are allowed for galleries!"), false);
-  }
+  cb(null, true);
 };
 
 const upload = multer({
@@ -73,11 +67,9 @@ const unlinkGalleryFiles = async (files) => {
   );
 };
 
+// Accept any field name (e.g. "image", "images", "file", "files", "photo", etc.)
 const handleGalleryUpload = (req, res, next) => {
-  upload.fields([
-    { name: "image", maxCount: 20 },
-    { name: "images", maxCount: 20 },
-  ])(req, res, async (err) => {
+  upload.any()(req, res, async (err) => {
     const files = collectGalleryFiles(req);
     if (files.length && !req.file) {
       req.file = files[0];
@@ -119,30 +111,43 @@ const validateImageMagicBytes = async (req, res, next) => {
 
   try {
     for (const file of files) {
-      const fd = await fs.promises.open(file.path, "r");
-      const buffer = Buffer.alloc(12);
-      await fd.read(buffer, 0, 12, 0);
-      await fd.close();
+      const ext = path.extname(file.originalname || file.filename || "").toLowerCase();
+      const mime = (file.mimetype || "").toLowerCase();
 
-      const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-      const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
-      const isGif = buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46;
-      const isWebp =
-        buffer[0] === 0x52 &&
-        buffer[1] === 0x49 &&
-        buffer[2] === 0x46 &&
-        buffer[3] === 0x46 &&
-        buffer[8] === 0x57 &&
-        buffer[9] === 0x45 &&
-        buffer[10] === 0x42 &&
-        buffer[11] === 0x50;
+      // Only check raster image magic bytes if the file claims to be a JPEG, PNG, GIF, or WebP
+      const isClaimedRasterImage =
+        [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(ext) ||
+        mime === "image/jpeg" ||
+        mime === "image/png" ||
+        mime === "image/gif" ||
+        mime === "image/webp";
 
-      if (!isJpeg && !isPng && !isGif && !isWebp) {
-        await unlinkGalleryFiles(files);
-        return res.status(400).json({
-          success: false,
-          message: "Invalid file content: Uploaded file is not a valid image.",
-        });
+      if (isClaimedRasterImage) {
+        const fd = await fs.promises.open(file.path, "r");
+        const buffer = Buffer.alloc(12);
+        await fd.read(buffer, 0, 12, 0);
+        await fd.close();
+
+        const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+        const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
+        const isGif = buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46;
+        const isWebp =
+          buffer[0] === 0x52 &&
+          buffer[1] === 0x49 &&
+          buffer[2] === 0x46 &&
+          buffer[3] === 0x46 &&
+          buffer[8] === 0x57 &&
+          buffer[9] === 0x45 &&
+          buffer[10] === 0x42 &&
+          buffer[11] === 0x50;
+
+        if (!isJpeg && !isPng && !isGif && !isWebp) {
+          await unlinkGalleryFiles(files);
+          return res.status(400).json({
+            success: false,
+            message: "Invalid file content: Uploaded file is not a valid image.",
+          });
+        }
       }
     }
   } catch (err) {

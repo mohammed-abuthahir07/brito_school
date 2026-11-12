@@ -41,6 +41,17 @@ const getKuralByNumber = async (kuralNumber) => {
   return rows[0];
 };
 
+const getDailyKural = async () => {
+  const query = `
+    SELECT ${KURAL_COLUMNS}
+    FROM thirukkural
+    ORDER BY created_at DESC, id DESC
+    LIMIT 1
+  `;
+  const [rows] = await pool.execute(query);
+  return rows[0] || null;
+};
+
 const createKural = async (kuralNumber, tamilText, englishMeaning, explanation) => {
   const query = `
     INSERT INTO thirukkural (kural_number, tamil_text, english_meaning, explanation)
@@ -84,6 +95,7 @@ module.exports = {
   getAllKurals,
   getKuralById,
   getKuralByNumber,
+  getDailyKural,
   createKural,
   updateKural,
   deleteKural,

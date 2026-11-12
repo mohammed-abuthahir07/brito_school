@@ -14,6 +14,8 @@ const calendarRoutes = require("./admin/routes/calendarRoutes");
 const thirukkuralRoutes = require("./admin/routes/thirukkuralRoutes");
 const galleryRoutes = require("./admin/routes/galleryRoutes");
 const profileRoutes = require("./admin/routes/profileRoutes");
+const dashboardRoutes = require("./admin/routes/dashboardRoutes");
+const publicRoutes = require("./public/routes/publicRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -165,6 +167,10 @@ app.use("/api/admin/forgot-password", authLimiter);
 app.use("/api/admin/reset-password", authLimiter);
 app.use("/api", generalLimiter);
 
+// Public Content Routes (Unauthenticated, Read-Heavy, In-Memory Cached)
+app.use("/api/public", publicRoutes);
+app.use("/api", publicRoutes);
+
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin", adminForgetpasswordRoutes);
 app.use("/api/admin", announcementRoutes);
@@ -172,6 +178,7 @@ app.use("/api/admin", calendarRoutes);
 app.use("/api/admin", thirukkuralRoutes);
 app.use("/api/admin", galleryRoutes);
 app.use("/api/admin", profileRoutes);
+app.use("/api/admin", dashboardRoutes);
 
 app.use((req, res, next) => {
   if (res.headersSent) {
