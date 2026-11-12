@@ -5,7 +5,6 @@ const {
   getPublicCalendars,
   getPublicGalleries,
   getPublicKurals,
-  getPublicDailyKural,
 } = require("../controller/publicController");
 
 // =====================================
@@ -14,7 +13,6 @@ const {
 router.get("/announcements", getPublicAnnouncements);
 router.get("/calendars", getPublicCalendars);
 router.get("/galleries", getPublicGalleries);
-
 router.get("/thirukkural", getPublicKurals);
 
 module.exports = router;
