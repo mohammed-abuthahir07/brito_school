@@ -6,8 +6,9 @@ const crypto = require("node:crypto");
 // =====================================================================
 
 class ContentCache {
-  constructor(defaultTtlMs = 5 * 60 * 1000) {
+  constructor(defaultTtlMs = 5 * 60 * 1000, maxEntries = 200) {
     this.defaultTtlMs = defaultTtlMs;
+    this.maxEntries = maxEntries;
     this.store = new Map();
     this.hits = 0;
     this.misses = 0;
@@ -44,6 +45,12 @@ class ContentCache {
       cachedAt: Date.now(),
       expiresAt: Date.now() + ttlMs,
     };
+    if (this.store.size >= this.maxEntries) {
+      const oldestKey = this.store.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.store.delete(oldestKey);
+      }
+    }
     this.store.set(key, entry);
     return entry;
   }

@@ -108,6 +108,21 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(res.headers.get("x-frame-options"), "SAMEORIGIN");
     });
 
+    test("GET /health/live returns 200 without requiring the database payload internals", async () => {
+      const res = await request("/health/live");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.status, "UP");
+      assert.ok(typeof res.data.uptimeSeconds === "number");
+      assert.equal(res.data.database, undefined);
+    });
+
+    test("GET /health/ready returns 200 when the database is reachable", async () => {
+      const res = await request("/health/ready");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.status, "UP");
+      assert.equal(res.data.database.status, "CONNECTED");
+    });
+
     test("GET /health returns 200 with UP status, DB connectivity, pool, and storage metrics", async () => {
       const res = await request("/health");
       assert.equal(res.status, 200);
@@ -353,19 +368,23 @@ describe("Brito School Backend API Test Suite", () => {
       createdKuralId = res.data.kural.id;
     });
 
-    test("POST /api/admin/thirukkural prevents duplicate kural_number", async () => {
+    test("POST /api/admin/thirukkural replaces the same-day active record instead of duplicating", async () => {
       const res = await request("/api/admin/thirukkural", {
         method: "POST",
         headers: { Authorization: `Bearer ${authToken}` },
         body: {
           kural_number: testKuralNumber,
-          tamil_text: "Duplicate",
-          english_meaning: "Duplicate",
+          tamil_text: "Replaced Tamil",
+          english_meaning: "Replaced English",
         },
       });
-      assert.equal(res.status, 400);
-      assert.equal(res.data.success, false);
-      assert.match(res.data.message, /already exists/);
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.equal(res.data.kural.id, createdKuralId);
+      assert.equal(res.data.kural.english_meaning, "Replaced English");
+
+      const [rows] = await pool.query("SELECT COUNT(*) AS total FROM thirukkural");
+      assert.equal(Number(rows[0].total), 1);
     });
 
     test("PUT /api/admin/thirukkural updates existing kural", async () => {
@@ -815,6 +834,7 @@ describe("Brito School Backend API Test Suite", () => {
       const res = await request("/api/public/thirukkural/daily");
       assert.equal(res.status, 200);
       assert.equal(res.data.success, true);
+      assert.ok(Object.prototype.hasOwnProperty.call(res.data, "kural"));
     });
 
     test("Aliased route GET /api/announcements works publicly without token", async () => {
@@ -940,6 +960,236 @@ describe("Brito School Backend API Test Suite", () => {
   // ==========================================
   // 11. 404 Route Handling
   // ==========================================
+  describe("Gallery Capacity Business Rule (max 30)", () => {
+    const CAPACITY_TITLE_PREFIX = "Capacity Test Image";
+    const miniJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]);
+
+    const uploadMiniJpeg = async (title) => {
+      const form = new FormData();
+      form.append("title", title);
+      form.append("image", new Blob([miniJpeg], { type: "image/jpeg" }), "cap.jpg");
+      return request("/api/admin/galleries", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: form,
+      });
+    };
+
+    after(async () => {
+      await pool.query("DELETE FROM galleries WHERE title LIKE ?", [`${CAPACITY_TITLE_PREFIX}%`]);
+    });
+
+    test("uploads succeed through the 30th image and reject the 31st", async () => {
+      await pool.query("DELETE FROM galleries WHERE title LIKE ?", [`${CAPACITY_TITLE_PREFIX}%`]);
+
+      for (let i = 1; i <= 29; i += 1) {
+        await pool.query(
+          "INSERT INTO galleries (title, description, image_path) VALUES (?, ?, ?)",
+          [`${CAPACITY_TITLE_PREFIX} ${i}`, "seed", `/uploads/galleries/capacity-seed-${i}.jpg`]
+        );
+      }
+
+      const thirtieth = await uploadMiniJpeg(`${CAPACITY_TITLE_PREFIX} 30`);
+      assert.equal(thirtieth.status, 200);
+      assert.equal(thirtieth.data.success, true);
+      assert.equal(thirtieth.data.total, 30);
+      assert.equal(thirtieth.data.remaining, 0);
+      const thirtiethId = thirtieth.data.gallery.id;
+
+      const thirtyFirst = await uploadMiniJpeg(`${CAPACITY_TITLE_PREFIX} 31`);
+      assert.equal(thirtyFirst.status, 409);
+      assert.equal(thirtyFirst.data.success, false);
+      assert.equal(
+        thirtyFirst.data.message,
+        "Maximum gallery capacity reached. Only 30 images are allowed. Please delete an existing image before uploading another."
+      );
+
+      const [countAtCap] = await pool.query("SELECT COUNT(*) AS total FROM galleries");
+      assert.equal(Number(countAtCap[0].total), 30);
+
+      const publicAtCap = await request("/api/public/galleries");
+      assert.ok(publicAtCap.data.galleries.length <= 30);
+
+      const deleted = await request(`/api/admin/galleries?id=${thirtiethId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      assert.equal(deleted.status, 200);
+      assert.equal(deleted.data.total, 29);
+      assert.equal(deleted.data.remaining, 1);
+
+      const replacement = await uploadMiniJpeg(`${CAPACITY_TITLE_PREFIX} replacement`);
+      assert.equal(replacement.status, 200);
+      assert.equal(replacement.data.total, 30);
+
+      const updateRes = await request(`/api/admin/galleries?id=${replacement.data.gallery.id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: (() => {
+          const form = new FormData();
+          form.append("title", `${CAPACITY_TITLE_PREFIX} updated`);
+          form.append("image", new Blob([miniJpeg], { type: "image/jpeg" }), "updated.jpg");
+          return form;
+        })(),
+      });
+      assert.equal(updateRes.status, 200);
+      assert.equal(updateRes.data.total, 30);
+    });
+
+    test("concurrent uploads at 29 images never produce more than 30 rows", async () => {
+      await pool.query("DELETE FROM galleries WHERE title LIKE ?", [`${CAPACITY_TITLE_PREFIX}%`]);
+
+      for (let i = 1; i <= 29; i += 1) {
+        await pool.query(
+          "INSERT INTO galleries (title, description, image_path) VALUES (?, ?, ?)",
+          [`${CAPACITY_TITLE_PREFIX} concurrent ${i}`, "seed", `/uploads/galleries/capacity-concurrent-${i}.jpg`]
+        );
+      }
+
+      const [first, second] = await Promise.all([
+        uploadMiniJpeg(`${CAPACITY_TITLE_PREFIX} concurrent A`),
+        uploadMiniJpeg(`${CAPACITY_TITLE_PREFIX} concurrent B`),
+      ]);
+
+      const statuses = [first.status, second.status].sort();
+      assert.equal(statuses[0], 200);
+      assert.equal(statuses[1], 409);
+
+      const [countRows] = await pool.query("SELECT COUNT(*) AS total FROM galleries");
+      assert.ok(Number(countRows[0].total) <= 30);
+      assert.equal(Number(countRows[0].total), 30);
+    });
+  });
+
+  describe("Daily Thirukkural Business Rule (one active record)", () => {
+    after(async () => {
+      await pool.query("DELETE FROM thirukkural WHERE kural_number IN (?, ?, ?)", [88001, 88002, 88003]);
+    });
+
+    test("same-day second upload replaces the current record and keeps a single row", async () => {
+      await pool.query("DELETE FROM thirukkural WHERE kural_number IN (?, ?, ?)", [88001, 88002, 88003]);
+
+      const first = await request("/api/admin/thirukkural", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "X-Test-Kolkata-Date": "2026-11-13",
+        },
+        body: {
+          kural_number: 88001,
+          tamil_text: "Day 1 original",
+          english_meaning: "Day 1 original meaning",
+          explanation: "A",
+        },
+      });
+      assert.equal(first.status, 200);
+      const firstId = first.data.kural.id;
+
+      const public1 = await request("/api/public/thirukkural");
+      assert.equal(public1.data.count, 1);
+      assert.equal(public1.data.kurals.length, 1);
+      assert.equal(public1.data.kurals[0].kural_number, 88001);
+
+      const second = await request("/api/admin/thirukkural", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "X-Test-Kolkata-Date": "2026-11-13",
+        },
+        body: {
+          kural_number: 88002,
+          tamil_text: "Day 1 replacement",
+          english_meaning: "Day 1 replacement meaning",
+          explanation: "B",
+        },
+      });
+      assert.equal(second.status, 200);
+      assert.equal(second.data.kural.id, firstId);
+      assert.equal(second.data.kural.kural_number, 88002);
+
+      const [countSameDay] = await pool.query("SELECT COUNT(*) AS total FROM thirukkural");
+      assert.equal(Number(countSameDay[0].total), 1);
+
+      const public2 = await request("/api/public/thirukkural/daily");
+      assert.equal(public2.data.kural.kural_number, 88002);
+    });
+
+    test("next-day upload replaces the previous active record", async () => {
+      const nextDay = await request("/api/admin/thirukkural", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "X-Test-Kolkata-Date": "2026-11-14",
+        },
+        body: {
+          kural_number: 88003,
+          tamil_text: "Day 2 verse",
+          english_meaning: "Day 2 meaning",
+          explanation: "C",
+        },
+      });
+      assert.equal(nextDay.status, 200);
+      assert.equal(nextDay.data.kural.kural_number, 88003);
+
+      const [rows] = await pool.query("SELECT kural_number FROM thirukkural");
+      assert.equal(rows.length, 1);
+      assert.equal(rows[0].kural_number, 88003);
+
+      const publicDaily = await request("/api/public/thirukkural/daily");
+      assert.equal(publicDaily.data.kural.kural_number, 88003);
+    });
+
+    test("validation failure does not delete the current valid Thirukkural", async () => {
+      const before = await request("/api/public/thirukkural/daily");
+      assert.ok(before.data.kural);
+
+      const failed = await request("/api/admin/thirukkural", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: { kural_number: 88099 },
+      });
+      assert.equal(failed.status, 400);
+
+      const after = await request("/api/public/thirukkural/daily");
+      assert.equal(after.data.kural.id, before.data.kural.id);
+      assert.equal(after.data.kural.kural_number, before.data.kural.kural_number);
+    });
+
+    test("simultaneous same-day uploads still leave a single active record", async () => {
+      const [a, b] = await Promise.all([
+        request("/api/admin/thirukkural", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "X-Test-Kolkata-Date": "2026-11-15",
+          },
+          body: {
+            kural_number: 88111,
+            tamil_text: "Concurrent A",
+            english_meaning: "Concurrent A meaning",
+          },
+        }),
+        request("/api/admin/thirukkural", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "X-Test-Kolkata-Date": "2026-11-15",
+          },
+          body: {
+            kural_number: 88112,
+            tamil_text: "Concurrent B",
+            english_meaning: "Concurrent B meaning",
+          },
+        }),
+      ]);
+
+      assert.equal(a.status, 200);
+      assert.equal(b.status, 200);
+      const [countRows] = await pool.query("SELECT COUNT(*) AS total FROM thirukkural");
+      assert.equal(Number(countRows[0].total), 1);
+    });
+  });
+
   describe("Route Fallback", () => {
     test("Unknown route returns 404 JSON", async () => {
       const res = await request("/api/admin/non-existent-route-xyz");

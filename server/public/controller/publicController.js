@@ -1,17 +1,24 @@
 const { getAllAnnouncements } = require("../../admin/model/announcementModel");
 const { getAllCalendars } = require("../../admin/model/calendarModel");
 const { getAllGalleries } = require("../../admin/model/galleryModel");
-const { getAllKurals } = require("../../admin/model/thirukkuralModel");
+const { getDailyKural } = require("../../admin/model/thirukkuralModel");
 const { parseListPagination } = require("../../admin/utils/validate");
 const { contentCache } = require("../../admin/utils/cache");
 
-// Helper to serve public content with caching, ETags, and 304 Not Modified
+const PUBLIC_CACHE_CONTROL = "public, max-age=0, must-revalidate";
+
+const applyPublicCacheHeaders = (req, res, entry) => {
+  res.setHeader("ETag", entry.etag);
+  res.setHeader("Cache-Control", PUBLIC_CACHE_CONTROL);
+  res.setHeader("Last-Modified", new Date(entry.cachedAt).toUTCString());
+  res.setHeader("Vary", "Accept-Encoding");
+};
+
 const sendCachedPublicResponse = async (req, res, cacheKey, namespace, fetchFn) => {
   try {
     const cached = contentCache.get(cacheKey);
     if (cached) {
-      res.setHeader("ETag", cached.etag);
-      res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=30");
+      applyPublicCacheHeaders(req, res, cached);
       if (req.headers["if-none-match"] === cached.etag) {
         return res.status(304).end();
       }
@@ -21,8 +28,7 @@ const sendCachedPublicResponse = async (req, res, cacheKey, namespace, fetchFn) 
     const data = await fetchFn();
     const entry = contentCache.set(cacheKey, data, namespace);
 
-    res.setHeader("ETag", entry.etag);
-    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=30");
+    applyPublicCacheHeaders(req, res, entry);
 
     if (req.headers["if-none-match"] === entry.etag) {
       return res.status(304).end();
@@ -76,14 +82,16 @@ const getPublicCalendars = async (req, res) => {
 // Public Galleries
 // =====================================
 const getPublicGalleries = async (req, res) => {
-  const pagination = parseListPagination(req.query);
-  const cacheKey = `galleries:${req.query.limit || "all"}:${req.query.page || 1}`;
+  const pagination = parseListPagination(req.query) || { limit: 30, offset: 0 };
+  pagination.limit = Math.min(pagination.limit, 30);
+  const cacheKey = `galleries:${pagination.limit}:${req.query.page || 1}`;
 
   return sendCachedPublicResponse(req, res, cacheKey, "galleries", async () => {
     const galleries = await getAllGalleries(pagination);
     return {
       success: true,
       count: galleries.length,
+      max_capacity: 30,
       galleries,
     };
   });
@@ -93,23 +101,30 @@ const getPublicGalleries = async (req, res) => {
 // Public Thirukkural List
 // =====================================
 const getPublicKurals = async (req, res) => {
-  const pagination = parseListPagination(req.query);
-  const cacheKey = `thirukkural:${req.query.limit || "all"}:${req.query.page || 1}`;
-
-  return sendCachedPublicResponse(req, res, cacheKey, "thirukkural", async () => {
-    const kurals = await getAllKurals(pagination);
+  return sendCachedPublicResponse(req, res, "thirukkural:current", "thirukkural", async () => {
+    const kural = await getDailyKural();
     return {
       success: true,
-      count: kurals.length,
-      kurals,
+      count: kural ? 1 : 0,
+      kurals: kural ? [kural] : [],
     };
   });
 };
 
+const getPublicDailyKural = async (req, res) => {
+  return sendCachedPublicResponse(req, res, "thirukkural:daily", "thirukkural", async () => {
+    const kural = await getDailyKural();
+    return {
+      success: true,
+      kural: kural || null,
+    };
+  });
+};
 
 module.exports = {
   getPublicAnnouncements,
   getPublicCalendars,
   getPublicGalleries,
   getPublicKurals,
+  getPublicDailyKural,
 };

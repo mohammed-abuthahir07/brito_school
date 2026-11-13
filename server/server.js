@@ -5,7 +5,7 @@ const zlib = require("zlib");
 const express = require("express");
 const cors = require("cors");
 const pool = require("./config/db");
-const { authLimiter, generalLimiter } = require("./admin/middleware/rateLimiter");
+const { authLimiter, generalLimiter, publicReadLimiter } = require("./admin/middleware/rateLimiter");
 
 const adminRoutes = require("./admin/routes/adminAuthRoutes");
 const adminForgetpasswordRoutes = require("./admin/routes/adminForgetpasswordRoutes");
@@ -73,7 +73,10 @@ app.use((req, res, next) => {
 
     zlib.gzip(payload, (err, compressed) => {
       if (err || res.headersSent) {
-        return originalJson(body);
+        if (!res.headersSent) {
+          return originalJson(body);
+        }
+        return;
       }
       res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.setHeader("Content-Encoding", "gzip");
@@ -162,9 +165,39 @@ app.get("/health", async (req, res) => {
   });
 });
 
+app.get("/health/live", (req, res) => {
+  return res.status(200).json({
+    status: "UP",
+    timestamp: new Date().toISOString(),
+    uptimeSeconds: Math.floor(process.uptime()),
+  });
+});
+
+app.get("/health/ready", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT 1 AS ping");
+    if (rows && rows[0] && rows[0].ping === 1) {
+      return res.status(200).json({
+        status: "UP",
+        database: { status: "CONNECTED" },
+      });
+    }
+    return res.status(503).json({
+      status: "DEGRADED",
+      database: { status: "DISCONNECTED" },
+    });
+  } catch (err) {
+    return res.status(503).json({
+      status: "DEGRADED",
+      database: { status: "UNREACHABLE" },
+    });
+  }
+});
+
 app.use("/api/admin/login", authLimiter);
 app.use("/api/admin/forgot-password", authLimiter);
 app.use("/api/admin/reset-password", authLimiter);
+app.use("/api/public", publicReadLimiter);
 app.use("/api", generalLimiter);
 
 // Public Content Routes (Unauthenticated, Read-Heavy, In-Memory Cached)

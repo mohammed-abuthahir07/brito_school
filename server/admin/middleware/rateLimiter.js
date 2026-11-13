@@ -71,8 +71,15 @@ const generalLimiter = createRateLimiter({
   message: "Rate limit exceeded. Please slow down your requests.",
 });
 
+const publicReadLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10000,
+  message: "Rate limit exceeded. Please slow down your requests.",
+});
+
 module.exports = {
   createRateLimiter,
   authLimiter,
   generalLimiter,
+  publicReadLimiter,
 };

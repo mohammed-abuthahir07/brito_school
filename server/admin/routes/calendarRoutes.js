@@ -32,9 +32,15 @@ const storage = multer.diskStorage({
   },
 });
 
-// Accept any file type (PDF, JPG, PNG, DOC, etc.)
+const allowedCalendarExtensions = [".pdf", ".jpg", ".jpeg", ".png", ".gif", ".webp"];
+
 const fileFilter = (req, file, cb) => {
-  cb(null, true);
+  const ext = path.extname(file.originalname || "").toLowerCase();
+  if (allowedCalendarExtensions.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only PDF and image files are allowed for calendars!"), false);
+  }
 };
 
 const upload = multer({

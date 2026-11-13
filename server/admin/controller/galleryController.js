@@ -1,6 +1,11 @@
 const {
+  GALLERY_MAX_CAPACITY,
+  GALLERY_CAPACITY_ERROR,
+  GalleryCapacityError,
   getAllGalleries,
   getGalleryById,
+  countGalleries,
+  countImagePathReferences,
   createGallery,
   updateGallery,
   deleteGallery,
@@ -38,12 +43,32 @@ const rejectOversizedGalleryImages = async (req, res) => {
   return true;
 };
 
+const capacityPayload = (total) => ({
+  total,
+  max_capacity: GALLERY_MAX_CAPACITY,
+  remaining: Math.max(0, GALLERY_MAX_CAPACITY - total),
+});
+
+const unlinkIfUnreferenced = async (imagePath, excludeId = null) => {
+  if (!imagePath) {
+    return;
+  }
+  const refs = await countImagePathReferences(imagePath, excludeId);
+  if (refs === 0) {
+    await unlinkUpload(imagePath);
+  }
+};
+
 const listGalleries = async (req, res) => {
   try {
-    const galleries = await getAllGalleries(parseListPagination(req.query));
+    const [galleries, total] = await Promise.all([
+      getAllGalleries(parseListPagination(req.query)),
+      countGalleries(),
+    ]);
     return res.status(200).json({
       success: true,
       count: galleries.length,
+      ...capacityPayload(total),
       galleries,
     });
   } catch (error) {
@@ -75,22 +100,29 @@ const addGallery = async (req, res) => {
     }
 
     const imagePath = `/uploads/galleries/${file.filename}`;
-    const insertId = await createGallery(title, description, imagePath);
+    const created = await createGallery(title, description, imagePath);
     contentCache.invalidate("galleries");
 
     return res.status(200).json({
       success: true,
       message: "Gallery image uploaded successfully!",
       gallery: {
-        id: insertId,
+        id: created.insertId,
         title,
         description: description || null,
         image_path: imagePath,
       },
+      ...capacityPayload(created.total),
     });
   } catch (error) {
     if (req.file && req.file.path) {
       await unlinkUpload(req.file.path);
+    }
+    if (error instanceof GalleryCapacityError || error.status === 409) {
+      return res.status(409).json({
+        success: false,
+        message: error.message || GALLERY_CAPACITY_ERROR,
+      });
     }
     console.error("Upload Gallery Error:", error);
     return res.status(500).json({
@@ -134,16 +166,20 @@ const editGallery = async (req, res) => {
     const updatedTitle = title || existing.title;
     const updatedDescription = description !== undefined ? description : existing.description;
     let updatedImagePath = existing.image_path;
+    const previousPath = existing.image_path;
 
     if (file) {
       updatedImagePath = `/uploads/galleries/${file.filename}`;
-      if (existing.image_path) {
-        await unlinkUpload(existing.image_path);
-      }
     }
 
     await updateGallery(id, updatedTitle, updatedDescription, updatedImagePath);
+
+    if (file && previousPath && previousPath !== updatedImagePath) {
+      await unlinkIfUnreferenced(previousPath, id);
+    }
+
     contentCache.invalidate("galleries");
+    const total = await countGalleries();
 
     return res.status(200).json({
       success: true,
@@ -154,6 +190,7 @@ const editGallery = async (req, res) => {
         description: updatedDescription,
         image_path: updatedImagePath,
       },
+      ...capacityPayload(total),
     });
   } catch (error) {
     if (req.file && req.file.path) {
@@ -186,16 +223,26 @@ const removeGallery = async (req, res) => {
       });
     }
 
-    if (existing.image_path) {
-      await unlinkUpload(existing.image_path);
+    const affectedRows = await deleteGallery(id);
+    if (!affectedRows) {
+      return res.status(404).json({
+        success: false,
+        message: "Gallery item not found",
+      });
     }
 
-    await deleteGallery(id);
     contentCache.invalidate("galleries");
+
+    if (existing.image_path) {
+      await unlinkIfUnreferenced(existing.image_path);
+    }
+
+    const total = await countGalleries();
 
     return res.status(200).json({
       success: true,
       message: `Gallery ID ${id} deleted successfully!`,
+      ...capacityPayload(total),
     });
   } catch (error) {
     console.error("Delete Gallery Error:", error);

@@ -5,7 +5,7 @@ const connectionLimit = parseInt(process.env.DB_CONNECTION_LIMIT, 10) || 25;
 const maxIdle = parseInt(process.env.DB_MAX_IDLE, 10) || 15;
 const queueLimit = process.env.DB_QUEUE_LIMIT !== undefined
   ? parseInt(process.env.DB_QUEUE_LIMIT, 10)
-  : 0; // 0 = unlimited queue (standard production MySQL pool practice)
+  : 500;
 
 // =====================================================================
 // Optimized MySQL Connection Pool

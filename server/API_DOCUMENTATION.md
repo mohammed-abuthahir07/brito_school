@@ -1,3 +1,4 @@
+# Brito School — API Documentation
 # Brito School Management System — API Documentation
 
 ## Table of Contents
@@ -63,7 +64,8 @@ Authorization: Bearer <your-token-here>
 ```
 
 - Token expiry: **1 day**
-- All endpoints except `POST /api/admin/login`, `POST /api/admin/forgot-password`, `POST /api/admin/reset-password`, and `GET /health` require a valid token.
+- Public (no token): `GET /health`, `GET /health/live`, `GET /health/ready`, all `GET /api/public/*` routes, and the aliases `GET /api/announcements|calendars|galleries|thirukkural`.
+- All `/api/admin/*` routes except login and password reset require a valid token.
 
 ---
 
@@ -108,6 +110,7 @@ Authorization: Bearer <your-token-here>
 | Route Group | Limit |
 |-------------|-------|
 | Auth routes (`/login`, `/forgot-password`, `/reset-password`) | 30 requests / 15 minutes |
+| Public read routes (`/api/public/*`) | 10000 requests / 15 minutes |
 | All other `/api/*` routes | 1000 requests / 15 minutes |
 
 When exceeded, the API returns HTTP `429` with:
@@ -176,6 +179,39 @@ Returns the server health status including database connectivity, memory usage, 
 ```
 
 **Degraded Response (503):** when DB is unreachable, `status` = `"DEGRADED"`.
+
+#### `GET /health/live`
+
+Process liveness. Does not query MySQL.
+
+**Auth:** Not required. **Success (200):** `{ "status": "UP", "timestamp": "...", "uptimeSeconds": 12 }`
+
+#### `GET /health/ready`
+
+Readiness. Pings MySQL only.
+
+**Auth:** Not required. **Success (200):** `{ "status": "UP", "database": { "status": "CONNECTED" } }`
+
+---
+
+### Public content (unauthenticated)
+
+These routes use an in-memory cache with ETag / `304 Not Modified`. `Cache-Control` is `public, max-age=0, must-revalidate` so browsers revalidate after admin writes. Admin create/update/delete invalidates the matching cache namespace immediately.
+
+| Method | URL | Auth | Description |
+|--------|-----|------|-------------|
+| GET | `/api/public/announcements` | No | List announcements |
+| GET | `/api/public/calendars` | No | List calendars |
+| GET | `/api/public/galleries` | No | List galleries |
+| GET | `/api/public/thirukkural` | No | List Thirukkural verses |
+| GET | `/api/public/thirukkural/daily` | No | Latest daily Thirukkural (`kural` or `null`) |
+| GET | `/api/announcements` | No | Alias of `/api/public/announcements` |
+| GET | `/api/calendars` | No | Alias of `/api/public/calendars` |
+| GET | `/api/galleries` | No | Alias of `/api/public/galleries` |
+| GET | `/api/thirukkural` | No | Alias of `/api/public/thirukkural` |
+| GET | `/api/thirukkural/daily` | No | Alias of `/api/public/thirukkural/daily` |
+
+Optional query: `limit`, `page` (omitting them returns the full list, matching the current frontend contract).
 
 ---
 
@@ -1189,3 +1225,186 @@ Copy the JSON below and save as a `.json` file, then import into Postman via **F
   ]
 }
 ```
+
+Canonical companion to `API_DOCUMENT.md`. This file lists every endpoint registered in `server.js` as of the 2026-11-13 backend audit.
+
+**Base URL:** `http://localhost:5000`  
+**Admin auth:** `Authorization: Bearer <JWT>` (1-day expiry)
+
+## Public GET APIs (no token)
+
+| Method | Path | Controller | Notes |
+|--------|------|------------|-------|
+| GET | `/health` | `server.js` | Liveness + readiness + metrics |
+| GET | `/health/live` | `server.js` | Process up; no DB |
+| GET | `/health/ready` | `server.js` | MySQL ping only |
+| GET | `/api/public/announcements` | `publicController.getPublicAnnouncements` | Cached + ETag |
+| GET | `/api/public/calendars` | `publicController.getPublicCalendars` | Cached + ETag |
+| GET | `/api/public/galleries` | `publicController.getPublicGalleries` | Cached + ETag |
+| GET | `/api/public/thirukkural` | `publicController.getPublicKurals` | Cached + ETag |
+| GET | `/api/public/thirukkural/daily` | `publicController.getPublicDailyKural` | Latest verse; `{ success, kural }` |
+| GET | `/api/announcements` | same public router alias | |
+| GET | `/api/calendars` | same public router alias | |
+| GET | `/api/galleries` | same public router alias | |
+| GET | `/api/thirukkural` | same public router alias | |
+| GET | `/api/thirukkural/daily` | same public router alias | |
+| GET | `/uploads/*` | `express.static` | 1-day cache, ETag |
+
+Optional list query params: `limit`, `page`. Omitting them returns the full list.
+
+Public cache: in-memory, namespace-invalidated on matching admin writes. HTTP `Cache-Control: public, max-age=0, must-revalidate` so clients revalidate instead of serving stale copies.
+
+## Protected Admin GET APIs (JWT)
+
+| Method | Path | Controller |
+|--------|------|------------|
+| GET | `/api/admin/dashboard` | `dashboardController.getDashboard` |
+| GET | `/api/admin/announcements` | `announcementController.listAnnouncements` |
+| GET | `/api/admin/calendars` | `calendarController.listCalendars` |
+| GET | `/api/admin/galleries` | `galleryController.listGalleries` |
+| GET | `/api/admin/thirukkural` | `thirukkuralController.listKurals` |
+| GET | `/api/admin/profile` | `profileController.getProfile` |
+
+## Admin POST APIs
+
+| Method | Path | Auth | Body |
+|--------|------|------|------|
+| POST | `/api/admin/login` | No (rate-limited) | `{ email, password }` |
+| POST | `/api/admin/forgot-password` | No (rate-limited) | `{ email }` |
+| POST | `/api/admin/reset-password` | No (rate-limited) | `{ email, otp, newPassword, confirmPassword }` |
+| POST | `/api/admin/announcements` | JWT | `{ title, content, category? }` |
+| POST | `/api/admin/calendars` | JWT | multipart: `title`, `description?`, file field (`file` or any name). PDF or image, under 30 MB |
+| POST | `/api/admin/galleries` | JWT | multipart: `title`, `description?`, image field (`image`, `file`, …). Images only, strictly below 30 MB |
+| POST | `/api/admin/thirukkural` | JWT | `{ kural_number, tamil_text, english_meaning, explanation? }` |
+| POST | `/api/admin/profile` | JWT | `{ full_name, alternative_email, ... }` |
+
+## Admin PUT APIs
+
+| Method | Path | Notes |
+|--------|------|-------|
+| PUT | `/api/admin/announcements?id=` | Partial field merge |
+| PUT | `/api/admin/galleries?id=` | Optional replacement image |
+| PUT | `/api/admin/thirukkural?id=` | Partial field merge |
+| PUT | `/api/admin/profile` | Partial field merge on `admins` row |
+
+There is **no** `PUT /api/admin/calendars` (calendars are list/upload/delete only).
+
+## Admin DELETE APIs
+
+| Method | Path |
+|--------|------|
+| DELETE | `/api/admin/announcements?id=` |
+| DELETE | `/api/admin/calendars?id=` (unlinks stored file) |
+| DELETE | `/api/admin/galleries?id=` (unlinks stored file) |
+| DELETE | `/api/admin/thirukkural?id=` |
+
+`DELETE /api/admin/profile` is **not registered** (returns 404).
+
+## Response conventions
+
+- Success: `{ success: true, ... }` with resource keys (`announcements`, `gallery`, `kural`, `dashboard`, `profile`, `token`).
+- Error: `{ success: false, message }` — no stack traces in production.
+- Auth failures: `401` with `Unauthorized: No token provided` or `Unauthorized: Invalid or expired token`.
+
+See `API_DOCUMENT.md` for full request/response examples.
+
+---
+
+## Business rule: Gallery maximum capacity (30)
+
+The `galleries` table is the source of active images. There is no separate archive flag.
+
+**Pre-implementation count (2026-11-13):** `0` rows. No cleanup required. Existing rows would never be auto-deleted if the count were already above 30; new uploads would be rejected until an admin deleted extras.
+
+### Concurrency
+
+`POST /api/admin/galleries` takes MySQL `GET_LOCK('brito_gallery_capacity', 10)`, then `COUNT(*)` and `INSERT` in one transaction. Two concurrent uploads at 29 images cannot both insert: one succeeds, the other receives `409`.
+
+### List / upload responses (compatible extras)
+
+Admin `GET /api/admin/galleries` and successful `POST`/`PUT`/`DELETE` include:
+
+```json
+{
+  "success": true,
+  "count": 18,
+  "total": 18,
+  "max_capacity": 30,
+  "remaining": 12,
+  "galleries": []
+}
+```
+
+`count` remains the length of the returned `galleries` array. Use `total` / `max_capacity` / `remaining` for `18/30` UI.
+
+### Capacity exceeded
+
+```http
+HTTP/1.1 409 Conflict
+```
+
+```json
+{
+  "success": false,
+  "message": "Maximum gallery capacity reached. Only 30 images are allowed. Please delete an existing image before uploading another."
+}
+```
+
+### Update vs create
+
+- `PUT /api/admin/galleries?id=` replaces metadata/file in place and **does not** increase `total`.
+- Old files are unlinked only after the row is updated, and only if no other row shares `image_path`.
+- `DELETE` removes the row first, then unlinks the file if unreferenced.
+
+### Public GET
+
+`GET /api/public/galleries` always applies `LIMIT 30`. Cache namespace `galleries` is invalidated on create/update/delete.
+
+### Tests
+
+`npm test` covers: fill to 30, reject 31st (`409`), delete then upload, replacement keeps count 30, two simultaneous uploads at 29 never exceed 30, invalid/oversize images.
+
+---
+
+## Business rule: Daily Thirukkural (one active record)
+
+Timezone for “today”: **Asia/Kolkata**.
+
+**Pre-implementation count:** `0` rows. No historical rows to preserve.
+
+### Workflow
+
+1. Validate `kural_number`, `tamil_text`, `english_meaning`.
+2. `GET_LOCK('brito_thirukkural_daily', 10)` + transaction.
+3. If a row already exists for today’s Kolkata date → **UPDATE** that row (same-day replacement). Previous content is kept if the update fails (rollback).
+4. If none exists for today and the table is empty → **INSERT**.
+5. If none exists for today but an older row exists → **UPDATE** the current row, then `DELETE` other ids in the same transaction (next-day replacement).
+6. Commit, then invalidate public cache namespace `thirukkural`.
+
+Public APIs:
+
+- `GET /api/public/thirukkural` → `{ success, count: 0|1, kurals: [ current or empty ] }`
+- `GET /api/public/thirukkural/daily` → `{ success, kural: object|null }`
+
+Never more than one current record is returned.
+
+### Same-day example
+
+```json
+POST /api/admin/thirukkural
+{
+  "kural_number": 1,
+  "tamil_text": "...",
+  "english_meaning": "..."
+}
+```
+
+A second POST the same day updates the same `id`. `COUNT(*)` stays 1.
+
+### Next-day example
+
+A POST on the following Kolkata date replaces the previous verse. Public GET returns only the new verse.
+
+### Tests
+
+Isolated `X-Test-Kolkata-Date` header is honored only when `NODE_ENV=test`. Coverage: same-day replace, next-day replace, validation does not wipe the current verse, concurrent posts leave one row, cache invalidation via public GET.

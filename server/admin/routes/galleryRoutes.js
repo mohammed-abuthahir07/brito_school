@@ -29,9 +29,15 @@ const storage = multer.diskStorage({
   },
 });
 
-// Accept any file type (images, documents, etc.)
+const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+
 const fileFilter = (req, file, cb) => {
-  cb(null, true);
+  const ext = path.extname(file.originalname || "").toLowerCase();
+  if (file.mimetype.startsWith("image/") && allowedExtensions.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed for galleries!"), false);
+  }
 };
 
 const upload = multer({

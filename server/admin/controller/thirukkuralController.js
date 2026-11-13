@@ -1,8 +1,7 @@
 const {
   getAllKurals,
   getKuralById,
-  getKuralByNumber,
-  createKural,
+  publishDailyKural,
   updateKural,
   deleteKural,
 } = require("../model/thirukkuralModel");
@@ -37,27 +36,30 @@ const addKural = async (req, res) => {
       });
     }
 
-    const existing = await getKuralByNumber(kural_number);
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: `Kural number ${kural_number} already exists`,
-      });
-    }
+    const testDate =
+      process.env.NODE_ENV === "test" ? req.headers["x-test-kolkata-date"] : undefined;
 
-    const insertId = await createKural(
-      kural_number,
-      tamil_text,
-      english_meaning,
-      explanation
-    );
+    const published = await publishDailyKural({
+      kuralNumber: kural_number,
+      tamilText: tamil_text,
+      englishMeaning: english_meaning,
+      explanation,
+      displayDate: testDate,
+    });
     contentCache.invalidate("thirukkural");
+
+    const saved = await getKuralById(published.id);
 
     return res.status(200).json({
       success: true,
-      message: "Thirukkural added successfully!",
-      kural: {
-        id: insertId,
+      message:
+        published.action === "updated"
+          ? "Today's Thirukkural was replaced successfully!"
+          : published.action === "replaced"
+            ? "Daily Thirukkural replaced successfully!"
+            : "Thirukkural added successfully!",
+      kural: saved || {
+        id: published.id,
         kural_number,
         tamil_text,
         english_meaning,
