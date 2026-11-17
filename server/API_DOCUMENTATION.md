@@ -136,6 +136,8 @@ Every response includes these security headers:
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `X-Powered-By` | *(removed)* |
 
+CORS: set `CORS_ORIGIN` to a comma-separated list of allowed browser origins (no hardcoded production domains). When unset, non-production allows `localhost` / `127.0.0.1` / `[::1]` only; production rejects browser origins. Requests with no `Origin` header (server-to-server, curl) are allowed.
+
 ---
 
 ## 7. API Endpoints
@@ -146,7 +148,7 @@ Every response includes these security headers:
 
 #### `GET /health`
 
-Returns the server health status including database connectivity, memory usage, connection pool, and disk storage metrics.
+Returns the server health status including database connectivity, memory usage, connection pool, and disk storage metrics. `/health` and `/health/ready` share a coalesced MySQL ping cached for 1 second (failures 250 ms) so probes do not stampede the pool. Response JSON is unchanged.
 
 **Auth:** Not required
 
@@ -188,7 +190,7 @@ Process liveness. Does not query MySQL.
 
 #### `GET /health/ready`
 
-Readiness. Pings MySQL only.
+Readiness. Uses the same coalesced MySQL ping as `/health`.
 
 **Auth:** Not required. **Success (200):** `{ "status": "UP", "database": { "status": "CONNECTED" } }`
 
@@ -196,7 +198,7 @@ Readiness. Pings MySQL only.
 
 ### Public content (unauthenticated)
 
-These routes use an in-memory cache with ETag / `304 Not Modified`. `Cache-Control` is `public, max-age=0, must-revalidate` so browsers revalidate after admin writes. Admin create/update/delete invalidates the matching cache namespace immediately.
+These routes use an in-memory cache with ETag / `304 Not Modified`. `Cache-Control` is `public, max-age=15, stale-while-revalidate=60` so browsers can reuse a successful response for 15 seconds. Admin create/update/delete still invalidates the matching server cache namespace immediately.
 
 | Method | URL | Auth | Description |
 |--------|-----|------|-------------|
@@ -262,11 +264,13 @@ Sends a one-time password (OTP) to the admin's registered email for password res
 }
 ```
 
+The response is the same whether or not the email is registered, so callers cannot enumerate accounts.
+
 **Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "OTP sent to your email address"
+  "message": "If an account exists for this email, a password reset OTP has been sent."
 }
 ```
 
@@ -275,7 +279,7 @@ Sends a one-time password (OTP) to the admin's registered email for password res
 | Status | Message |
 |--------|---------|
 | `400` | `"Email address is required"` |
-| `404` | `"Admin account not found with this email"` |
+| `400` | `"A valid email address is required"` |
 
 ---
 
@@ -310,8 +314,8 @@ Resets the admin password using the OTP received by email.
 | `400` | `"All fields are required"` |
 | `400` | `"New password and confirm password do not match"` |
 | `400` | `"Password must be at least 6 characters long"` |
-| `400` | `"Invalid or expired OTP"` |
-| `404` | `"Admin account not found with this email"` |
+| `400` | `"Invalid OTP code."` |
+| `400` | `"OTP has expired! Please request a new one."` |
 
 ---
 
@@ -1248,11 +1252,11 @@ Canonical companion to `API_DOCUMENT.md`. This file lists every endpoint registe
 | GET | `/api/galleries` | same public router alias | |
 | GET | `/api/thirukkural` | same public router alias | |
 | GET | `/api/thirukkural/daily` | same public router alias | |
-| GET | `/uploads/*` | `express.static` | 1-day cache, ETag |
+| GET | `/uploads/*` | `express.static` | 7-day immutable cache, ETag |
 
 Optional list query params: `limit`, `page`. Omitting them returns the full list.
 
-Public cache: in-memory, namespace-invalidated on matching admin writes. HTTP `Cache-Control: public, max-age=0, must-revalidate` so clients revalidate instead of serving stale copies.
+Public cache: in-memory, namespace-invalidated on matching admin writes. HTTP `Cache-Control: public, max-age=15, stale-while-revalidate=60`.
 
 ## Protected Admin GET APIs (JWT)
 

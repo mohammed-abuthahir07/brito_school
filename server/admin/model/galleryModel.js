@@ -27,7 +27,7 @@ const getAllGalleries = async (pagination = null) => {
     `SELECT ${GALLERY_COLUMNS} FROM galleries ORDER BY created_at DESC`,
     pagination
   );
-  const [rows] = await pool.execute(query);
+  const [rows] = pagination ? await pool.execute(query) : await pool.query(query);
   return rows;
 };
 
@@ -43,7 +43,7 @@ const getGalleryById = async (id) => {
 };
 
 const countGalleries = async (connection = pool) => {
-  const [rows] = await connection.execute("SELECT COUNT(*) AS total FROM galleries");
+  const [rows] = await connection.query("SELECT COUNT(*) AS total FROM galleries");
   return Number(rows[0].total);
 };
 

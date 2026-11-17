@@ -21,11 +21,16 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const SHUTDOWN_TIMEOUT_MS = 10000;
 const DISK_METRICS_TTL_MS = 30000;
-const GZIP_MIN_BYTES = 1024;
+const DB_PING_TTL_MS = 1000;
+const DB_PING_FAILURE_TTL_MS = 250;
+const LISTEN_BACKLOG = parseInt(process.env.LISTEN_BACKLOG, 10) || 2048;
+const GZIP_MIN_BYTES = 8192;
 
 let serverInstance = null;
 let isShuttingDown = false;
 let diskMetricsCache = { value: null, expiresAt: 0 };
+let dbPingCache = { status: "DISCONNECTED", latencyMs: null, expiresAt: 0 };
+let dbPingInflight = null;
 
 process.on("unhandledRejection", (reason) => {
   console.error("Critical: Unhandled Promise Rejection:", reason);
@@ -50,15 +55,58 @@ app.use((req, res, next) => {
   next();
 });
 
-const corsOptions = process.env.CORS_ORIGIN
-  ? { origin: process.env.CORS_ORIGIN.split(",").map((s) => s.trim()) }
-  : {};
-app.use(cors(corsOptions));
+const LOCAL_DEV_ORIGIN =
+  /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i;
+
+const configuredCorsOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+
+const isCorsOriginAllowed = (origin) => {
+  if (!origin) {
+    return true;
+  }
+  if (configuredCorsOrigins.length > 0) {
+    return configuredCorsOrigins.includes(origin);
+  }
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+  return LOCAL_DEV_ORIGIN.test(origin);
+};
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (isCorsOriginAllowed(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "If-None-Match"],
+    optionsSuccessStatus: 204,
+  })
+);
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
 app.use((req, res, next) => {
+  if (req.method === "GET") {
+    const path = req.path || "";
+    if (
+      path.startsWith("/api/public") ||
+      path.startsWith("/uploads") ||
+      path === "/health" ||
+      path === "/health/live" ||
+      path === "/health/ready"
+    ) {
+      return next();
+    }
+  }
+
   const acceptEncoding = req.headers["accept-encoding"] || "";
   if (!/\bgzip\b/i.test(acceptEncoding)) {
     return next();
@@ -66,19 +114,22 @@ app.use((req, res, next) => {
 
   const originalJson = res.json.bind(res);
   res.json = (body) => {
-    const payload = JSON.stringify(body);
-    if (!payload || payload.length < GZIP_MIN_BYTES) {
+    if (body === undefined) {
       return originalJson(body);
+    }
+    const payload = typeof body === "string" ? body : JSON.stringify(body);
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    if (!payload || payload.length < GZIP_MIN_BYTES) {
+      return res.send(payload);
     }
 
     zlib.gzip(payload, (err, compressed) => {
       if (err || res.headersSent) {
         if (!res.headersSent) {
-          return originalJson(body);
+          return res.send(payload);
         }
         return;
       }
-      res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.setHeader("Content-Encoding", "gzip");
       res.setHeader("Vary", "Accept-Encoding");
       return res.send(compressed);
@@ -93,8 +144,10 @@ const uploadsPath = path.join(__dirname, "uploads");
 app.use(
   "/uploads",
   express.static(uploadsPath, {
-    maxAge: "1d",
+    maxAge: "7d",
+    immutable: true,
     etag: true,
+    lastModified: true,
   })
 );
 
@@ -120,21 +173,53 @@ const readDiskMetrics = async () => {
   }
 };
 
-app.get("/health", async (req, res) => {
-  let dbStatus = "DISCONNECTED";
-  let dbLatencyMs = null;
-  const start = performance.now();
-
-  try {
-    const [rows] = await pool.query("SELECT 1 AS ping");
-    if (rows && rows[0] && rows[0].ping === 1) {
-      dbStatus = "CONNECTED";
-      dbLatencyMs = parseFloat((performance.now() - start).toFixed(2));
-    }
-  } catch (err) {
-    dbStatus = "UNREACHABLE";
-    console.error("Health check database ping failure:", err.message);
+const pingDatabase = async () => {
+  const now = Date.now();
+  if (now < dbPingCache.expiresAt) {
+    return dbPingCache;
   }
+
+  if (dbPingInflight) {
+    return dbPingInflight;
+  }
+
+  dbPingInflight = (async () => {
+    const start = performance.now();
+    try {
+      const [rows] = await pool.query("SELECT 1 AS ping");
+      if (rows && rows[0] && rows[0].ping === 1) {
+        dbPingCache = {
+          status: "CONNECTED",
+          latencyMs: parseFloat((performance.now() - start).toFixed(2)),
+          expiresAt: Date.now() + DB_PING_TTL_MS,
+        };
+      } else {
+        dbPingCache = {
+          status: "DISCONNECTED",
+          latencyMs: null,
+          expiresAt: Date.now() + DB_PING_FAILURE_TTL_MS,
+        };
+      }
+    } catch (err) {
+      console.error("Health check database ping failure:", err.message);
+      dbPingCache = {
+        status: "UNREACHABLE",
+        latencyMs: null,
+        expiresAt: Date.now() + DB_PING_FAILURE_TTL_MS,
+      };
+    }
+    return dbPingCache;
+  })().finally(() => {
+    dbPingInflight = null;
+  });
+
+  return dbPingInflight;
+};
+
+app.get("/health", async (req, res) => {
+  const ping = await pingDatabase();
+  const dbStatus = ping.status;
+  const dbLatencyMs = ping.latencyMs;
 
   const memory = process.memoryUsage();
   const diskMetrics = await readDiskMetrics();
@@ -174,34 +259,37 @@ app.get("/health/live", (req, res) => {
 });
 
 app.get("/health/ready", async (req, res) => {
-  try {
-    const [rows] = await pool.query("SELECT 1 AS ping");
-    if (rows && rows[0] && rows[0].ping === 1) {
-      return res.status(200).json({
-        status: "UP",
-        database: { status: "CONNECTED" },
-      });
-    }
-    return res.status(503).json({
-      status: "DEGRADED",
-      database: { status: "DISCONNECTED" },
-    });
-  } catch (err) {
-    return res.status(503).json({
-      status: "DEGRADED",
-      database: { status: "UNREACHABLE" },
+  const ping = await pingDatabase();
+  if (ping.status === "CONNECTED") {
+    return res.status(200).json({
+      status: "UP",
+      database: { status: "CONNECTED" },
     });
   }
+  return res.status(503).json({
+    status: "DEGRADED",
+    database: { status: ping.status },
+  });
 });
 
 app.use("/api/admin/login", authLimiter);
 app.use("/api/admin/forgot-password", authLimiter);
 app.use("/api/admin/reset-password", authLimiter);
 app.use("/api/public", publicReadLimiter);
-app.use("/api", generalLimiter);
-
-// Public Content Routes (Unauthenticated, Read-Heavy, In-Memory Cached)
 app.use("/api/public", publicRoutes);
+app.use("/api", (req, res, next) => {
+  const path = req.path || "";
+  if (
+    path === "/admin/login" ||
+    path === "/admin/forgot-password" ||
+    path === "/admin/reset-password"
+  ) {
+    return next();
+  }
+  return generalLimiter(req, res, next);
+});
+
+// Aliased public routes without the /public prefix (still rate-limited)
 app.use("/api", publicRoutes);
 
 app.use("/api/admin", adminRoutes);
@@ -264,7 +352,7 @@ app.use((err, req, res, next) => {
 });
 
 const StartServer = () => {
-  serverInstance = app.listen(PORT, async () => {
+  serverInstance = app.listen({ port: Number(PORT), backlog: LISTEN_BACKLOG }, async () => {
     console.log(`Brito School Express Server running on port ${PORT}`);
 
     try {

@@ -20,6 +20,15 @@ const updateOtpByEmail = async (email, otpCode) => {
   await pool.execute(query, [otpCode, email]);
 };
 
+const clearOtpByEmail = async (email) => {
+  const query = `
+    UPDATE admins
+    SET otp_code = NULL, otp_expires_at = NULL
+    WHERE email = ?
+  `;
+  await pool.execute(query, [email]);
+};
+
 const updatePasswordByEmail = async (email, hashedPassword) => {
   const query = `
     UPDATE admins
@@ -32,5 +41,6 @@ const updatePasswordByEmail = async (email, hashedPassword) => {
 module.exports = {
   findAdminByEmail,
   updateOtpByEmail,
+  clearOtpByEmail,
   updatePasswordByEmail,
 };

@@ -4,8 +4,14 @@ const nodemailer = require("nodemailer");
 const {
   findAdminByEmail,
   updateOtpByEmail,
+  clearOtpByEmail,
   updatePasswordByEmail,
 } = require("../model/adminForgetpasswordModel");
+
+const GENERIC_FORGOT_MESSAGE =
+  "If an account exists for this email, a password reset OTP has been sent.";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -15,9 +21,20 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// =====================================
-// Forgot Password: Send OTP
-// =====================================
+const mailer = {
+  sendOtpEmail: async (email, otpCode) => {
+    if (process.env.NODE_ENV === "test") {
+      return;
+    }
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Brito School - Password Reset OTP",
+      text: `Your OTP code for password reset is: ${otpCode}. It is valid for 2 minutes.`,
+    });
+  },
+};
+
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -29,47 +46,42 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    const admin = await findAdminByEmail(email);
-    if (!admin) {
-      return res.status(404).json({
+    if (!EMAIL_PATTERN.test(String(email).trim())) {
+      return res.status(400).json({
         success: false,
-        message: "Admin account not found with this email",
+        message: "A valid email address is required",
       });
     }
 
-    // Generate cryptographically secure 6-digit OTP code
-    const otpCode = crypto.randomInt(100000, 1000000).toString();
-
-    // Save OTP and let MySQL handle the 2-minute expiration timestamp
-    await updateOtpByEmail(email, otpCode);
-
-    // Send Email via Nodemailer
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Brito School - Password Reset OTP",
-      text: `Your OTP code for password reset is: ${otpCode}. It is valid for 2 minutes.`,
-    };
-
-    await transporter.sendMail(mailOptions);
+    const admin = await findAdminByEmail(email);
+    if (admin) {
+      const otpCode = crypto.randomInt(100000, 1000000).toString();
+      await updateOtpByEmail(email, otpCode);
+      try {
+        await mailer.sendOtpEmail(email, otpCode);
+      } catch (smtpError) {
+        console.error("Forgot Password SMTP Error:", smtpError.message || smtpError);
+        try {
+          await clearOtpByEmail(email);
+        } catch (clearError) {
+          console.error("Forgot Password OTP cleanup Error:", clearError.message || clearError);
+        }
+      }
+    }
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent successfully to your email. Valid for 2 minutes.",
+      message: GENERIC_FORGOT_MESSAGE,
     });
-
   } catch (error) {
     console.error("Forgot Password Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to send OTP email",
+    return res.status(200).json({
+      success: true,
+      message: GENERIC_FORGOT_MESSAGE,
     });
   }
 };
 
-// =====================================
-// Reset Password with OTP Verification
-// =====================================
 const resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword, confirmPassword } = req.body;
@@ -96,22 +108,13 @@ const resetPassword = async (req, res) => {
     }
 
     const admin = await findAdminByEmail(email);
-    if (!admin) {
-      return res.status(404).json({
-        success: false,
-        message: "Admin account not found",
-      });
-    }
-
-    // Verify OTP match
-    if (!admin.otp_code || admin.otp_code !== otp) {
+    if (!admin || !admin.otp_code || admin.otp_code !== otp) {
       return res.status(400).json({
         success: false,
         message: "Invalid OTP code.",
       });
     }
 
-    // Verify OTP expiration safely using local date comparison
     const currentTime = new Date();
     const expiryTime = new Date(admin.otp_expires_at);
     if (currentTime > expiryTime) {
@@ -122,15 +125,12 @@ const resetPassword = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update password and clear OTP in DB
     await updatePasswordByEmail(email, hashedPassword);
 
     return res.status(200).json({
       success: true,
       message: "Password reset successful! You can now log in.",
     });
-
   } catch (error) {
     console.error("Reset Password Error:", error);
     return res.status(500).json({
@@ -143,4 +143,6 @@ const resetPassword = async (req, res) => {
 module.exports = {
   forgotPassword,
   resetPassword,
+  mailer,
+  GENERIC_FORGOT_MESSAGE,
 };

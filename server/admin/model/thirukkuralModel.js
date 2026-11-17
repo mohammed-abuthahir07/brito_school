@@ -30,7 +30,7 @@ const getAllKurals = async (pagination = null) => {
     `SELECT ${KURAL_COLUMNS} FROM thirukkural ORDER BY kural_number ASC`,
     pagination
   );
-  const [rows] = await pool.execute(query);
+  const [rows] = pagination ? await pool.execute(query) : await pool.query(query);
   return rows;
 };
 
@@ -63,7 +63,7 @@ const getDailyKural = async () => {
     ORDER BY created_at DESC, id DESC
     LIMIT 1
   `;
-  const [rows] = await pool.execute(query);
+  const [rows] = await pool.query(query);
   return rows[0] || null;
 };
 

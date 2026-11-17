@@ -60,7 +60,7 @@ async function measure(name, iterations, fn) {
 
 async function main() {
   const server = http.createServer(app);
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  await new Promise((resolve) => server.listen({ port: 0, host: "127.0.0.1", backlog: 2048 }, resolve));
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
   const [admins] = await pool.query("SELECT id, email FROM admins LIMIT 1");

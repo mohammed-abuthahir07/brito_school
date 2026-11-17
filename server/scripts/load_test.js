@@ -34,11 +34,12 @@ async function runSingleRequest(url, options = {}) {
   const start = performance.now();
   try {
     const res = await fetch(url, options);
+    await res.arrayBuffer();
     const duration = performance.now() - start;
     return { success: res.ok, status: res.status, duration };
   } catch (err) {
     const duration = performance.now() - start;
-    return { success: false, status: 0, error: err.message, duration };
+    return { success: false, status: 0, error: err.cause?.code || err.code || err.message, duration };
   }
 }
 
@@ -55,6 +56,7 @@ async function runBenchmark(name, { concurrency, totalRequests, endpoint, method
   const latencies = [];
   let errorCount = 0;
   let completed = 0;
+  const errorReasons = {};
 
   const url = `${baseUrl}${endpoint}`;
   const headers = {
@@ -78,6 +80,8 @@ async function runBenchmark(name, { concurrency, totalRequests, endpoint, method
       latencies.push(res.duration);
       if (!res.success) {
         errorCount++;
+        const reason = res.error || `HTTP ${res.status}`;
+        errorReasons[reason] = (errorReasons[reason] || 0) + 1;
       }
       completed++;
     }
@@ -109,6 +113,9 @@ async function runBenchmark(name, { concurrency, totalRequests, endpoint, method
   console.log(`  Max Latency        : ${stats.max} ms`);
   console.log(`  Errors             : ${errorCount} (${((errorCount / completed) * 100).toFixed(2)}%)`);
   console.log(`  Heap Delta         : ${heapUsedDiffMb} MB`);
+  if (errorCount > 0) {
+    console.log(`  Error reasons      :`, errorReasons);
+  }
 
   return {
     name,
@@ -125,7 +132,7 @@ async function runBenchmark(name, { concurrency, totalRequests, endpoint, method
 async function main() {
   await new Promise((resolve) => {
     server = http.createServer(app);
-    server.listen(0, "127.0.0.1", () => {
+    server.listen({ port: 0, host: "127.0.0.1", backlog: 2048 }, () => {
       const port = server.address().port;
       baseUrl = `http://127.0.0.1:${port}`;
       console.log(`Benchmarking against ${baseUrl}`);

@@ -6,6 +6,7 @@ async function rollback() {
     { table: "announcements", name: "idx_announcements_created_at" },
     { table: "calendars", name: "idx_calendars_created_at" },
     { table: "galleries", name: "idx_galleries_created_at" },
+    { table: "thirukkural", name: "idx_thirukkural_created_at_id" },
   ];
 
   try {

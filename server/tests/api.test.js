@@ -10,6 +10,11 @@ process.env.DISABLE_RATE_LIMIT = "true";
 
 const app = require("../server");
 const pool = require("../config/db");
+const { ContentCache } = require("../admin/utils/cache");
+const {
+  mailer,
+  GENERIC_FORGOT_MESSAGE,
+} = require("../admin/controller/adminForgetpasswordController");
 
 let server;
 let baseUrl;
@@ -90,12 +95,53 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(res.data.message, "Unauthorized: No token provided");
     });
 
+    test("GET protected endpoint with expired token returns 401", async () => {
+      const expired = jwt.sign(
+        { id: 1, email: testEmail },
+        process.env.JWT_SECRET || "your_super_secret_jwt_key_here_12345",
+        { expiresIn: -10 }
+      );
+      const res = await request("/api/admin/announcements", {
+        headers: { Authorization: `Bearer ${expired}` },
+      });
+      assert.equal(res.status, 401);
+      assert.equal(res.data.success, false);
+      assert.equal(res.data.message, "Unauthorized: Invalid or expired token");
+    });
+
     test("GET protected endpoint with invalid token returns 401", async () => {
       const res = await request("/api/admin/announcements", {
         headers: { Authorization: "Bearer invalid_token_value_12345" },
       });
       assert.equal(res.status, 401);
       assert.equal(res.data.success, false);
+      assert.equal(res.data.message, "Unauthorized: Invalid or expired token");
+    });
+
+    test("GET protected endpoint with a signed JWT for a non-existent admin id returns 401", async () => {
+      const forged = jwt.sign(
+        { id: 999999, email: "not-an-admin@example.com" },
+        process.env.JWT_SECRET || "your_super_secret_jwt_key_here_12345",
+        { expiresIn: "1h" }
+      );
+      const res = await request("/api/admin/dashboard", {
+        headers: { Authorization: `Bearer ${forged}` },
+      });
+      assert.equal(res.status, 401);
+      assert.equal(res.data.success, false);
+      assert.equal(res.data.message, "Unauthorized: Invalid or expired token");
+    });
+
+    test("GET protected endpoint with a signed JWT missing admin id returns 401", async () => {
+      const forged = jwt.sign(
+        { email: testEmail },
+        process.env.JWT_SECRET || "your_super_secret_jwt_key_here_12345",
+        { expiresIn: "1h" }
+      );
+      const res = await request("/api/admin/announcements", {
+        headers: { Authorization: `Bearer ${forged}` },
+      });
+      assert.equal(res.status, 401);
       assert.equal(res.data.message, "Unauthorized: Invalid or expired token");
     });
 
@@ -172,14 +218,17 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(res.data.message, "Email address is required");
     });
 
-    test("POST /api/admin/forgot-password returns 404 for unknown email", async () => {
+    test("POST /api/admin/forgot-password returns the same generic 200 for unknown email", async () => {
       const res = await request("/api/admin/forgot-password", {
         method: "POST",
         body: { email: "doesnotexist_98765@example.com" },
       });
-      assert.equal(res.status, 404);
-      assert.equal(res.data.success, false);
-      assert.equal(res.data.message, "Admin account not found with this email");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.success, true);
+      assert.equal(
+        res.data.message,
+        "If an account exists for this email, a password reset OTP has been sent."
+      );
     });
 
     test("POST /api/admin/reset-password fails when missing fields", async () => {
@@ -1187,6 +1236,275 @@ describe("Brito School Backend API Test Suite", () => {
       assert.equal(b.status, 200);
       const [countRows] = await pool.query("SELECT COUNT(*) AS total FROM thirukkural");
       assert.equal(Number(countRows[0].total), 1);
+    });
+  });
+
+  describe("CORS", () => {
+    test("allowed local origin receives Access-Control-Allow-Origin", async () => {
+      const res = await request("/api/public/announcements", {
+        headers: { Origin: "http://localhost:5173" },
+      });
+      assert.equal(res.status, 200);
+      assert.equal(res.headers.get("access-control-allow-origin"), "http://localhost:5173");
+    });
+
+    test("unauthorized origin is not reflected in CORS headers", async () => {
+      const res = await request("/api/public/announcements", {
+        headers: { Origin: "https://evil.example" },
+      });
+      assert.equal(res.status, 200);
+      assert.notEqual(res.headers.get("access-control-allow-origin"), "https://evil.example");
+    });
+
+    test("OPTIONS preflight succeeds for an allowed origin", async () => {
+      const res = await request("/api/public/announcements", {
+        method: "OPTIONS",
+        headers: {
+          Origin: "http://localhost:5173",
+          "Access-Control-Request-Method": "GET",
+          "Access-Control-Request-Headers": "authorization,content-type",
+        },
+      });
+      assert.ok(res.status === 204 || res.status === 200);
+      assert.equal(res.headers.get("access-control-allow-origin"), "http://localhost:5173");
+    });
+
+    test("requests without an Origin header still succeed", async () => {
+      const res = await request("/health/live");
+      assert.equal(res.status, 200);
+      assert.equal(res.data.status, "UP");
+    });
+  });
+
+  describe("Forgot password anti-enumeration", () => {
+    test("registered and unknown emails return the same status and message", async () => {
+      const unknown = await request("/api/admin/forgot-password", {
+        method: "POST",
+        body: { email: "doesnotexist_98765@example.com" },
+      });
+      const known = await request("/api/admin/forgot-password", {
+        method: "POST",
+        body: { email: testEmail },
+      });
+      assert.equal(unknown.status, known.status);
+      assert.equal(unknown.status, 200);
+      assert.deepEqual(unknown.data, known.data);
+      assert.equal(known.data.message, GENERIC_FORGOT_MESSAGE);
+    });
+
+    test("invalid email format returns 400 without revealing accounts", async () => {
+      const res = await request("/api/admin/forgot-password", {
+        method: "POST",
+        body: { email: "not-an-email" },
+      });
+      assert.equal(res.status, 400);
+      assert.equal(res.data.success, false);
+      assert.equal(res.data.message, "A valid email address is required");
+    });
+
+    test("SMTP failure for a registered email still returns the generic 200", async () => {
+      const original = mailer.sendOtpEmail;
+      mailer.sendOtpEmail = async () => {
+        throw new Error("SMTP connection refused");
+      };
+      try {
+        const res = await request("/api/admin/forgot-password", {
+          method: "POST",
+          body: { email: testEmail },
+        });
+        assert.equal(res.status, 200);
+        assert.equal(res.data.message, GENERIC_FORGOT_MESSAGE);
+        const [rows] = await pool.query("SELECT otp_code FROM admins WHERE email = ? LIMIT 1", [testEmail]);
+        assert.equal(rows[0].otp_code, null);
+      } finally {
+        mailer.sendOtpEmail = original;
+      }
+    });
+
+    test("invalid OTP and unknown account use the same reset error", async () => {
+      const unknown = await request("/api/admin/reset-password", {
+        method: "POST",
+        body: {
+          email: "doesnotexist_98765@example.com",
+          otp: "000000",
+          newPassword: "password123",
+          confirmPassword: "password123",
+        },
+      });
+      const known = await request("/api/admin/reset-password", {
+        method: "POST",
+        body: {
+          email: testEmail,
+          otp: "000000",
+          newPassword: "password123",
+          confirmPassword: "password123",
+        },
+      });
+      assert.equal(unknown.status, 400);
+      assert.equal(known.status, 400);
+      assert.equal(unknown.data.message, known.data.message);
+      assert.equal(unknown.data.message, "Invalid OTP code.");
+    });
+
+    test("expired OTP is rejected", async () => {
+      await pool.execute(
+        "UPDATE admins SET otp_code = ?, otp_expires_at = DATE_SUB(NOW(), INTERVAL 5 MINUTE) WHERE email = ?",
+        ["654321", testEmail]
+      );
+      const res = await request("/api/admin/reset-password", {
+        method: "POST",
+        body: {
+          email: testEmail,
+          otp: "654321",
+          newPassword: "password123",
+          confirmPassword: "password123",
+        },
+      });
+      assert.equal(res.status, 400);
+      assert.equal(res.data.message, "OTP has expired! Please request a new one.");
+      await pool.execute("UPDATE admins SET otp_code = NULL, otp_expires_at = NULL WHERE email = ?", [testEmail]);
+    });
+
+    test("successful reset then reused OTP fails", async () => {
+      const [beforeRows] = await pool.query("SELECT password FROM admins WHERE email = ? LIMIT 1", [testEmail]);
+      const originalHash = beforeRows[0].password;
+      try {
+        const forgot = await request("/api/admin/forgot-password", {
+          method: "POST",
+          body: { email: testEmail },
+        });
+        assert.equal(forgot.status, 200);
+        const [otpRows] = await pool.query("SELECT otp_code FROM admins WHERE email = ? LIMIT 1", [testEmail]);
+        const otp = otpRows[0].otp_code;
+        assert.ok(otp);
+
+        const reset = await request("/api/admin/reset-password", {
+          method: "POST",
+          body: {
+            email: testEmail,
+            otp,
+            newPassword: "TempReset9",
+            confirmPassword: "TempReset9",
+          },
+        });
+        assert.equal(reset.status, 200);
+        assert.equal(reset.data.success, true);
+
+        const reuse = await request("/api/admin/reset-password", {
+          method: "POST",
+          body: {
+            email: testEmail,
+            otp,
+            newPassword: "TempReset9",
+            confirmPassword: "TempReset9",
+          },
+        });
+        assert.equal(reuse.status, 400);
+        assert.equal(reuse.data.message, "Invalid OTP code.");
+      } finally {
+        await pool.execute(
+          "UPDATE admins SET password = ?, otp_code = NULL, otp_expires_at = NULL WHERE email = ?",
+          [originalHash, testEmail]
+        );
+      }
+    });
+  });
+
+  describe("Public cache generation and single-flight", () => {
+    test("stale in-flight fill does not populate cache after invalidate (Scenario A)", async () => {
+      const cache = new ContentCache(5000, 20);
+      let releaseFetch;
+      let started;
+      const startedPromise = new Promise((resolve) => {
+        started = resolve;
+      });
+      const fetchFn = () => {
+        started();
+        return new Promise((resolve) => {
+          releaseFetch = () => resolve({ title: "old-announcement" });
+        });
+      };
+
+      const loadPromise = cache.load("announcements:all:1", "announcements", fetchFn);
+      await startedPromise;
+      cache.invalidate("announcements");
+      releaseFetch();
+      const result = await loadPromise;
+
+      assert.equal(result.data.title, "old-announcement");
+      assert.equal(result.ephemeral, true);
+      assert.equal(cache.get("announcements:all:1"), null);
+
+      const fresh = await cache.load("announcements:all:1", "announcements", async () => ({
+        title: "new-announcement",
+      }));
+      assert.equal(fresh.data.title, "new-announcement");
+      assert.equal(fresh.ephemeral, undefined);
+    });
+
+    test("concurrent loads share one database fill for the same generation (Scenario B)", async () => {
+      const cache = new ContentCache(5000, 20);
+      let fills = 0;
+      const fetchFn = async () => {
+        fills += 1;
+        await new Promise((resolve) => setTimeout(resolve, 25));
+        return { fills };
+      };
+
+      const [a, b, c] = await Promise.all([
+        cache.load("announcements:all:1", "announcements", fetchFn),
+        cache.load("announcements:all:1", "announcements", fetchFn),
+        cache.load("announcements:all:1", "announcements", fetchFn),
+      ]);
+
+      assert.equal(fills, 1);
+      assert.equal(a.data.fills, 1);
+      assert.equal(b.data.fills, 1);
+      assert.equal(c.data.fills, 1);
+      assert.equal(cache.inflight.size, 0);
+    });
+
+    test("admin invalidate then load returns the newest data (Scenario C)", async () => {
+      const cache = new ContentCache(5000, 20);
+      await cache.load("announcements:all:1", "announcements", async () => ({ title: "before" }));
+      cache.invalidate("announcements");
+      const after = await cache.load("announcements:all:1", "announcements", async () => ({ title: "after" }));
+      assert.equal(after.data.title, "after");
+    });
+
+    test("older generations never overwrite a newer cache (Scenario D)", async () => {
+      const cache = new ContentCache(5000, 20);
+      let releaseFirst;
+      let started;
+      const startedPromise = new Promise((resolve) => {
+        started = resolve;
+      });
+
+      const first = cache.load("announcements:all:1", "announcements", () => {
+        started();
+        return new Promise((resolve) => {
+          releaseFirst = () => resolve({ title: "gen-0" });
+        });
+      });
+      await startedPromise;
+      cache.invalidate("announcements");
+      cache.invalidate("announcements");
+      const second = await cache.load("announcements:all:1", "announcements", async () => ({ title: "gen-2" }));
+      releaseFirst();
+      await first;
+
+      assert.equal(second.data.title, "gen-2");
+      assert.equal(cache.get("announcements:all:1").data.title, "gen-2");
+    });
+
+    test("expired entries refresh on the next load (Scenario E)", async () => {
+      const cache = new ContentCache(30, 20);
+      const first = await cache.load("announcements:all:1", "announcements", async () => ({ n: 1 }));
+      assert.equal(first.data.n, 1);
+      await new Promise((resolve) => setTimeout(resolve, 40));
+      assert.equal(cache.get("announcements:all:1"), null);
+      const second = await cache.load("announcements:all:1", "announcements", async () => ({ n: 2 }));
+      assert.equal(second.data.n, 2);
     });
   });
 

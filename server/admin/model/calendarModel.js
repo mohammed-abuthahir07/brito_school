@@ -15,7 +15,7 @@ const getAllCalendars = async (pagination = null) => {
     `SELECT ${CALENDAR_COLUMNS} FROM calendars ORDER BY created_at DESC`,
     pagination
   );
-  const [rows] = await pool.execute(query);
+  const [rows] = pagination ? await pool.execute(query) : await pool.query(query);
   return rows;
 };
 

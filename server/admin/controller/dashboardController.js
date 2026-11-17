@@ -2,59 +2,86 @@ const pool = require("../../config/db");
 
 // =====================================
 // GET /api/admin/dashboard
-// Returns aggregated statistics from all 5 tables
-// High-performance: combines scalar counts into 1 query to reduce pool pressure
+// Two roundtrips: one combined snapshot (counts + latest rows) and one category GROUP BY.
+// Response shape is unchanged.
 // =====================================
 const getDashboard = async (req, res) => {
   try {
-    const [
-      countsResult,
-      announcementsByCategoryResult,
-      announcementsLatestResult,
-      calendarsLatestResult,
-      galleriesLatestResult,
-      thirukkuralLatestResult,
-    ] = await Promise.all([
-      // Combined scalar counts in 1 single roundtrip
+    const [snapshotResult, announcementsByCategoryResult] = await Promise.all([
       pool.query(`
         SELECT
           (SELECT COUNT(*) FROM announcements) AS announcementsTotal,
           (SELECT COUNT(*) FROM calendars) AS calendarsTotal,
           (SELECT COUNT(*) FROM galleries) AS galleriesTotal,
-          (SELECT COUNT(*) FROM thirukkural) AS thirukkuralTotal
+          (SELECT COUNT(*) FROM thirukkural) AS thirukkuralTotal,
+          a.id AS a_id,
+          a.title AS a_title,
+          a.category AS a_category,
+          a.created_at AS a_created_at,
+          c.id AS c_id,
+          c.title AS c_title,
+          c.created_at AS c_created_at,
+          g.id AS g_id,
+          g.title AS g_title,
+          g.created_at AS g_created_at,
+          t.id AS t_id,
+          t.kural_number AS t_kural_number,
+          t.created_at AS t_created_at
+        FROM (SELECT 1 AS _x) AS dummy
+        LEFT JOIN announcements a
+          ON a.id = (SELECT id FROM announcements ORDER BY created_at DESC LIMIT 1)
+        LEFT JOIN calendars c
+          ON c.id = (SELECT id FROM calendars ORDER BY created_at DESC LIMIT 1)
+        LEFT JOIN galleries g
+          ON g.id = (SELECT id FROM galleries ORDER BY created_at DESC LIMIT 1)
+        LEFT JOIN thirukkural t
+          ON t.id = (SELECT id FROM thirukkural ORDER BY created_at DESC, id DESC LIMIT 1)
       `),
       pool.query(
         "SELECT category, COUNT(*) AS count FROM announcements GROUP BY category ORDER BY count DESC"
       ),
-      pool.query(
-        "SELECT id, title, category, created_at FROM announcements ORDER BY created_at DESC LIMIT 1"
-      ),
-      pool.query(
-        "SELECT id, title, created_at FROM calendars ORDER BY created_at DESC LIMIT 1"
-      ),
-      pool.query(
-        "SELECT id, title, created_at FROM galleries ORDER BY created_at DESC LIMIT 1"
-      ),
-      pool.query(
-        "SELECT id, kural_number, created_at FROM thirukkural ORDER BY created_at DESC LIMIT 1"
-      ),
     ]);
 
-    const countsRow = (countsResult[0] && countsResult[0][0]) || {};
-    const announcementsTotal = Number(countsRow.announcementsTotal || 0);
-    const calendarsTotal = Number(countsRow.calendarsTotal || 0);
-    const galleriesTotal = Number(countsRow.galleriesTotal || 0);
-    const thirukkuralTotal = Number(countsRow.thirukkuralTotal || 0);
+    const row = (snapshotResult[0] && snapshotResult[0][0]) || {};
+    const announcementsTotal = Number(row.announcementsTotal || 0);
+    const calendarsTotal = Number(row.calendarsTotal || 0);
+    const galleriesTotal = Number(row.galleriesTotal || 0);
+    const thirukkuralTotal = Number(row.thirukkuralTotal || 0);
 
-    const announcementsByCategory = announcementsByCategoryResult[0].map((row) => ({
-      category: row.category,
-      count: Number(row.count),
+    const announcementsByCategory = announcementsByCategoryResult[0].map((item) => ({
+      category: item.category,
+      count: Number(item.count),
     }));
 
-    const announcementsLatest = announcementsLatestResult[0][0] || null;
-    const calendarsLatest = calendarsLatestResult[0][0] || null;
-    const galleriesLatest = galleriesLatestResult[0][0] || null;
-    const thirukkuralLatest = thirukkuralLatestResult[0][0] || null;
+    const announcementsLatest = row.a_id
+      ? {
+          id: row.a_id,
+          title: row.a_title,
+          category: row.a_category,
+          created_at: row.a_created_at,
+        }
+      : null;
+    const calendarsLatest = row.c_id
+      ? {
+          id: row.c_id,
+          title: row.c_title,
+          created_at: row.c_created_at,
+        }
+      : null;
+    const galleriesLatest = row.g_id
+      ? {
+          id: row.g_id,
+          title: row.g_title,
+          created_at: row.g_created_at,
+        }
+      : null;
+    const thirukkuralLatest = row.t_id
+      ? {
+          id: row.t_id,
+          kural_number: row.t_kural_number,
+          created_at: row.t_created_at,
+        }
+      : null;
 
     return res.status(200).json({
       success: true,

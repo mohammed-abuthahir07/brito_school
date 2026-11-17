@@ -18,6 +18,11 @@ async function migrate() {
       name: "idx_galleries_created_at",
       sql: "CREATE INDEX idx_galleries_created_at ON galleries (created_at DESC)",
     },
+    {
+      table: "thirukkural",
+      name: "idx_thirukkural_created_at_id",
+      sql: "CREATE INDEX idx_thirukkural_created_at_id ON thirukkural (created_at DESC, id DESC)",
+    },
   ];
 
   try {

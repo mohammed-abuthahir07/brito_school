@@ -1,6 +1,6 @@
 -- Rollback Script: Remove Performance Indexes for Brito School Backend
 -- Purpose: Safely roll back added indexes if ever needed in schema management
--- Target Tables: announcements, calendars, galleries
+-- Target Tables: announcements, calendars, galleries, thirukkural
 
 USE `brito_school`;
 
@@ -12,3 +12,6 @@ DROP INDEX IF EXISTS idx_calendars_created_at ON calendars;
 
 -- 3. Drop index on galleries
 DROP INDEX IF EXISTS idx_galleries_created_at ON galleries;
+
+-- 4. Drop index on thirukkural
+DROP INDEX IF EXISTS idx_thirukkural_created_at_id ON thirukkural;

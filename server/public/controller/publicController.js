@@ -5,36 +5,24 @@ const { getDailyKural } = require("../../admin/model/thirukkuralModel");
 const { parseListPagination } = require("../../admin/utils/validate");
 const { contentCache } = require("../../admin/utils/cache");
 
-const PUBLIC_CACHE_CONTROL = "public, max-age=0, must-revalidate";
+const PUBLIC_CACHE_CONTROL = "public, max-age=15, stale-while-revalidate=60";
 
-const applyPublicCacheHeaders = (req, res, entry) => {
+const sendCachedJson = (req, res, entry) => {
   res.setHeader("ETag", entry.etag);
   res.setHeader("Cache-Control", PUBLIC_CACHE_CONTROL);
   res.setHeader("Last-Modified", new Date(entry.cachedAt).toUTCString());
   res.setHeader("Vary", "Accept-Encoding");
+  if (req.headers["if-none-match"] === entry.etag) {
+    return res.status(304).end();
+  }
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  return res.status(200).send(entry.jsonStr);
 };
 
 const sendCachedPublicResponse = async (req, res, cacheKey, namespace, fetchFn) => {
   try {
-    const cached = contentCache.get(cacheKey);
-    if (cached) {
-      applyPublicCacheHeaders(req, res, cached);
-      if (req.headers["if-none-match"] === cached.etag) {
-        return res.status(304).end();
-      }
-      return res.status(200).json(cached.data);
-    }
-
-    const data = await fetchFn();
-    const entry = contentCache.set(cacheKey, data, namespace);
-
-    applyPublicCacheHeaders(req, res, entry);
-
-    if (req.headers["if-none-match"] === entry.etag) {
-      return res.status(304).end();
-    }
-
-    return res.status(200).json(data);
+    const entry = await contentCache.load(cacheKey, namespace, fetchFn);
+    return sendCachedJson(req, res, entry);
   } catch (error) {
     console.error(`Public API Error [${cacheKey}]:`, error);
     return res.status(500).json({

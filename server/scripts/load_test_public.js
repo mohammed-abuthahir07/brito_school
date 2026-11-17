@@ -1,4 +1,5 @@
 const http = require("node:http");
+const { monitorEventLoopDelay } = require("node:perf_hooks");
 const jwt = require("jsonwebtoken");
 const app = require("../server");
 const pool = require("../config/db");
@@ -34,11 +35,12 @@ async function makeRequest(url, options = {}) {
   const start = performance.now();
   try {
     const res = await fetch(url, options);
+    await res.arrayBuffer();
     const duration = performance.now() - start;
     return { success: res.ok || res.status === 304, status: res.status, duration };
   } catch (err) {
     const duration = performance.now() - start;
-    return { success: false, status: 0, error: err.message, duration };
+    return { success: false, status: 0, error: err.cause?.code || err.code || err.message, duration };
   }
 }
 
@@ -51,11 +53,17 @@ async function runMixedWorkload(name, { concurrency, totalRequests, adminWriteRa
   console.log(`------------------------------------------------------`);
 
   const initialMemory = process.memoryUsage();
+  const cpuStart = process.cpuUsage();
+  const histogram = monitorEventLoopDelay({ resolution: 20 });
+  histogram.enable();
   const startTime = performance.now();
   const readLatencies = [];
   const writeLatencies = [];
   let errorCount = 0;
   let requestIndex = 0;
+  const errorReasons = {};
+  let peakPoolWaiting = 0;
+  let peakPoolTotal = 0;
 
   const publicEndpoints = [
     "/api/public/thirukkural/daily",
@@ -90,6 +98,8 @@ async function runMixedWorkload(name, { concurrency, totalRequests, adminWriteRa
         writeLatencies.push(duration);
         if (!postRes.success) {
           errorCount++;
+          const reason = `WRITE ${postRes.error || `HTTP ${postRes.status}`}`;
+          errorReasons[reason] = (errorReasons[reason] || 0) + 1;
         }
       } else {
         // Public reader operation: fetch cached public content
@@ -98,10 +108,22 @@ async function runMixedWorkload(name, { concurrency, totalRequests, adminWriteRa
         readLatencies.push(res.duration);
         if (!res.success) {
           errorCount++;
+          const reason = `${ep} ${res.error || `HTTP ${res.status}`}`;
+          errorReasons[reason] = (errorReasons[reason] || 0) + 1;
         }
       }
     }
   }
+
+  const sampleTimer = setInterval(() => {
+    if (!pool.pool) {
+      return;
+    }
+    const total = pool.pool._allConnections ? pool.pool._allConnections.length : 0;
+    const waiting = pool.pool._connectionQueue ? pool.pool._connectionQueue.length : 0;
+    peakPoolTotal = Math.max(peakPoolTotal, total);
+    peakPoolWaiting = Math.max(peakPoolWaiting, waiting);
+  }, 20);
 
   const workers = [];
   for (let i = 0; i < concurrency; i++) {
@@ -109,6 +131,8 @@ async function runMixedWorkload(name, { concurrency, totalRequests, adminWriteRa
   }
 
   await Promise.all(workers);
+  clearInterval(sampleTimer);
+  histogram.disable();
 
   const totalTimeSec = (performance.now() - startTime) / 1000;
   const completed = readLatencies.length + writeLatencies.length;
@@ -117,6 +141,7 @@ async function runMixedWorkload(name, { concurrency, totalRequests, adminWriteRa
   const writeStats = calculateStats(writeLatencies);
   const finalMemory = process.memoryUsage();
   const heapDiffMb = ((finalMemory.heapUsed - initialMemory.heapUsed) / (1024 * 1024)).toFixed(2);
+  const cpu = process.cpuUsage(cpuStart);
 
   console.log(`Results for ${name}:`);
   console.log(`  Requests Completed : ${completed} (${readLatencies.length} reads, ${writeLatencies.length} writes)`);
@@ -126,6 +151,14 @@ async function runMixedWorkload(name, { concurrency, totalRequests, adminWriteRa
   console.log(`  Admin WRITE P95    : ${writeStats.p95 || 0} ms (Avg: ${writeStats.avg || 0} ms)`);
   console.log(`  Errors             : ${errorCount} (${((errorCount / completed) * 100).toFixed(2)}%)`);
   console.log(`  Heap Delta         : ${heapDiffMb} MB`);
+  console.log(`  CPU user/system    : ${(cpu.user / 1000).toFixed(1)} / ${(cpu.system / 1000).toFixed(1)} ms`);
+  console.log(
+    `  Event loop p95/max : ${(histogram.percentile(95) / 1e6).toFixed(2)} / ${(histogram.max / 1e6).toFixed(2)} ms`
+  );
+  console.log(`  Pool peak total/wait: ${peakPoolTotal} / ${peakPoolWaiting}`);
+  if (errorCount > 0) {
+    console.log(`  Error reasons      :`, errorReasons);
+  }
 
   return {
     name,
@@ -143,7 +176,7 @@ async function runMixedWorkload(name, { concurrency, totalRequests, adminWriteRa
 async function main() {
   await new Promise((resolve) => {
     server = http.createServer(app);
-    server.listen(0, "127.0.0.1", () => {
+    server.listen({ port: 0, host: "127.0.0.1", backlog: 2048 }, () => {
       const port = server.address().port;
       baseUrl = `http://127.0.0.1:${port}`;
       console.log(`Mixed Workload Benchmarking against ${baseUrl}`);

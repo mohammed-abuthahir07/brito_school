@@ -61,10 +61,9 @@ const unlinkIfUnreferenced = async (imagePath, excludeId = null) => {
 
 const listGalleries = async (req, res) => {
   try {
-    const [galleries, total] = await Promise.all([
-      getAllGalleries(parseListPagination(req.query)),
-      countGalleries(),
-    ]);
+    const pagination = parseListPagination(req.query);
+    const galleries = await getAllGalleries(pagination);
+    const total = pagination ? await countGalleries() : galleries.length;
     return res.status(200).json({
       success: true,
       count: galleries.length,
