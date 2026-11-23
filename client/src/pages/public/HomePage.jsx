@@ -63,41 +63,43 @@ export const HomePage = () => {
         aria-label="History and Introduction of St. Britto Higher Secondary School"
       >
         <div className="hero-history-overlay" />
-        <div className="container hero-history-content">
-          <div className="hero-badge animate-fade-in">
+        <div className="hero-history-content animate-fade-in">
+          <div className="hero-badge">
             <IconSparkles size={16} />
             <span>ESTD. 22-06-1968 • TEMPLE OF LEARNING & VIRTUE</span>
           </div>
 
-          <h1 className="hero-title animate-fade-in-up">
-            St. Britto Higher Secondary School
+          <h1 className="hero-title">
+            St. Britto Higher<br />Secondary School
           </h1>
 
-          <div className="hero-motto-callout animate-fade-in-up">
+          <div className="hero-motto-callout">
             “Let Justice and Love Prevail”
           </div>
 
-          <p className="hero-history-text">
-            This temple of learning, which considers education and discipline as its two eyes, was established on <strong>22-06-1968</strong> through the visionary zeal of the former Archbishop of Madurai, <strong>Most Rev. Dr. Justin Diraviam</strong>.
-          </p>
+          <div className="hero-history-copy">
+            <p className="hero-history-text">
+              This temple of learning, which considers education and discipline as its two eyes, was established on <strong>22-06-1968</strong> through the visionary zeal of the former Archbishop of Madurai, <strong>Most Rev. Dr. Justin Diraviam</strong>.
+            </p>
 
-          <p className="hero-history-text">
-            Over more than five decades of academic stewardship, St. Britto has flourished under the providential guidance of Most Rev. Dr. G. Casimir S.J., Most Rev. Dr. M. Arockiasamy, Most Rev. Dr. Peter Fernando, Most Rev. Dr. Antony Pappusamy, and presently under the pastoral leadership of <strong>Most Rev. Dr. Antonysamy Savarimuthu</strong>.
-          </p>
+            <p className="hero-history-text">
+              Over more than five decades of academic stewardship, St. Britto has flourished under the providential guidance of Most Rev. Dr. G. Casimir S.J., Most Rev. Dr. M. Arockiasamy, Most Rev. Dr. Peter Fernando, Most Rev. Dr. Antony Pappusamy, and presently under the pastoral leadership of <strong>Most Rev. Dr. Antonysamy Savarimuthu</strong>.
+            </p>
 
-          <p className="hero-history-text">
-            Though founded primarily for Catholic students, the institution opens its gates unconditionally to scholars of every religion, caste, and creed. Out of <strong>2,100 students</strong> studying within our portals, over 1,800 represent diverse backgrounds, uniting under an ethos of human dignity, mutual respect, and peaceful brotherhood.
-          </p>
+            <p className="hero-history-text">
+              Though founded primarily for Catholic students, the institution opens its gates unconditionally to scholars of every religion, caste, and creed. Out of <strong>2,100 students</strong> studying within our portals, over 1,800 represent diverse backgrounds, uniting under an ethos of human dignity, mutual respect, and peaceful brotherhood.
+            </p>
+          </div>
 
           <div className="hero-cta-group">
-            <Link to="/about" className="btn btn-primary btn-lg">
+            <Link to="/about" className="hero-cta-primary">
               Explore History & Achievements
               <IconChevronRight size={18} />
             </Link>
-            <Link to="/facilities" className="btn btn-secondary btn-lg">
+            <Link to="/facilities" className="hero-cta-ghost">
               Campus Facilities & Clubs
             </Link>
-            <Link to="/gallery" className="btn btn-outline btn-lg" style={{ color: '#fff', borderColor: 'var(--sandal-300)' }}>
+            <Link to="/gallery" className="hero-cta-ghost">
               Photo Gallery
             </Link>
           </div>
