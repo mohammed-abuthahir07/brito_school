@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import alumni1Img from '../../assets/Alumini/alumni.webp';
 import alumni2Img from '../../assets/Alumini/animini2.webp';
 import { useScrollReveal } from '../../utils/useScrollReveal';
+import { PageHero } from '../../components/public/PageHero';
 import { Button } from '../../components/common/Button';
 import { Alert } from '../../components/common/Alert';
 import { IconUsers, IconAlertCircle, IconAward, IconSparkles } from '../../components/common/Icons';
@@ -95,22 +96,16 @@ export const AlumniPage = () => {
   };
 
   return (
-    <div className="alumni-page">
+    <div className="alumni-page page-enter">
       {/* =========================================================================
           HERO BANNER
           ========================================================================= */}
-      <section className="alumni-hero">
-        <div className="container">
-          <span className="hero-badge animate-fade-in" style={{ backgroundColor: 'rgba(216, 195, 165, 0.2)', borderColor: 'var(--sandal-300)', color: 'var(--sandal-100)' }}>
-            <IconUsers size={16} />
-            BRITTO ALUMNI ASSOCIATION • ESTD. 1968
-          </span>
-          <h1 className="alumni-hero-title animate-fade-in-up">Connecting Generations of Brittoites</h1>
-          <p className="alumni-hero-subtitle animate-fade-in-up">
-            Celebrating the enduring legacy of thousands of distinguished alumni making noble contributions across Tamil Nadu, India, and around the world.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        icon={<IconUsers size={16} />}
+        badge="Britto Alumni Association • Estd. 1968"
+        title="Connecting Generations of Brittoites"
+        subtitle="Celebrating the enduring legacy of thousands of distinguished alumni making noble contributions across Tamil Nadu, India, and around the world."
+      />
 
       {/* =========================================================================
           ALUMNI INTRODUCTION & PHOTO ARCHIVE
@@ -119,29 +114,29 @@ export const AlumniPage = () => {
         <div className="container alumni-intro-grid">
           <div className="alumni-text-block">
             <span className="section-tag">Lifelong Bond & Fraternity</span>
-            <h2>Pride of St. Britto: Our Global Alumni</h2>
+            <h2>Welcome back, Brittoites</h2>
             <p className="alumni-lead">
-              From our inception on June 22, 1968, thousands of young boys have crossed the portals of St. Britto and blossomed into ethical civil servants, engineers, doctors, defense leaders, entrepreneurs, and educators.
+              Since 22-06-1968, boys have left this campus carrying the motto “Let Justice and Love Prevail.” This page is the school’s welcome for former students — not a published roll of names or claimed career lists.
             </p>
             <p className="alumni-desc">
-              The Britto Alumni Association serves as an unbroken bridge between past scholars and current students. Our alumni fraternity actively organizes career guidance symposia, higher education scholarships for underprivileged students, sports training sponsorships, and commemorative reunion reunions.
+              St. Britto remains your second home whether you finished in an early batch or recently completed Class XII. Registering helps the school keep a current directory and send reunion notices when they are arranged.
             </p>
             <p className="alumni-desc">
-              Whether you graduated in our inaugural batches of the 1970s or recently completed Class XII, St. Britto remains your second home. We welcome your homecoming, mentorship, and participation.
+              The photographs here are campus alumni gatherings from the school archive. Individual testimonials are not invented on this site; if you share a memory in the form, it stays with your submission.
             </p>
 
             <div className="alumni-stats-grid">
               <div className="alumni-stat-box">
-                <span className="alumni-stat-val">15,000+</span>
-                <span className="alumni-stat-lbl">Global Alumni</span>
+                <span className="alumni-stat-val">1968</span>
+                <span className="alumni-stat-lbl">Founding year</span>
               </div>
               <div className="alumni-stat-box">
                 <span className="alumni-stat-val">58+</span>
-                <span className="alumni-stat-lbl">Graduating Batches</span>
+                <span className="alumni-stat-lbl">Years of batches</span>
               </div>
               <div className="alumni-stat-box">
-                <span className="alumni-stat-val">100%</span>
-                <span className="alumni-stat-lbl">Ethical Leadership</span>
+                <span className="alumni-stat-val">2,100+</span>
+                <span className="alumni-stat-lbl">Students on roll today</span>
               </div>
             </div>
           </div>
@@ -165,10 +160,10 @@ export const AlumniPage = () => {
       <section className="alumni-pillars-section reveal-init">
         <div className="container">
           <div className="section-header-center">
-            <span className="section-tag">Giving Back</span>
-            <h2 className="section-heading">How Our Alumni Support St. Britto</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>
-              Strengthening current scholars through practical mentorship, career coaching, and educational sponsorships.
+            <span className="section-tag">Stay connected</span>
+            <h2 className="section-heading">Why this register matters</h2>
+            <p className="alumni-connect-lead">
+              The school does not list unofficial scholarships or named alumni achievements here. Registration is how former students keep a working link with St. Britto.
             </p>
           </div>
 
@@ -177,24 +172,24 @@ export const AlumniPage = () => {
               <div className="pillar-icon-box">
                 <IconAward size={24} />
               </div>
-              <h4>Merit Scholarships & Support</h4>
-              <p>Financial assistance and textbook grants provided to meritorious students hailing from rural and economically weaker backgrounds.</p>
+              <h4>A living directory</h4>
+              <p>Your name, batch, and course help the school reach the right people when reunions or notices are prepared.</p>
             </div>
 
             <div className="pillar-card reveal-init stagger-2">
               <div className="pillar-icon-box">
                 <IconSparkles size={24} />
               </div>
-              <h4>Career Guidance & Seminars</h4>
-              <p>Senior alumni in software, medicine, civil services, and entrepreneurship conduct regular interactive workshops for Higher Secondary classes.</p>
+              <h4>A bond with the campus</h4>
+              <p>The same motto, patron, and grounds that formed you still shape the 2,100 students now on roll.</p>
             </div>
 
             <div className="pillar-card reveal-init stagger-3">
               <div className="pillar-icon-box">
                 <IconUsers size={24} />
               </div>
-              <h4>Sports Sponsorships</h4>
-              <p>Sponsoring basketball and athletic equipment, uniforms, and travel stipends for state and national tournament contingents.</p>
+              <h4>Your own words</h4>
+              <p>The optional message field is for memories you choose to share — nothing is written in your name on this page.</p>
             </div>
           </div>
         </div>
@@ -210,8 +205,13 @@ export const AlumniPage = () => {
               <span className="section-tag">Directory Enrolment</span>
               <h2 className="form-title">Alumni Registration Form</h2>
               <p className="form-subtitle">
-                Please register your updated profile information to be included in the official school alumni directory and receive reunion invitations.
+                Complete the required fields, add optional details if you wish, then submit. Marks of * are compulsory. Batch years are accepted from 1968 to the current year.
               </p>
+              <ol className="alumni-form-steps">
+                <li>Enter your name, year of passing, course or group, email, and phone.</li>
+                <li>Optionally add occupation, organisation, city, higher studies, and a memory.</li>
+                <li>Submit. You will see a confirmation summary on this page. Email dispatch is not available on the present server.</li>
+              </ol>
             </div>
 
             {submittedData ? (

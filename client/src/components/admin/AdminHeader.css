@@ -24,6 +24,10 @@
   padding: 0.5rem;
   color: var(--brown-800);
   border-radius: var(--radius-sm);
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
 }
 
 .admin-page-title {

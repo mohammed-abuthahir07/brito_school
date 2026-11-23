@@ -25,28 +25,28 @@ export const PublicFooter = () => {
             </div>
           </div>
 
-          {/* Col 2: Navigation */}
-          <div>
-            <h4 className="footer-heading">Quick Links</h4>
-            <ul className="footer-links-list">
-              <li><Link to="/" className="footer-link">Home</Link></li>
-              <li><Link to="/about" className="footer-link">About Us & History</Link></li>
-              <li><Link to="/facilities" className="footer-link">Facilities & Clubs</Link></li>
-              <li><Link to="/alumni" className="footer-link">Alumni Network</Link></li>
-              <li><Link to="/gallery" className="footer-link">Photo Gallery</Link></li>
-            </ul>
-          </div>
+          <div className="footer-nav-pair">
+            <div className="footer-nav-col">
+              <h4 className="footer-heading">Quick Links</h4>
+              <ul className="footer-links-list">
+                <li><Link to="/" className="footer-link">Home</Link></li>
+                <li><Link to="/about" className="footer-link">About Us & History</Link></li>
+                <li><Link to="/facilities" className="footer-link">Facilities & Clubs</Link></li>
+                <li><Link to="/alumni" className="footer-link">Alumni Network</Link></li>
+                <li><Link to="/gallery" className="footer-link">Photo Gallery</Link></li>
+              </ul>
+            </div>
 
-          {/* Col 3: Student Activities */}
-          <div>
-            <h4 className="footer-heading">Extracurricular</h4>
-            <ul className="footer-links-list">
-              <li><Link to="/facilities" className="footer-link">NCC Unit 4(TN)</Link></li>
-              <li><Link to="/facilities" className="footer-link">Bharat Scouts Movement</Link></li>
-              <li><Link to="/facilities" className="footer-link">Britto Band Troupe</Link></li>
-              <li><Link to="/facilities" className="footer-link">Junior Red Cross (JRC)</Link></li>
-              <li><Link to="/facilities" className="footer-link">Sports & Basketball</Link></li>
-            </ul>
+            <div className="footer-nav-col">
+              <h4 className="footer-heading">Extracurricular</h4>
+              <ul className="footer-links-list">
+                <li><Link to="/facilities" className="footer-link">NCC Unit 4(TN)</Link></li>
+                <li><Link to="/facilities" className="footer-link">Bharat Scouts Movement</Link></li>
+                <li><Link to="/facilities" className="footer-link">Britto Band Troupe</Link></li>
+                <li><Link to="/facilities" className="footer-link">Junior Red Cross (JRC)</Link></li>
+                <li><Link to="/facilities" className="footer-link">Sports & Basketball</Link></li>
+              </ul>
+            </div>
           </div>
 
           {/* Col 4: Contact & Administration */}

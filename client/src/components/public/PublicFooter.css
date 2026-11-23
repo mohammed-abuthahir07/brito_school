@@ -74,6 +74,10 @@
   max-width: 100%;
 }
 
+.footer-nav-pair {
+  display: contents;
+}
+
 .footer-heading {
   font-size: 1.05rem;
   font-weight: 700;
@@ -171,6 +175,27 @@
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+  .footer-nav-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem 1rem;
+    align-items: start;
+    min-width: 0;
+  }
+  .footer-nav-col {
+    min-width: 0;
+  }
+  .footer-heading {
+    font-size: 0.95rem;
+    margin-bottom: 0.9rem;
+  }
+  .footer-link {
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+  .footer-link:hover {
+    transform: none;
   }
   .footer-top {
     padding: 2.75rem 0 1.75rem;

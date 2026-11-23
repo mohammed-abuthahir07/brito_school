@@ -78,6 +78,9 @@
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
   position: relative;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .nav-link:hover {
@@ -111,6 +114,10 @@
   color: var(--brown-800);
   border-radius: var(--radius-sm);
   transition: background-color 0.2s;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
 }
 
 .mobile-toggle-btn:hover {
@@ -198,5 +205,17 @@
   }
   .school-name {
     font-size: 1.05rem;
+  }
+  .school-motto {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .school-name {
+    font-size: 0.95rem;
+  }
+  .school-location {
+    font-size: 0.72rem;
   }
 }

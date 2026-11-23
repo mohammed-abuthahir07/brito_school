@@ -347,15 +347,148 @@
   line-height: 1.7;
 }
 
+.about-values-section {
+  padding: 4.5rem 0;
+  background-color: var(--sandal-50);
+  border-top: 1px solid var(--sandal-200);
+  border-bottom: 1px solid var(--sandal-200);
+}
+
+.about-values-intro {
+  color: #2b2b2b;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.about-values-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.about-value-card {
+  background: #ffffff;
+  border: 1px solid var(--sandal-200);
+  border-radius: var(--radius-xl);
+  padding: 1.6rem 1.4rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.about-value-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.about-value-card h3 {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: var(--brown-800);
+  margin-bottom: 0.65rem;
+}
+
+.about-value-card p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #2b2b2b;
+}
+
+.about-patron-section {
+  padding: 5rem 0;
+  background: var(--sandal-50);
+}
+
+.about-patron-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.about-patron-photos {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 0.85rem;
+}
+
+.about-patron-photos img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--sandal-200);
+}
+
+.about-patron-photos img:last-child {
+  height: 280px;
+  margin-top: 2.5rem;
+}
+
+.about-leaders-section {
+  padding: 5rem 0;
+  background: #ffffff;
+}
+
+.about-leaders-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2.25rem;
+}
+
+.about-leader-card {
+  background: #ffffff;
+  border: 1px solid var(--sandal-200);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.about-leader-card img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.about-leader-card h3 {
+  font-size: 1.05rem;
+  margin: 1rem 1.15rem 0.3rem;
+  font-weight: 800;
+}
+
+.about-leader-role {
+  margin: 0 1.15rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brown-700);
+}
+
+.about-leader-card p:last-child {
+  margin: 0 1.15rem 1.2rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #3b3b3b;
+}
+
 /* ==========================================================================
    RESPONSIVE DESIGN (320px - 1920px)
    ========================================================================== */
 @media (max-width: 1024px) {
   .overview-grid,
   .spotlight-card,
-  .faculty-grid {
+  .faculty-grid,
+  .about-patron-grid,
+  .about-leaders-grid {
     grid-template-columns: 1fr;
     gap: 2.5rem;
+  }
+  .about-values-grid {
+    grid-template-columns: 1fr;
+  }
+  .about-patron-photos img:last-child {
+    margin-top: 0;
   }
 }
 

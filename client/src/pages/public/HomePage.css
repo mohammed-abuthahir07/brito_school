@@ -196,6 +196,99 @@
   line-height: 1.3;
 }
 
+.home-creed-section {
+  padding: 4.25rem 0 3.5rem;
+  background: var(--sandal-50);
+  border-bottom: 1px solid var(--sandal-200);
+}
+
+.home-creed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.home-creed-card {
+  background: #ffffff;
+  border: 1px solid var(--sandal-200);
+  border-radius: var(--radius-xl);
+  padding: 1.6rem 1.4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.home-creed-card h3 {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: var(--brown-800);
+  margin: 0 0 0.6rem;
+}
+
+.home-creed-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #2b2b2b;
+}
+
+.home-setting-section {
+  padding: 4.75rem 0 3.5rem;
+  background: #ffffff;
+}
+
+.home-setting-lead {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.home-setting-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.35rem;
+  margin-top: 2.25rem;
+}
+
+.home-setting-card {
+  display: grid;
+  grid-template-columns: 168px 1fr;
+  gap: 1.1rem;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--sandal-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.home-setting-card img {
+  width: 100%;
+  height: 148px;
+  object-fit: cover;
+  display: block;
+}
+
+.home-setting-card h3 {
+  margin: 0 0.85rem 0.35rem 0;
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.home-setting-card p {
+  margin: 0 0.95rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #3b3b3b;
+}
+
+.home-setting-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
 /* ==========================================================================
    2. DEDICATED "TODAY'S THIRUKKURAL" SECTION
    ========================================================================== */
@@ -206,9 +299,9 @@
 
 .home-kural-card {
   background-color: #ffffff;
-  border: 2px solid var(--sandal-200);
+  border: 1px solid var(--sandal-200);
   border-radius: var(--radius-xl);
-  box-shadow: 0 10px 25px -5px rgba(56, 26, 5, 0.08);
+  box-shadow: 0 18px 40px -18px rgba(56, 26, 5, 0.18);
   overflow: hidden;
   position: relative;
 }
@@ -216,11 +309,10 @@
 .home-kural-header {
   background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
   color: #ffffff;
-  padding: 1.1rem 1.75rem;
+  padding: 1rem 1.85rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 3px solid var(--sandal-300);
   flex-wrap: wrap;
   gap: 0.75rem;
 }
@@ -229,140 +321,186 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   color: #ffffff;
 }
 
 .kural-num-pill {
-  background-color: var(--sandal-300);
-  color: var(--brown-900);
-  padding: 0.25rem 0.8rem;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 0.32rem 0.85rem;
   border-radius: var(--radius-full);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.home-kural-loading,
+.home-kural-empty {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--text-muted);
 }
 
 .home-kural-content {
-  padding: 2.25rem;
+  padding: 2rem 2.1rem 1.85rem;
 }
 
 .home-kural-main-grid {
   display: grid;
-  grid-template-columns: 1fr 220px;
-  gap: 2rem;
-  align-items: start;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 2.15rem;
+  align-items: stretch;
+}
+
+.home-kural-portrait-col {
+  display: flex;
+}
+
+.home-kural-portrait-frame {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, var(--brown-900) 0%, var(--brown-700) 100%);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.home-kural-portrait-img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  background: #fff;
+  display: block;
+}
+
+.home-kural-portrait-tag {
+  color: #fff;
+  text-align: center;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  white-space: normal;
+}
+
+.home-kural-portrait-tag span {
+  display: block;
+  font-family: var(--font-tamil), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.home-kural-portrait-tag small {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sandal-200);
+  font-weight: 700;
 }
 
 .home-kural-verses-col {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  padding-top: 0.15rem;
+}
+
+.kural-eyebrow {
+  margin: 0 0 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown-700);
 }
 
 .home-kural-tamil-box {
-  background-color: var(--sandal-50);
-  border: 1.5px solid var(--sandal-200);
-  border-radius: var(--radius-lg);
-  padding: 1.75rem 2rem;
-  text-align: center;
-  margin-bottom: 1.75rem;
+  position: relative;
+  background: linear-gradient(180deg, var(--sandal-50) 0%, #fff 100%);
+  border: 1px solid var(--sandal-200);
+  border-left: 4px solid var(--brown-800);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 1.35rem 1.5rem 1.25rem 1.7rem;
+  margin: 0 0 1.35rem;
+  text-align: left;
+}
+
+.home-kural-quote {
+  position: absolute;
+  top: -0.15rem;
+  left: 0.55rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 3.2rem;
+  line-height: 1;
+  color: var(--sandal-300);
+  pointer-events: none;
 }
 
 .home-kural-tamil-text {
   font-family: var(--font-tamil), 'Inter', sans-serif;
-  font-size: 1.45rem;
-  line-height: 2.2;
-  color: #000000;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  line-height: 2.05;
+  color: #111111;
   font-weight: 700;
   white-space: pre-line;
+  margin: 0;
+  position: relative;
 }
 
-.home-kural-details-grid {
+.home-kural-readings {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.75rem;
+  grid-template-columns: 1fr;
+  gap: 0.95rem;
 }
 
 .home-kural-detail-card {
-  background-color: #ffffff;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  padding: 1.25rem 1.5rem;
-  box-shadow: var(--shadow-sm);
+  background-color: transparent;
+  border: none;
+  border-top: 1px solid var(--sandal-200);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0.85rem 0.15rem 0.15rem;
   display: flex;
   flex-direction: column;
 }
 
 .kural-sublabel {
-  font-size: 0.8rem;
+  display: block;
+  font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   color: var(--brown-700);
   margin-bottom: 0.4rem;
 }
 
 .kural-translation-text {
+  margin: 0;
   font-size: 1.02rem;
-  line-height: 1.65;
-  color: #000000;
+  line-height: 1.75;
+  color: #1a1a1a;
   font-style: italic;
 }
 
 .kural-explanation-text {
-  font-size: 0.95rem;
-  line-height: 1.65;
-  color: #2b2b2b;
-}
-
-/* Home Page Thiruvalluvar Portrait Column */
-.home-kural-portrait-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.home-kural-portrait-frame {
-  background: linear-gradient(180deg, #ffffff 0%, var(--sandal-50) 100%);
-  border: 2px solid var(--sandal-300);
-  border-radius: var(--radius-lg);
-  padding: 0.85rem;
-  box-shadow: var(--shadow-md);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.65rem;
-  width: 100%;
-}
-
-.home-kural-portrait-img {
-  width: 100%;
-  max-width: 185px;
-  height: auto;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--sandal-200);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  display: block;
-}
-
-.home-kural-portrait-tag {
-  font-family: var(--font-tamil), sans-serif;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--brown-800);
-  text-align: center;
-  background-color: var(--sandal-100);
-  border: 1px solid var(--sandal-300);
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-sm);
-  width: 100%;
-  white-space: nowrap;
+  margin: 0;
+  font-family: var(--font-tamil), 'Inter', sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.9;
+  color: #2a2a2a;
 }
 
 .home-kural-footer-row {
@@ -370,52 +508,49 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1.25rem;
-  padding-top: 1.35rem;
-  border-top: 1px solid var(--border-light);
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--sandal-200);
 }
 
 .home-kural-subtext {
   font-size: 0.88rem;
   color: var(--text-muted);
-  font-style: italic;
+  font-style: normal;
+  line-height: 1.55;
   flex: 1;
-  min-width: 250px;
+  min-width: 220px;
 }
 
-/* Beautiful, polished action button */
 .home-kural-popup-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  background: linear-gradient(135deg, var(--brown-800), var(--brown-700));
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  background: var(--brown-800);
   color: #ffffff;
-  border: 1.5px solid var(--sandal-300);
-  padding: 0.65rem 1.35rem;
+  border: 1px solid var(--brown-900);
+  padding: 0.6rem 1.2rem;
   border-radius: var(--radius-md);
   font-weight: 700;
-  font-size: 0.92rem;
-  box-shadow: 0 2px 6px rgba(56, 26, 5, 0.15);
-  transition: all 0.25s ease;
+  font-size: 0.9rem;
+  box-shadow: none;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
 
 .home-kural-popup-btn:hover {
-  background: linear-gradient(135deg, var(--brown-900), var(--brown-800));
-  color: var(--sandal-200);
-  border-color: var(--sandal-400);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(56, 26, 5, 0.25);
+  background: var(--brown-900);
+  color: #ffffff;
+  border-color: var(--brown-900);
+  transform: none;
+  box-shadow: 0 6px 16px rgba(56, 26, 5, 0.22);
 }
 
 .home-kural-popup-btn:active {
   transform: translateY(0);
-}
-
-.home-kural-empty {
-  padding: 3rem 2rem;
-  text-align: center;
-  color: var(--text-muted);
 }
 
 /* ==========================================================================
@@ -541,101 +676,171 @@
   margin: 0 auto 3.5rem;
 }
 
-.leadership-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2.5rem;
-}
-
-.leader-card {
-  background-color: #ffffff;
-  border-radius: var(--radius-xl);
-  border: 1.5px solid var(--sandal-200);
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.leader-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--brown-400);
-}
-
-.leader-image-wrapper {
+.leadership-carousel {
   position: relative;
-  height: 350px;
-  background-color: var(--sandal-50);
-  overflow: hidden;
+  width: min(1480px, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 0;
+  cursor: pointer;
 }
 
-.leader-image {
+.leadership-slide {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 0;
+  animation: leadershipFade 0.55s ease;
+  cursor: pointer;
+}
+
+@keyframes leadershipFade {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
+.leadership-slide-media {
+  width: 300px;
+  height: 380px;
+  margin: 1.75rem 0 1.75rem 2rem;
+  background: var(--sandal-50);
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(62, 39, 18, 0.12);
+  cursor: pointer;
+}
+
+.leadership-slide-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  transition: transform 0.4s ease;
+  display: block;
+  cursor: pointer;
 }
 
-.leader-card:hover .leader-image {
-  transform: scale(1.03);
-}
-
-.leader-role-badge {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
-  color: #ffffff;
-  padding: 0.4rem 0.95rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border: 1px solid var(--sandal-300);
-}
-
-.leader-content {
-  padding: 1.85rem;
-  flex: 1;
+.leadership-slide-copy {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  padding: 2rem 4.5rem 2.25rem 1.25rem;
 }
 
-.leader-name {
-  font-size: 1.35rem;
+.leadership-slide-tag {
+  font-size: 0.78rem;
   font-weight: 800;
-  color: #000000;
-  margin-bottom: 0.25rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown-700);
+  margin-bottom: 0.7rem;
 }
 
-.leader-subtitle {
-  font-size: 0.85rem;
+.leadership-slide-name {
+  font-size: clamp(1.55rem, 2.4vw, 2.2rem);
+  font-weight: 800;
+  color: #2b2b2b;
+  line-height: 1.2;
+  margin: 0 0 0.85rem;
+  letter-spacing: -0.02em;
+}
+
+.leadership-slide-rule {
+  width: 48px;
+  height: 3px;
+  background: var(--brown-700);
+  margin-bottom: 1.1rem;
+}
+
+.leadership-slide-subtitle {
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--brown-600);
-  margin-bottom: 1rem;
+  margin: 0 0 1rem;
+  line-height: 1.5;
 }
 
-.leader-quote {
-  font-size: 0.9rem;
+.leadership-slide-quote {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
   font-style: italic;
   color: var(--brown-900);
-  background-color: var(--sandal-50);
-  padding: 0.75rem 0.95rem;
-  border-radius: var(--radius-sm);
-  margin-bottom: 1rem;
-  border-left: 3px solid var(--sandal-400);
   line-height: 1.55;
 }
 
-.leader-desc {
+.leadership-slide-desc {
   font-size: 0.94rem;
-  color: #3b3b3b;
+  color: #4a4a4a;
   line-height: 1.65;
-  margin-bottom: 1rem;
+  margin: 0 0 0.7rem;
+}
+
+.leadership-slide-desc:last-child {
+  margin-bottom: 0;
+}
+
+.leadership-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--sandal-200);
+  background: #ffffff;
+  color: #3a3a3a;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.leadership-nav:hover,
+.leadership-nav:focus-visible {
+  background: var(--brown-800);
+  color: #ffffff;
+  border-color: var(--brown-800);
+  outline: none;
+}
+
+.leadership-nav.prev {
+  left: 1.1rem;
+}
+
+.leadership-nav.next {
+  right: 1.1rem;
+}
+
+.leadership-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.35rem;
+}
+
+.leadership-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  background: var(--sandal-300);
+  cursor: pointer;
+}
+
+.leadership-dot.is-active {
+  background: var(--brown-800);
+  width: 22px;
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leadership-slide {
+    animation: none;
+  }
 }
 
 .discrepancy-notice {
@@ -731,14 +936,23 @@
    ========================================================================== */
 .calendar-section {
   padding: 5.5rem 0;
-  background-color: #ffffff;
+  background:
+    linear-gradient(180deg, #ffffff 0%, var(--sandal-50) 28%, #ffffff 100%);
+}
+
+.calendar-section-lead {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.7;
 }
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 1.75rem;
-  margin-top: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 1.5rem;
+  margin-top: 2.25rem;
   width: 100%;
 }
 
@@ -751,124 +965,175 @@
 .calendar-card {
   background-color: #ffffff;
   border-radius: var(--radius-lg);
-  border: 1.5px solid var(--sandal-200);
-  padding: 1.75rem;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
+  border: 1px solid var(--sandal-200);
+  box-shadow: 0 10px 28px rgba(74, 44, 16, 0.07);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 168px 1fr;
+  min-height: 240px;
+  transition: box-shadow 0.28s ease, border-color 0.28s ease;
 }
 
 .calendar-card:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: var(--brown-500);
-  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(74, 44, 16, 0.12);
+  border-color: var(--sandal-400);
 }
 
-.calendar-header-row {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.calendar-icon-box {
-  width: 46px;
-  height: 46px;
-  background-color: var(--sandal-100);
-  color: var(--brown-800);
-  border-radius: var(--radius-md);
+.calendar-doc-preview {
+  background:
+    linear-gradient(165deg, var(--brown-900) 0%, var(--brown-700) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  border: 1px solid var(--sandal-200);
+  padding: 1.5rem 1.1rem;
+  position: relative;
+}
+
+.calendar-doc-preview::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.calendar-doc-sheet {
+  width: 108px;
+  height: 142px;
+  background: #fff;
+  border-radius: 3px 10px 3px 3px;
+  position: relative;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.35rem 0.65rem 0.7rem;
+}
+
+.calendar-doc-ribbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--brown-800);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.28rem 0.42rem 0.28rem 0.55rem;
+  border-radius: 0 10px 0 8px;
+}
+
+.calendar-doc-icon {
+  color: var(--brown-800);
+  margin-bottom: 0.45rem;
+}
+
+.calendar-doc-filename {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brown-900);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.calendar-doc-lines {
+  display: block;
+  width: 78%;
+  height: 28px;
+  margin-top: 0.65rem;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      var(--sandal-200) 0 2px,
+      transparent 2px 8px
+    );
+}
+
+.calendar-card-body {
+  padding: 1.65rem 1.75rem 1.7rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.calendar-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brown-700);
+  margin-bottom: 0.45rem;
 }
 
 .calendar-title {
-  font-size: 1.18rem;
+  font-size: 1.28rem;
   font-weight: 800;
   color: #000000;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 0.55rem;
 }
 
 .calendar-desc {
-  font-size: 0.94rem;
+  font-size: 0.95rem;
   color: #3b3b3b;
-  line-height: 1.6;
-  margin-bottom: 1.25rem;
+  line-height: 1.65;
+  margin: 0 0 1rem;
   flex: 1;
 }
 
-.calendar-date {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-bottom: 1.25rem;
-  font-weight: 600;
+.calendar-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.25rem;
+}
+
+.calendar-meta li {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--brown-900);
+  background: var(--sandal-50);
+  border: 1px solid var(--sandal-200);
+  border-radius: var(--radius-full);
+  padding: 0.28rem 0.7rem;
 }
 
 .calendar-actions {
   display: flex;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.7rem;
   margin-top: auto;
 }
 
-/* Featured Single Calendar Presentation */
+.calendar-actions .btn {
+  min-height: 44px;
+  padding: 0.7rem 1.2rem;
+  font-weight: 700;
+}
+
 .calendar-card.featured-calendar-card {
   max-width: 920px;
   width: 100%;
-  padding: 2.75rem 3rem;
-  border: 2px solid var(--sandal-300);
-  background: linear-gradient(180deg, #ffffff 0%, var(--sandal-50) 100%);
-  box-shadow: var(--shadow-md);
+  grid-template-columns: 200px 1fr;
   border-radius: var(--radius-xl);
 }
 
-.featured-calendar-card .calendar-header-row {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  margin-bottom: 1.25rem;
-}
-
-.featured-calendar-card .calendar-icon-box {
-  width: 58px;
-  height: 58px;
-  background-color: var(--sandal-200);
-  color: var(--brown-900);
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--sandal-300);
+.featured-calendar-card .calendar-card-body {
+  padding: 2rem 2.15rem 2rem 1.9rem;
 }
 
 .featured-calendar-card .calendar-title {
   font-size: 1.55rem;
-  font-weight: 800;
-  color: #000000;
 }
 
 .featured-calendar-card .calendar-desc {
-  font-size: 1.05rem;
-  color: #2b2b2b;
-  line-height: 1.75;
-  margin-bottom: 1.5rem;
-}
-
-.featured-calendar-card .calendar-date {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-bottom: 1.75rem;
-  font-weight: 600;
-}
-
-.featured-calendar-card .calendar-actions {
-  display: flex;
-  gap: 1.25rem;
-  max-width: 480px;
-}
-
-.featured-calendar-card .calendar-actions .btn {
-  padding: 0.85rem 1.75rem;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.7;
 }
 
 /* ==========================================================================
@@ -933,12 +1198,35 @@
    RESPONSIVE MEDIA QUERIES (320px - 1920px)
    ========================================================================== */
 @media (max-width: 1024px) {
+  .home-creed-grid,
+  .home-setting-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .home-kural-main-grid {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 1.5rem;
+  }
   .hero-history-content {
     max-width: 760px;
   }
-  .leadership-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+  .leadership-carousel {
+    width: min(100% - 1.5rem, 1240px);
+  }
+
+  .leadership-slide {
+    grid-template-columns: 260px minmax(0, 1fr);
+    min-height: 0;
+    gap: 0.75rem;
+  }
+
+  .leadership-slide-media {
+    width: 230px;
+    height: 300px;
+    margin: 1.25rem 0 1.25rem 1.25rem;
+  }
+
+  .leadership-slide-copy {
+    padding: 1.5rem 3.25rem 1.6rem 0.75rem;
   }
   .vibrancy-mosaic-grid {
     grid-template-columns: 1fr 1fr;
@@ -957,7 +1245,7 @@
 @media (max-width: 768px) {
   .hero-history-section {
     min-height: auto;
-    padding: 2.75rem 0 3rem;
+    padding: 2.75rem 1.15rem 3rem;
     background-position: center;
   }
   .hero-history-content {
@@ -969,50 +1257,109 @@
   .hero-stats-strip {
     grid-template-columns: 1fr 1fr;
   }
+  .home-creed-grid,
+  .home-setting-grid {
+    grid-template-columns: 1fr;
+  }
+  .home-setting-card {
+    grid-template-columns: 1fr;
+  }
+  .home-setting-card img {
+    height: 180px;
+  }
+  .home-setting-card h3,
+  .home-setting-card p {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  .home-setting-card p {
+    margin-bottom: 1rem;
+  }
   .home-kural-main-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  .home-kural-portrait-col {
-    order: -1;
+    gap: 1.25rem;
   }
   .home-kural-portrait-frame {
     flex-direction: row;
-    max-width: 280px;
-    margin: 0 auto;
-    padding: 0.6rem 0.85rem;
-    gap: 0.85rem;
+    align-items: center;
+    max-width: 100%;
+    padding: 0.75rem 0.9rem;
+    gap: 0.9rem;
   }
   .home-kural-portrait-img {
-    width: 65px;
-    height: 65px;
+    width: 72px;
+    height: 72px;
     aspect-ratio: 1;
     border-radius: 50%;
+    flex-shrink: 0;
   }
   .home-kural-portrait-tag {
-    font-size: 0.9rem;
-    white-space: normal;
+    text-align: left;
   }
-  .home-kural-details-grid {
-    grid-template-columns: 1fr;
+  .home-kural-tamil-box {
+    padding: 1.2rem 1.15rem 1.1rem 1.35rem;
   }
-  .leadership-grid {
+  .leadership-carousel {
+    width: calc(100% - 1.25rem);
+  }
+
+  .leadership-slide {
     grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 0 auto;
+    min-height: 0;
+    justify-items: center;
+  }
+
+  .leadership-slide-media {
+    width: 220px;
+    height: 270px;
+    margin: 1.15rem auto 0;
+  }
+
+  .leadership-slide-copy {
+    padding: 1.2rem 1.15rem 1.4rem;
+  }
+
+  .leadership-nav {
+    width: 40px;
+    height: 40px;
+    top: 150px;
+    transform: none;
+  }
+
+  .leadership-nav.prev {
+    left: 0.4rem;
+  }
+
+  .leadership-nav.next {
+    right: 0.4rem;
   }
   .vibrancy-mosaic-grid {
     grid-template-columns: 1fr;
   }
+  .calendar-card,
   .calendar-card.featured-calendar-card {
-    padding: 2rem 1.5rem;
+    grid-template-columns: 1fr;
+  }
+  .calendar-doc-preview {
+    min-height: 168px;
+    padding: 1.25rem 1rem;
+  }
+  .calendar-doc-sheet {
+    width: 96px;
+    height: 126px;
+  }
+  .featured-calendar-card .calendar-card-body {
+    padding: 1.4rem 1.25rem 1.5rem;
   }
   .featured-calendar-card .calendar-title {
-    font-size: 1.3rem;
+    font-size: 1.28rem;
   }
-  .featured-calendar-card .calendar-actions {
-    max-width: 100%;
+  .calendar-actions {
     flex-direction: column;
+  }
+  .calendar-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
   .portals-banner {
     padding: 2rem 1.5rem;

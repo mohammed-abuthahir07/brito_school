@@ -65,7 +65,7 @@ export const DashboardPage = () => {
   const { announcements, calendars, galleries, thirukkural, generatedAt } = dashboard || {};
 
   return (
-    <div className="dashboard-root">
+    <div className="dashboard-root page-enter">
       {/* Top Welcome Strip */}
       <div className="dashboard-top-row">
         <div className="dashboard-welcome">

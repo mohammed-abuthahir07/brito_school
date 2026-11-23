@@ -17,14 +17,14 @@ import districtLevImg from '../../assets/Achievements/DistrictLevel.jpeg';
 import stateLevImg from '../../assets/Achievements/StateLev.png';
 import jrcImg from '../../assets/JRC/JRC-Cadets.jpg';
 import nssImg from '../../assets/NSS/nss.jpg';
+import nss1Img from '../../assets/NSS/nss1.png';
 import rrcImg from '../../assets/RRC/rcc.jpg';
+import independenceImg from '../../assets/School/independenceday.jpg';
 import { useScrollReveal } from '../../utils/useScrollReveal';
+import { PageHero } from '../../components/public/PageHero';
 import {
   IconBuilding,
-  IconUsers,
   IconAward,
-  IconSparkles,
-  IconBookOpen,
 } from '../../components/common/Icons';
 import './FacilitiesPage.css';
 
@@ -32,22 +32,16 @@ export const FacilitiesPage = () => {
   useScrollReveal();
 
   return (
-    <div className="facilities-page">
+    <div className="facilities-page page-enter">
       {/* =========================================================================
           HERO BANNER
           ========================================================================= */}
-      <section className="facilities-hero">
-        <div className="container">
-          <span className="hero-badge animate-fade-in" style={{ backgroundColor: 'rgba(216, 195, 165, 0.2)', borderColor: 'var(--sandal-300)', color: 'var(--sandal-100)' }}>
-            <IconBuilding size={16} />
-            CAMPUS & CO-CURRICULAR EXCELLENCE
-          </span>
-          <h1 className="facilities-hero-title animate-fade-in-up">Infrastructure & Student Wings</h1>
-          <p className="facilities-hero-subtitle animate-fade-in-up">
-            State-of-the-art educational infrastructure paired with 11+ dynamic student wings fostering civic duty, physical stamina, leadership, and moral character.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        icon={<IconBuilding size={16} />}
+        badge="Campus & Co-Curricular Excellence"
+        title="Infrastructure & Student Wings"
+        subtitle="State-of-the-art educational infrastructure paired with 11+ dynamic student wings fostering civic duty, physical stamina, leadership, and moral character."
+      />
 
       {/* =========================================================================
           SECTION 1: SCHOOL INFRASTRUCTURE FACILITIES
@@ -146,8 +140,8 @@ export const FacilitiesPage = () => {
           <div className="section-header-center">
             <span className="section-tag">Youth Movements</span>
             <h2 className="section-heading">Clubs & Co-Curricular Student Wings</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>
-              Eleven specialized wings instilling patriotic duty, disciplined leadership, physical fitness, and compassionate service.
+            <p className="facilities-clubs-lead">
+              Eleven specialised wings: NCC 4(TN) Engr Coy, Bharat Scouts, Britto Band, Sports, Junior Red Cross, NSS, Red Ribbon Club, YCS &amp; YSM, Anti-Drug Club, Finance Club, and Cultural activities.
             </p>
           </div>
 
@@ -368,90 +362,96 @@ export const FacilitiesPage = () => {
           {/* =========================================================================
               SECTION 3: SERVICE WINGS (JRC, NSS, RRC)
               ========================================================================= */}
-          <div className="infra-grid" style={{ marginTop: '3.5rem' }}>
-            <article className="infra-card reveal-init stagger-1">
-              <div className="infra-img-wrapper">
-                <img src={jrcImg} alt="Junior Red Cross Cadets" className="infra-img" loading="lazy" />
-              </div>
-              <div className="infra-body">
-                <span className="club-tag">JRC Wing</span>
-                <h3 className="infra-title">Junior Red Cross (JRC)</h3>
-                <p className="infra-desc">
-                  Dedicated to health awareness, disaster first-aid, sanitation, and humanitarian service, fostering community empathy and immediate relief response.
-                </p>
-              </div>
-            </article>
+          <article className="club-feature-card reveal-init">
+            <div className="club-img-col">
+              <img src={jrcImg} alt="Junior Red Cross Cadets" className="club-feature-img" loading="lazy" />
+            </div>
+            <div className="club-content-col">
+              <span className="club-tag">JRC Wing</span>
+              <h3 className="club-title">Junior Red Cross (JRC)</h3>
+              <p className="club-desc">
+                Cadets are formed in health awareness, disaster first-aid, sanitation, and humanitarian service — training that supports empathy and an immediate relief response in the school community.
+              </p>
+            </div>
+          </article>
 
-            <article className="infra-card reveal-init stagger-2">
-              <div className="infra-img-wrapper">
-                <img src={nssImg} alt="NSS Community Volunteers" className="infra-img" loading="lazy" />
-              </div>
-              <div className="infra-body">
-                <span className="club-tag">NSS Unit</span>
-                <h3 className="infra-title">National Service Scheme (NSS)</h3>
-                <p className="infra-desc">
-                  Youth volunteerism organizing rural literacy workshops, tree-planting campaigns, blood donation awareness, and civic environmental sanitation.
-                </p>
-              </div>
-            </article>
+          <article className="club-feature-card reverse reveal-init">
+            <div className="club-img-col">
+              <img src={nssImg} alt="NSS Community Volunteers" className="club-feature-img" loading="lazy" />
+            </div>
+            <div className="club-content-col">
+              <span className="club-tag">NSS Unit</span>
+              <h3 className="club-title">National Service Scheme (NSS)</h3>
+              <p className="club-desc">
+                Volunteers take part in rural literacy workshops, tree-planting, blood-donation awareness, and civic sanitation. The unit’s work is campus service, not a substitute for the detailed NCC and Scouts programmes above.
+              </p>
+            </div>
+          </article>
 
-            <article className="infra-card reveal-init stagger-3">
-              <div className="infra-img-wrapper">
-                <img src={rrcImg} alt="Red Ribbon Club" className="infra-img" loading="lazy" />
-              </div>
-              <div className="infra-body">
-                <span className="club-tag">RRC Movement</span>
-                <h3 className="infra-title">Red Ribbon Club (RRC)</h3>
-                <p className="infra-desc">
-                  A youth health initiative promoting positive lifestyles, health awareness, peer counseling, and adolescent hygiene and wellness.
-                </p>
-              </div>
-            </article>
-          </div>
+          <article className="club-feature-card reveal-init">
+            <div className="club-img-col">
+              <img src={rrcImg} alt="Red Ribbon Club" className="club-feature-img" loading="lazy" />
+            </div>
+            <div className="club-content-col">
+              <span className="club-tag">RRC Movement</span>
+              <h3 className="club-title">Red Ribbon Club (RRC)</h3>
+              <p className="club-desc">
+                A youth health wing that promotes positive lifestyles, health awareness, peer counselling, and adolescent hygiene on campus.
+              </p>
+            </div>
+          </article>
 
           {/* =========================================================================
               SECTION 4: SPECIALIZED STUDENT CLUBS
               ========================================================================= */}
           <div className="secondary-clubs-grid" style={{ marginTop: '2.5rem' }}>
-            <div className="secondary-club-card reveal-init stagger-1">
-              <div className="secondary-club-icon">
-                <IconSparkles size={24} />
+            <article className="secondary-club-card reveal-init stagger-1">
+              <div className="secondary-club-img-wrap">
+                <img src={prayerImg} alt="YCS and YSM student gathering" className="secondary-club-img" loading="lazy" />
               </div>
-              <h4 className="secondary-club-title">YCS & YSM</h4>
-              <p className="secondary-club-desc">
-                Young Christian Students / Young Students Movement encourages analytical social awareness, moral leadership, self-reflection, and compassionate civic engagement.
-              </p>
-            </div>
+              <div className="secondary-club-body">
+                <h4 className="secondary-club-title">YCS & YSM</h4>
+                <p className="secondary-club-desc">
+                  Young Christian Students / Young Students Movement encourages analytical social awareness, moral leadership, self-reflection, and compassionate civic engagement.
+                </p>
+              </div>
+            </article>
 
-            <div className="secondary-club-card reveal-init stagger-2">
-              <div className="secondary-club-icon">
-                <IconAward size={24} />
+            <article className="secondary-club-card reveal-init stagger-2">
+              <div className="secondary-club-img-wrap">
+                <img src={nss1Img} alt="Anti-Drug Club campus awareness" className="secondary-club-img" loading="lazy" />
               </div>
-              <h4 className="secondary-club-title">Anti-Drug Club</h4>
-              <p className="secondary-club-desc">
-                Active campus campaigns, informative seminars, and peer-to-peer dialogues promoting drug-free campuses, mental fitness, and wholesome lifestyle choices.
-              </p>
-            </div>
+              <div className="secondary-club-body">
+                <h4 className="secondary-club-title">Anti-Drug Club</h4>
+                <p className="secondary-club-desc">
+                  Active campus campaigns, informative seminars, and peer-to-peer dialogues promoting drug-free campuses, mental fitness, and wholesome lifestyle choices.
+                </p>
+              </div>
+            </article>
 
-            <div className="secondary-club-card reveal-init stagger-3">
-              <div className="secondary-club-icon">
-                <IconBookOpen size={24} />
+            <article className="secondary-club-card reveal-init stagger-3">
+              <div className="secondary-club-img-wrap">
+                <img src={officeImg} alt="Finance Club academic work" className="secondary-club-img" loading="lazy" />
               </div>
-              <h4 className="secondary-club-title">Finance Club</h4>
-              <p className="secondary-club-desc">
-                Empowering secondary students with foundational financial literacy, savings disciplines, family budgeting ethics, and modern economic awareness.
-              </p>
-            </div>
+              <div className="secondary-club-body">
+                <h4 className="secondary-club-title">Finance Club</h4>
+                <p className="secondary-club-desc">
+                  Empowering secondary students with foundational financial literacy, savings disciplines, family budgeting ethics, and modern economic awareness.
+                </p>
+              </div>
+            </article>
 
-            <div className="secondary-club-card reveal-init stagger-4">
-              <div className="secondary-club-icon">
-                <IconUsers size={24} />
+            <article className="secondary-club-card reveal-init stagger-4">
+              <div className="secondary-club-img-wrap">
+                <img src={independenceImg} alt="Cultural activities and arts on campus" className="secondary-club-img" loading="lazy" />
               </div>
-              <h4 className="secondary-club-title">Cultural Activities & Arts</h4>
-              <p className="secondary-club-desc">
-                Annual theatrical productions, classical and folk music performances, Tamil literary debates, oratorical championships, and celebratory carnivals.
-              </p>
-            </div>
+              <div className="secondary-club-body">
+                <h4 className="secondary-club-title">Cultural Activities & Arts</h4>
+                <p className="secondary-club-desc">
+                  Annual theatrical productions, classical and folk music performances, Tamil literary debates, oratorical championships, and celebratory carnivals.
+                </p>
+              </div>
+            </article>
           </div>
         </div>
       </section>

@@ -35,12 +35,12 @@
 .stat-card {
   background-color: #ffffff;
   border-radius: var(--radius-xl);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--sandal-200);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   position: relative;
   overflow: hidden;
 }

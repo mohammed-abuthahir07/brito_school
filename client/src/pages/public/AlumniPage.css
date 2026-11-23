@@ -233,6 +233,28 @@
   margin: 0 auto;
 }
 
+.alumni-connect-lead {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.alumni-form-steps {
+  text-align: left;
+  max-width: 640px;
+  margin: 1.25rem auto 0;
+  padding-left: 1.25rem;
+  color: #2b2b2b;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.alumni-form-steps li {
+  margin-bottom: 0.4rem;
+}
+
 .alumni-form {
   display: flex;
   flex-direction: column;

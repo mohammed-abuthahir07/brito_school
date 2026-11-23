@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import entranceImg from '../../assets/School/Entrence.jpg';
 import managerImg from '../../assets/Manager/manager.png';
@@ -12,6 +12,10 @@ import classroomImg from '../../assets/School/classrooms.jpg';
 import basketballImg from '../../assets/Sports/basketball.jpg';
 import nccImg from '../../assets/NCC/ncc.jpeg';
 import bandImg from '../../assets/Band/Band.jpeg';
+import groundImg from '../../assets/Infrastracture/Ground.jpg';
+import sideviewImg from '../../assets/Infrastracture/Schoolsideview.jpg';
+import studentsImg from '../../assets/School/students.jpg';
+import stateLevImg from '../../assets/Achievements/StateLev.png';
 import thiruImg from '../../assets/thiru.webp';
 import { publicService } from '../../services/publicService';
 import { API_BASE_URL } from '../../services/api';
@@ -25,14 +29,70 @@ import {
   IconExternalLink,
   IconSparkles,
   IconChevronRight,
+  IconChevronLeft,
   IconBookOpen,
   IconEye,
 } from '../../components/common/Icons';
 import './HomePage.css';
 
+const LEADERS = [
+  {
+    role: 'School Manager',
+    name: 'Most Rev. Dr. Antonysamy Savarimuthu',
+    subtitle: 'Metropolitan Archbishop of the Roman Catholic Archdiocese of Madurai',
+    image: managerImg,
+    alt: 'Most Rev. Dr. Antonysamy Savarimuthu - Manager',
+    paragraphs: [
+      'The Metropolitan Archbishop of the Roman Catholic Archdiocese of Madurai, Most Rev. Dr. Antonysamy Savarimuthu serves as the Manager of the school.',
+      'He, as the Manager, designs the policy decisions, oversees the implementation of the archdiocesan educational policies and presides over the board meetings of the Education Council.',
+      'Being the Manager he safeguards the religious character, values of the church and the national integrity imparted in the minds of the youth who are catered in our school.',
+    ],
+  },
+  {
+    role: 'Correspondent',
+    name: 'Rev. Fr. Louis A.',
+    subtitle: 'A Visionary Leader – An Innovative Thinker – A Spiritual Guide',
+    quote: '“Leadership is not about authority; it is about vision, inspiration and transformation.”',
+    image: corresImg,
+    alt: 'Rev. Fr. Louis A. - Correspondent',
+    paragraphs: [
+      'Rev. Fr. Louis A is a visionary leader and dedicated priest committed to the academic, moral and spiritual development of students. With his progressive vision, he has worked towards increasing student strength and enhancing the quality of education at St. Britto Hr. Sec. School, Madurai.',
+      'His notable initiatives include introducing smart board facilities for the Middle, High and Higher Secondary sections, special cursive writing classes and innovative reading sessions with the guidance of experts. He takes an active role in academic improvement through regular classroom visits, monitoring teaching practices and assessing students’ learning progress.',
+      'He provides continuous guidance and motivation to teachers, encouraging effective teaching strategies and quality classroom instruction. Through regular interaction with students, he identifies their learning needs, inspires them to overcome challenges and motivates them to achieve their fullest potential. He constantly motivates teachers to work towards achieving 100% results in both Class X and Class XII examinations.',
+      'As a spiritual guide, he emphasizes faith, discipline, prayer, compassion and moral values, ensuring that education goes beyond academics to shape responsible and value-driven individuals.',
+    ],
+  },
+  {
+    role: 'Headmaster',
+    name: 'Rev. Fr. Maria Arul Selvam',
+    subtitle: 'M.A., B.Ed. • A visionary leader • A committed teacher • A beacon of light',
+    quote: '“A true leader inspires others to dream more, learn more and achieve more.”',
+    image: headmasterImg,
+    alt: 'Rev. Fr. Maria Arul Selvam - Headmaster',
+    paragraphs: [
+      '“Be perfect, therefore, as your heavenly Father is perfect.”',
+      'Rev. Fr. Maria Arul Selvam is a devoted educational leader whose path demonstrates commitment, tenacity, and an unwavering love of learning. In 2015, he started working at St. Britto Hr Sec. School as a Post Graduate Assistant (PG Assistant). In 2023, he received a promotion to Assistant Headmaster (AHM) in recognition of his leadership abilities and devotion to the teaching profession. He assumed the role of Headmaster in 2025 after years of outstanding service and administrative expertise.',
+      'As the headmaster of St. Britto Hr. Sec. School in Madurai, he feels that education encompasses both the formation and the acquisition of information. He motivates teachers to strive for excellence, encourages innovative teaching practices and inspires students to develop confidence, responsibility and respect for others. Guided by Christian values and a spirit of service, he strongly believes in nurturing young minds through knowledge, discipline, integrity and humanity.',
+    ],
+  },
+];
+
+const LEADER_SLIDE_MS = 5000;
+
+const calendarFileMeta = (fileUrl = '') => {
+  const ext = (fileUrl.split('?')[0].split('.').pop() || '').toLowerCase();
+  if (ext === 'pdf') return { label: 'PDF', kind: 'Document' };
+  if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) return { label: ext.toUpperCase(), kind: 'Image' };
+  if (['doc', 'docx'].includes(ext)) return { label: 'DOC', kind: 'Document' };
+  return { label: 'FILE', kind: 'Attachment' };
+};
+
 export const HomePage = () => {
   const [calendars, setCalendars] = useState([]);
   const [calendarsLoading, setCalendarsLoading] = useState(true);
+  const [leaderIndex, setLeaderIndex] = useState(0);
+  const leaderPausedRef = useRef(false);
+  const leaderTouchX = useRef(null);
   const { kural, loading: kuralLoading, openModal } = useDailyKural();
 
   useScrollReveal(calendars.length);
@@ -52,8 +112,33 @@ export const HomePage = () => {
       });
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      if (leaderPausedRef.current) return;
+      setLeaderIndex((current) => (current + 1) % LEADERS.length);
+    }, LEADER_SLIDE_MS);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const pauseLeaders = () => {
+    leaderPausedRef.current = true;
+  };
+
+  const resumeLeaders = () => {
+    leaderPausedRef.current = false;
+  };
+
+  const goToLeader = (nextIndex) => {
+    setLeaderIndex((nextIndex + LEADERS.length) % LEADERS.length);
+  };
+
+  const activeLeader = LEADERS[leaderIndex];
+
   return (
-    <div className="home-page">
+    <div className="home-page page-enter">
       {/* =========================================================================
           SECTION 1: HERO & HISTORICAL FOUNDATION
           ========================================================================= */}
@@ -126,89 +211,31 @@ export const HomePage = () => {
       </section>
 
       {/* =========================================================================
-          SECTION 2: DEDICATED "TODAY'S THIRUKKURAL" SECTION
+          SECTION 2: PATRON SAINT — SAINT ARULANANDAR (ST. BRITTO)
           ========================================================================= */}
-      <section className="home-kural-section reveal-init" aria-label="Today's Thirukkural">
+      <section className="home-creed-section reveal-init" aria-label="School motto and values">
         <div className="container">
-          <div className="home-kural-card">
-            <div className="home-kural-header">
-              <div className="home-kural-badge">
-                <IconBookOpen size={18} />
-                <span>TODAY'S THIRUKKURAL • இன்றைய திருக்குறள்</span>
-              </div>
-              {kural && kural.kural_number && (
-                <span className="kural-num-pill">குறள் எண்: {kural.kural_number}</span>
-              )}
-            </div>
-
-            {kuralLoading ? (
-              <div style={{ padding: '2rem 0' }}>
-                <LoadingSpinner text="Retrieving today's sacred Thirukkural verse..." />
-              </div>
-            ) : kural ? (
-              <div className="home-kural-content">
-                <div className="home-kural-main-grid">
-                  <div className="home-kural-verses-col">
-                    <div className="home-kural-tamil-box">
-                      <p className="home-kural-tamil-text">{kural.tamil_text}</p>
-                    </div>
-
-                    <div className="home-kural-details-grid">
-                      <div className="home-kural-detail-card">
-                        <span className="kural-sublabel">English Translation</span>
-                        <p className="kural-translation-text">"{kural.english_meaning}"</p>
-                      </div>
-
-                      {kural.explanation && (
-                        <div className="home-kural-detail-card">
-                          <span className="kural-sublabel">Verse Meaning & Context • விளக்கம்</span>
-                          <p className="kural-explanation-text">{kural.explanation}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="home-kural-portrait-col">
-                    <div className="home-kural-portrait-frame">
-                      <img
-                        src={thiruImg}
-                        alt="Ayyan Thiruvalluvar"
-                        className="home-kural-portrait-img"
-                        loading="lazy"
-                      />
-                      <div className="home-kural-portrait-tag">
-                        <span>அய்யன் திருவள்ளுவர்</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="home-kural-footer-row">
-                  <span className="home-kural-subtext">
-                    Daily moral philosophy inspiring righteous character, discipline, and compassion at St. Britto.
-                  </span>
-                  <button
-                    type="button"
-                    className="home-kural-popup-btn"
-                    onClick={openModal}
-                  >
-                    <IconEye size={17} />
-                    <span>View in Popup Dialog</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="home-kural-empty">
-                <p>Today's Thirukkural will be updated shortly by the school administrator.</p>
-              </div>
-            )}
+          <div className="section-header-center">
+            <span className="section-tag">Motto &amp; Values</span>
+            <h2 className="section-heading">What This Temple of Learning Stands For</h2>
+          </div>
+          <div className="home-creed-grid">
+            <article className="home-creed-card reveal-init stagger-1">
+              <h3>Let Justice and Love Prevail</h3>
+              <p>The school motto, adopted at the foundation on 22-06-1968, still measures discipline, fairness, and brotherhood on campus.</p>
+            </article>
+            <article className="home-creed-card reveal-init stagger-2">
+              <h3>Education and Discipline</h3>
+              <p>St. Britto regards education and discipline as its two eyes — academic work joined to character, moral conscience, and civic virtue.</p>
+            </article>
+            <article className="home-creed-card reveal-init stagger-3">
+              <h3>Silence is the Greatest Weapon</h3>
+              <p>Peaceful resolution and human dignity are practised among 2,100 students of every religion, caste, and creed.</p>
+            </article>
           </div>
         </div>
       </section>
 
-      {/* =========================================================================
-          SECTION 3: PATRON SAINT — SAINT ARULANANDAR (ST. BRITTO)
-          ========================================================================= */}
       <section className="patron-section reveal-init" aria-label="Patron Saint of St. Britto">
         <div className="container">
           <div className="patron-card">
@@ -264,84 +291,75 @@ export const HomePage = () => {
               Visionary educational leaders dedicated to character formation, academic distinction, and servant leadership.
             </p>
           </div>
-
-          <div className="leadership-grid">
-            {/* MANAGER */}
-            <article className="leader-card reveal-init stagger-1">
-              <div className="leader-image-wrapper">
-                <img
-                  src={managerImg}
-                  alt="Most Rev. Dr. Antonysamy Savarimuthu - Manager"
-                  className="leader-image"
-                  loading="lazy"
-                />
-                <span className="leader-role-badge">School Manager</span>
-              </div>
-              <div className="leader-content">
-                <h3 className="leader-name">Most Rev. Dr. Antonysamy Savarimuthu</h3>
-                <div className="leader-subtitle">Metropolitan Archbishop of Madurai</div>
-                <div className="leader-quote">
-                  “Safeguarding religious character, gospel values, and national integrity in the hearts and minds of youth.”
-                </div>
-                <p className="leader-desc">
-                  The Metropolitan Archbishop of the Roman Catholic Archdiocese of Madurai serves ex-officio as the Manager of St. Britto. He formulates macro policy decisions, steers archdiocesan educational objectives, and presides over the Archdiocesan Education Council.
-                </p>
-              </div>
-            </article>
-
-            {/* CORRESPONDENT */}
-            <article className="leader-card reveal-init stagger-2">
-              <div className="leader-image-wrapper">
-                <img
-                  src={corresImg}
-                  alt="Rev. Fr. Louis A. - Correspondent"
-                  className="leader-image"
-                  loading="lazy"
-                />
-                <span className="leader-role-badge">Correspondent</span>
-              </div>
-              <div className="leader-content">
-                <h3 className="leader-name">Rev. Fr. Louis A.</h3>
-                <div className="leader-subtitle">Visionary Leader • Innovative Thinker • Spiritual Guide</div>
-                <div className="leader-quote">
-                  “Leadership is not about authority; it is about vision, inspiration, and transformation.”
-                </div>
-                <p className="leader-desc">
-                  Rev. Fr. Louis A. is a dedicated priest spearheading holistic academic and infrastructural advancement. Notable accomplishments include installing smart digital classrooms for Middle, High, and Higher Secondary wings, cursive handwriting classes, and expert reading modules while fostering 100% board examination targets.
-                </p>
-                <div className="discrepancy-notice" title="Document Note">
-                  *Historical narrative notes Rev. Fr. A. Joyce; current operational Correspondent is Rev. Fr. Louis A.
-                </div>
-              </div>
-            </article>
-
-            {/* HEADMASTER */}
-            <article className="leader-card reveal-init stagger-3">
-              <div className="leader-image-wrapper">
-                <img
-                  src={headmasterImg}
-                  alt="Rev. Fr. Maria Arul Selvam - Headmaster"
-                  className="leader-image"
-                  loading="lazy"
-                />
-                <span className="leader-role-badge">Headmaster</span>
-              </div>
-              <div className="leader-content">
-                <h3 className="leader-name">Rev. Fr. Maria Arul Selvam</h3>
-                <div className="leader-subtitle">M.A., B.Ed. • Committed Teacher & Beacon of Light</div>
-                <div className="leader-quote">
-                  “Be perfect, therefore, as your heavenly Father is perfect.”
-                </div>
-                <p className="leader-desc">
-                  Joined St. Britto in 2015 as Post Graduate Assistant, promoted in 2023 to Assistant Headmaster (AHM), and assumed the office of Headmaster in 2025. Guided by Gospel virtues, he champions educational innovation, classroom discipline, and nurturing civic leaders.
-                </p>
-                <div className="discrepancy-notice" title="Document Note">
-                  *Historical text records Rev. Fr. D. Maria Arul Selvam; personal profile lists Rev. Fr. Maria Arul Selvam, M.A., B.Ed.
-                </div>
-              </div>
-            </article>
-          </div>
         </div>
+
+          <div
+            className="leadership-carousel"
+            onMouseEnter={pauseLeaders}
+            onMouseLeave={resumeLeaders}
+            onPointerEnter={pauseLeaders}
+            onPointerLeave={resumeLeaders}
+            onTouchStart={(event) => {
+              leaderTouchX.current = event.changedTouches[0].clientX;
+            }}
+            onTouchEnd={(event) => {
+              if (leaderTouchX.current == null) return;
+              const delta = event.changedTouches[0].clientX - leaderTouchX.current;
+              leaderTouchX.current = null;
+              if (delta > 40) goToLeader(leaderIndex - 1);
+              if (delta < -40) goToLeader(leaderIndex + 1);
+            }}
+          >
+            <button
+              type="button"
+              className="leadership-nav prev"
+              onClick={() => goToLeader(leaderIndex - 1)}
+              aria-label="Previous leader"
+            >
+              <IconChevronLeft size={22} />
+            </button>
+
+            <article className="leadership-slide" key={activeLeader.role} aria-live="polite">
+              <div className="leadership-slide-media">
+                <img src={activeLeader.image} alt={activeLeader.alt} />
+              </div>
+              <div className="leadership-slide-copy">
+                <span className="leadership-slide-tag">{activeLeader.role}</span>
+                <h3 className="leadership-slide-name">{activeLeader.name}</h3>
+                <div className="leadership-slide-rule" aria-hidden="true" />
+                <p className="leadership-slide-subtitle">{activeLeader.subtitle}</p>
+                {activeLeader.quote && (
+                  <blockquote className="leadership-slide-quote">{activeLeader.quote}</blockquote>
+                )}
+                {activeLeader.paragraphs.map((text) => (
+                  <p key={text} className="leadership-slide-desc">{text}</p>
+                ))}
+              </div>
+            </article>
+
+            <button
+              type="button"
+              className="leadership-nav next"
+              onClick={() => goToLeader(leaderIndex + 1)}
+              aria-label="Next leader"
+            >
+              <IconChevronRight size={22} />
+            </button>
+
+            <div className="leadership-dots" role="tablist" aria-label="Leadership slides">
+              {LEADERS.map((leader, index) => (
+                <button
+                  key={leader.role}
+                  type="button"
+                  role="tab"
+                  className={`leadership-dot${index === leaderIndex ? ' is-active' : ''}`}
+                  aria-selected={index === leaderIndex}
+                  aria-label={`Show ${leader.name}`}
+                  onClick={() => goToLeader(index)}
+                />
+              ))}
+            </div>
+          </div>
       </section>
 
       {/* =========================================================================
@@ -430,12 +448,141 @@ export const HomePage = () => {
       {/* =========================================================================
           SECTION 6: OFFICIAL SCHOOL ACADEMIC CALENDAR
           ========================================================================= */}
+      <section className="home-setting-section reveal-init" aria-label="Campus infrastructure highlights">
+        <div className="container">
+          <div className="section-header-center">
+            <span className="section-tag">Campus Setting</span>
+            <h2 className="section-heading">Grounds, Blocks &amp; Student Community</h2>
+            <p className="home-setting-lead">
+              The Madurai campus combines open athletic grounds, multi-level academic blocks, and a united student body of 2,100 boys. Full facility notes live on the Facilities page.
+            </p>
+          </div>
+          <div className="home-setting-grid">
+            <article className="home-setting-card reveal-init stagger-1">
+              <img src={groundImg} alt="School athletic grounds" loading="lazy" />
+              <div>
+                <h3>Athletic grounds</h3>
+                <p>Open grounds used for football, basketball, volleyball, track meets, morning assembly, and cadet parades.</p>
+              </div>
+            </article>
+            <article className="home-setting-card reveal-init stagger-2">
+              <img src={sideviewImg} alt="Academic campus buildings" loading="lazy" />
+              <div>
+                <h3>Academic blocks</h3>
+                <p>Multi-level classroom buildings with wide breezeways, serving Middle, High, and Higher Secondary wings with smart boards.</p>
+              </div>
+            </article>
+            <article className="home-setting-card reveal-init stagger-3">
+              <img src={studentsImg} alt="Students of St. Britto" loading="lazy" />
+              <div>
+                <h3>Student community</h3>
+                <p>More than 1,800 of the 2,100 students come from diverse religious and community backgrounds, studying under one motto.</p>
+              </div>
+            </article>
+            <article className="home-setting-card reveal-init stagger-4">
+              <img src={stateLevImg} alt="State-level sports recognition" loading="lazy" />
+              <div>
+                <h3>Athletic distinction</h3>
+                <p>Third place at the State-Level Chief Minister’s Trophy basketball tournament, with a government award of ₹3,00,000.</p>
+              </div>
+            </article>
+          </div>
+          <div className="home-setting-cta">
+            <Link to="/facilities" className="hero-cta-primary">
+              View all facilities &amp; clubs
+              <IconChevronRight size={18} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-kural-section reveal-init" aria-label="Today's Thirukkural">
+        <div className="container">
+          <div className="home-kural-card">
+            <div className="home-kural-header">
+              <div className="home-kural-badge">
+                <IconBookOpen size={18} />
+                <span>Today’s Thirukkural • இன்றைய திருக்குறள்</span>
+              </div>
+              {kural && kural.kural_number && (
+                <span className="kural-num-pill">குறள் எண் {kural.kural_number}</span>
+              )}
+            </div>
+
+            {kuralLoading ? (
+              <div className="home-kural-loading">
+                <LoadingSpinner text="Retrieving today's sacred Thirukkural verse..." />
+              </div>
+            ) : kural ? (
+              <div className="home-kural-content">
+                <div className="home-kural-main-grid">
+                  <aside className="home-kural-portrait-col">
+                    <div className="home-kural-portrait-frame">
+                      <img
+                        src={thiruImg}
+                        alt="Ayyan Thiruvalluvar"
+                        className="home-kural-portrait-img"
+                        loading="lazy"
+                      />
+                      <div className="home-kural-portrait-tag">
+                        <span>அய்யன் திருவள்ளுவர்</span>
+                        <small>Thiruvalluvar</small>
+                      </div>
+                    </div>
+                  </aside>
+
+                  <div className="home-kural-verses-col">
+                    <p className="kural-eyebrow">Verse of the day</p>
+                    <blockquote className="home-kural-tamil-box">
+                      <span className="home-kural-quote" aria-hidden="true">“</span>
+                      <p className="home-kural-tamil-text">{kural.tamil_text}</p>
+                    </blockquote>
+
+                    <div className="home-kural-readings">
+                      <div className="home-kural-detail-card">
+                        <span className="kural-sublabel">English translation</span>
+                        <p className="kural-translation-text">“{kural.english_meaning}”</p>
+                      </div>
+
+                      {kural.explanation && (
+                        <div className="home-kural-detail-card">
+                          <span className="kural-sublabel">விளக்கம் • Meaning</span>
+                          <p className="kural-explanation-text">{kural.explanation}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="home-kural-footer-row">
+                  <span className="home-kural-subtext">
+                    Daily moral philosophy inspiring righteous character, discipline, and compassion at St. Britto.
+                  </span>
+                  <button
+                    type="button"
+                    className="home-kural-popup-btn"
+                    onClick={openModal}
+                  >
+                    <IconEye size={17} />
+                    <span>Open full reading</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="home-kural-empty">
+                <p>Today's Thirukkural will be updated shortly by the school administrator.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       <section className="calendar-section reveal-init" aria-label="School Academic Calendar">
         <div className="container">
           <div className="section-header-center">
             <span className="section-tag">Academic Schedule</span>
             <h2 className="section-heading">Official School Academic Calendar</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>
+            <p className="calendar-section-lead">
               Access and download authentic academic year schedules, examination dates, and official institutional announcements.
             </p>
           </div>
@@ -454,54 +601,65 @@ export const HomePage = () => {
                 const fileUrl = cal.file_url?.startsWith('http')
                   ? cal.file_url
                   : `${API_BASE_URL}${cal.file_url || `/uploads/calendars/${cal.file_path}`}`;
+                const fileMeta = calendarFileMeta(fileUrl);
+                const publishedOn = cal.created_at
+                  ? new Date(cal.created_at).toLocaleDateString('en-IN', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })
+                  : null;
 
                 return (
-                  <div key={cal.id} className={`calendar-card reveal-init ${calendars.length === 1 ? 'featured-calendar-card' : ''}`}>
-                    <div className="calendar-header-row">
-                      <div className="calendar-icon-box">
-                        <IconCalendar size={calendars.length === 1 ? 28 : 24} />
-                      </div>
-                      <div>
-                        <h3 className="calendar-title">{cal.title}</h3>
+                  <article
+                    key={cal.id}
+                    className={`calendar-card reveal-init ${calendars.length === 1 ? 'featured-calendar-card' : ''}`}
+                  >
+                    <div className="calendar-doc-preview" aria-hidden="true">
+                      <div className="calendar-doc-sheet">
+                        <span className="calendar-doc-ribbon">{fileMeta.label}</span>
+                        <div className="calendar-doc-icon">
+                          <IconCalendar size={28} />
+                        </div>
+                        <span className="calendar-doc-filename">Academic Calendar</span>
+                        <span className="calendar-doc-lines" />
                       </div>
                     </div>
 
-                    <p className="calendar-desc">
-                      {cal.description || 'Official academic year schedule and institutional events.'}
-                    </p>
+                    <div className="calendar-card-body">
+                      <span className="calendar-kicker">Official institutional release</span>
+                      <h3 className="calendar-title">{cal.title}</h3>
+                      <p className="calendar-desc">
+                        {cal.description || 'Official academic year schedule and institutional events.'}
+                      </p>
 
-                    {cal.created_at && (
-                      <div className="calendar-date">
-                        Published on: {new Date(cal.created_at).toLocaleDateString('en-IN', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                      <ul className="calendar-meta">
+                        {publishedOn && <li>Published {publishedOn}</li>}
+                        <li>{fileMeta.kind} · {fileMeta.label}</li>
+                        <li>For students &amp; parents</li>
+                      </ul>
+
+                      <div className="calendar-actions">
+                        <a
+                          href={fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-primary"
+                        >
+                          <IconExternalLink size={16} />
+                          <span>View document</span>
+                        </a>
+                        <a
+                          href={fileUrl}
+                          download
+                          className="btn btn-secondary"
+                        >
+                          <IconDownload size={16} />
+                          <span>Download</span>
+                        </a>
                       </div>
-                    )}
-
-                    <div className="calendar-actions">
-                      <a
-                        href={fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-primary btn-sm"
-                        style={{ flex: 1 }}
-                      >
-                        <IconExternalLink size={16} />
-                        <span>View File</span>
-                      </a>
-                      <a
-                        href={fileUrl}
-                        download
-                        className="btn btn-secondary btn-sm"
-                        style={{ flex: 1 }}
-                      >
-                        <IconDownload size={16} />
-                        <span>Download</span>
-                      </a>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>

@@ -5,6 +5,7 @@ import { useScrollReveal } from '../../utils/useScrollReveal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Alert } from '../../components/common/Alert';
+import { PageHero } from '../../components/public/PageHero';
 import { Button } from '../../components/common/Button';
 import {
   IconImage,
@@ -47,7 +48,16 @@ export const GalleryPage = () => {
     fetchGalleries();
   }, []);
 
-  // Handle ESC and Arrow keys for lightbox
+  const getImageSrc = (item) => {
+    if (!item) return '';
+    const rawPath = item.image_path || item.file_url || '';
+    if (rawPath.startsWith('http')) return rawPath;
+    const cleanPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+    return `${API_BASE_URL}${cleanPath}`;
+  };
+
+  const currentItem = activeIndex !== null ? galleries[activeIndex] : null;
+
   useEffect(() => {
     if (activeIndex === null) return;
 
@@ -70,47 +80,35 @@ export const GalleryPage = () => {
     };
   }, [activeIndex, galleries.length]);
 
-  const getImageSrc = (item) => {
-    if (!item) return '';
-    const rawPath = item.image_path || item.file_url || '';
-    if (rawPath.startsWith('http')) return rawPath;
-    const cleanPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
-    return `${API_BASE_URL}${cleanPath}`;
+  const openLightbox = (index) => {
+    setActiveIndex(index);
   };
 
-  const currentItem = activeIndex !== null ? galleries[activeIndex] : null;
-
   return (
-    <div className="gallery-page">
-      {/* =========================================================================
-          HERO BANNER
-          ========================================================================= */}
-      <section className="gallery-hero">
-        <div className="container">
-          <span className="hero-badge animate-fade-in" style={{ backgroundColor: 'rgba(216, 195, 165, 0.2)', borderColor: 'var(--sandal-300)', color: 'var(--sandal-100)' }}>
-            <IconImage size={16} />
-            HISTORICAL & CONTEMPORARY ARCHIVES
-          </span>
-          <h1 className="gallery-hero-title animate-fade-in-up">School Moments & Visual Archives</h1>
-          <p className="gallery-hero-subtitle animate-fade-in-up">
-            A dynamic visual chronicle of institutional ceremonies, sports championships, cadet marches, prayer assemblies, and jubilant student milestones.
-          </p>
-        </div>
-      </section>
+    <div className="gallery-page page-enter">
+      <PageHero
+        icon={<IconImage size={16} />}
+        badge="School Photo Archives"
+        title="School Moments & Visual Archives"
+        subtitle="Photographs of campus life, ceremonies, sports and student activities — published by the school administration."
+      />
 
-      {/* =========================================================================
-          GALLERY CONTENT SECTION
-          ========================================================================= */}
       <section className="gallery-content-section reveal-init">
         <div className="container">
-          {/* Status Bar */}
+          <div className="gallery-intro">
+            <span className="section-tag">Published gallery</span>
+            <h2 className="section-heading">School photographs</h2>
+            <p>
+              Each picture, title and description is added from the staff gallery. When a new photo is published, it appears here in the same card layout.
+            </p>
+          </div>
+
           <div className="gallery-status-bar">
             <div className="gallery-count-badge">
-              <IconImage size={20} style={{ color: 'var(--brown-700)' }} />
+              <IconImage size={20} />
               <span>
-                Displaying <strong>{galleries.length}</strong> photo memories
+                Displaying <strong>{galleries.length}</strong> photo{galleries.length === 1 ? '' : 's'}
               </span>
-              <span className="gallery-capacity-pill">Backend Capacity: 30 Max</span>
             </div>
 
             <Button
@@ -134,14 +132,14 @@ export const GalleryPage = () => {
           )}
 
           {loading ? (
-            <div style={{ padding: '4rem 0' }}>
-              <LoadingSpinner text="Retrieving high-resolution school photographs..." />
+            <div className="gallery-loading">
+              <LoadingSpinner text="Retrieving school photographs..." />
             </div>
           ) : galleries.length === 0 ? (
             <EmptyState
               icon={<IconImage size={36} />}
-              title="No Gallery Photographs Uploaded Yet"
-              description="The school administration will publish new gallery photographs soon. Real-time uploads from the admin portal will automatically display here."
+              title="No photographs published yet"
+              description="When the school administration uploads a photo with a title and description, it will appear in this gallery."
               action={
                 <Button variant="primary" size="sm" onClick={fetchGalleries}>
                   Check Again
@@ -154,21 +152,21 @@ export const GalleryPage = () => {
                 <article
                   key={item.id}
                   className="gallery-card reveal-init"
-                  onClick={() => setActiveIndex(index)}
+                  onClick={() => openLightbox(index)}
                   tabIndex={0}
                   role="button"
                   aria-label={`View photo: ${item.title}`}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      setActiveIndex(index);
+                      openLightbox(index);
                     }
                   }}
                 >
                   <div className="gallery-card-img-wrapper">
                     <img
                       src={getImageSrc(item)}
-                      alt={item.title || 'School photo memory'}
+                      alt={item.title || 'School photograph'}
                       className="gallery-card-img"
                       loading="lazy"
                     />
@@ -192,9 +190,6 @@ export const GalleryPage = () => {
         </div>
       </section>
 
-      {/* =========================================================================
-          LIGHTBOX MODAL
-          ========================================================================= */}
       {currentItem && (
         <div
           className="lightbox-overlay"
