@@ -6,12 +6,12 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Alert } from '../../components/common/Alert';
 import { PageHero } from '../../components/public/PageHero';
+import independenceImg from '../../assets/School/independenceday.jpg';
 import { Button } from '../../components/common/Button';
 import {
   IconImage,
   IconEye,
   IconX,
-  IconRefresh,
   IconChevronRight,
   IconChevronLeft,
 } from '../../components/common/Icons';
@@ -91,6 +91,8 @@ export const GalleryPage = () => {
         badge="School Photo Archives"
         title="School Moments & Visual Archives"
         subtitle="Photographs of campus life, ceremonies, sports and student activities — published by the school administration."
+        backgroundImage={independenceImg}
+        backgroundPosition="center 35%"
       />
 
       <section className="gallery-content-section reveal-init">
@@ -101,25 +103,6 @@ export const GalleryPage = () => {
             <p>
               Each picture, title and description is added from the staff gallery. When a new photo is published, it appears here in the same card layout.
             </p>
-          </div>
-
-          <div className="gallery-status-bar">
-            <div className="gallery-count-badge">
-              <IconImage size={20} />
-              <span>
-                Displaying <strong>{galleries.length}</strong> photo{galleries.length === 1 ? '' : 's'}
-              </span>
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              icon={<IconRefresh size={16} />}
-              onClick={fetchGalleries}
-              disabled={loading}
-            >
-              Refresh Gallery
-            </Button>
           </div>
 
           {error && (

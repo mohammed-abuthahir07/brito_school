@@ -15,7 +15,6 @@ import {
 } from '../../components/common/Icons';
 import './AnnouncementsAdminPage.css';
 
-const CATEGORIES = ['General', 'Academic', 'Events', 'Sports', 'Urgent'];
 
 export const AnnouncementsAdminPage = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -286,18 +285,14 @@ export const AnnouncementsAdminPage = () => {
             <label htmlFor="announcementCategory" className="form-label">
               Category
             </label>
-            <select
+            <input
               id="announcementCategory"
-              className="form-select"
+              type="text"
+              className="form-input"
+              placeholder="e.g. Academic"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           <div className="form-group">

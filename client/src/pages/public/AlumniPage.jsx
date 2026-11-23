@@ -5,7 +5,7 @@ import { useScrollReveal } from '../../utils/useScrollReveal';
 import { PageHero } from '../../components/public/PageHero';
 import { Button } from '../../components/common/Button';
 import { Alert } from '../../components/common/Alert';
-import { IconUsers, IconAlertCircle, IconAward, IconSparkles } from '../../components/common/Icons';
+import { IconUsers, IconAward, IconSparkles } from '../../components/common/Icons';
 import './AlumniPage.css';
 
 export const AlumniPage = () => {
@@ -105,6 +105,8 @@ export const AlumniPage = () => {
         badge="Britto Alumni Association • Estd. 1968"
         title="Connecting Generations of Brittoites"
         subtitle="Celebrating the enduring legacy of thousands of distinguished alumni making noble contributions across Tamil Nadu, India, and around the world."
+        backgroundImage={alumni1Img}
+        backgroundPosition="center 22%"
       />
 
       {/* =========================================================================
@@ -210,7 +212,7 @@ export const AlumniPage = () => {
               <ol className="alumni-form-steps">
                 <li>Enter your name, year of passing, course or group, email, and phone.</li>
                 <li>Optionally add occupation, organisation, city, higher studies, and a memory.</li>
-                <li>Submit. You will see a confirmation summary on this page. Email dispatch is not available on the present server.</li>
+                <li>Submit. You will see a confirmation summary on this page.</li>
               </ol>
             </div>
 
@@ -235,19 +237,6 @@ export const AlumniPage = () => {
                     {submittedData.location && <li><strong>Location:</strong> {submittedData.location}</li>}
                     {submittedData.higherEducation && <li><strong>Higher Education:</strong> {submittedData.higherEducation}</li>}
                   </ul>
-                </div>
-
-                <div className="alumni-limitation-box">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-                    <IconAlertCircle size={20} />
-                    <span>Technical & Architectural Notice Regarding Email Delivery</span>
-                  </div>
-                  <p>
-                    <strong>Backend Status:</strong> The existing backend contains administrative APIs for Announcements, Calendars, Galleries, Thirukkural, and Profile, but <em>does not currently provide an active server-side email dispatch endpoint for public alumni registration</em> (such as <code>POST /api/public/alumni</code>).
-                  </p>
-                  <p style={{ marginTop: '0.5rem' }}>
-                    In accordance with strict project rules prohibiting client-side exposure of Gmail App Passwords or mock persistence, all client-side validation has succeeded and this limitation is recorded for backend expansion.
-                  </p>
                 </div>
 
                 <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>

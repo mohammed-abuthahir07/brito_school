@@ -3,10 +3,9 @@ import classroomImg from '../../assets/School/classrooms.jpg';
 import staffsImg from '../../assets/Staffs/img1.jpg';
 import britoImg from '../../assets/Brito/brito.jpeg';
 import britoPortraitImg from '../../assets/Brito/img4.jpg';
-import stateLevImg from '../../assets/Achievements/StateLev.png';
-import pricesImg from '../../assets/Sports/prices.jpg';
-import independenceImg from '../../assets/School/independenceday.jpg';
-import studentsImg from '../../assets/School/students.jpg';
+import stateLevImg from '../../assets/Achievements/SportDev.png';
+import DistrictLev from '../../assets/Achievements/DistrictLevel.jpeg';
+import sideviewImg from '../../assets/Infrastracture/Schoolsideview.jpg';
 import { useScrollReveal } from '../../utils/useScrollReveal';
 import { PageHero } from '../../components/public/PageHero';
 import { IconSparkles, IconCheck, IconAward } from '../../components/common/Icons';
@@ -25,6 +24,8 @@ export const AboutPage = () => {
         badge="About St. Britto Hr. Sec. School"
         title="Legacy of Discipline, Character & Victory"
         subtitle='Established on June 22, 1968, fostering academic prominence, athletic triumph, and civic responsibility under the timeless motto "Let Justice and Love Prevail".'
+        backgroundImage={sideviewImg}
+        backgroundPosition="center 40%"
       />
 
       {/* =========================================================================
@@ -242,14 +243,14 @@ export const AboutPage = () => {
               </div>
               <h2 className="spotlight-title">Chief Minister’s Trophy — Basketball, 3rd Place</h2>
               <p className="spotlight-desc">
-                Madurai district students won third place at the state-level tournament in Coimbatore. The award total was <strong>₹3,00,000</strong>, with twelve players receiving ₹25,000 each. St. Britto student <strong>R. Dilip Akash</strong> was among those honoured.
+                1. Madurai district students won third place at the state-level tournament in Coimbatore. The award total was <strong>₹3,00,000</strong>, with twelve players receiving ₹25,000 each. St. Britto student <strong>R. Dilip Akash</strong> was among those honoured . <br />2. 100mts  Dash zonal level  1st place sabarimalaikannan 9A1
+3rd place Beemaragul 9F, 
               </p>
             </div>
             <div className="spotlight-image-grid">
               <img src={stateLevImg} alt="State-level award presentation" className="spotlight-img" loading="lazy" />
-              <img src={pricesImg} alt="Trophy prize distribution" className="spotlight-img" loading="lazy" />
-              <img src={independenceImg} alt="National observance on campus" className="spotlight-img" loading="lazy" />
-              <img src={studentsImg} alt="Students of St. Britto" className="spotlight-img" loading="lazy" />
+              <img src={DistrictLev} alt="State-level award presentation" className="spotlight-img" loading="lazy" />
+            
             </div>
           </div>
         </div>

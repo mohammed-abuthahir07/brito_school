@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import groundImg from '../../assets/Infrastracture/Ground.jpg';
 import sideviewImg from '../../assets/Infrastracture/Schoolsideview.jpg';
 import classroomImg from '../../assets/School/classrooms.jpg';
@@ -9,9 +9,6 @@ import nccImg from '../../assets/NCC/ncc.jpeg';
 import scoutsImg from '../../assets/Scouts/Scouts.jpg';
 import bandImg from '../../assets/Band/Band.jpeg';
 import sportsImg from '../../assets/Sports/Football.jpg';
-import basketballImg from '../../assets/Sports/basketball.jpg';
-import basketball1Img from '../../assets/Sports/basketball1.jpg';
-import pricesImg from '../../assets/Sports/prices.jpg';
 import sportDevImg from '../../assets/Achievements/SportDev.png';
 import districtLevImg from '../../assets/Achievements/DistrictLevel.jpeg';
 import stateLevImg from '../../assets/Achievements/StateLev.png';
@@ -24,9 +21,214 @@ import { useScrollReveal } from '../../utils/useScrollReveal';
 import { PageHero } from '../../components/public/PageHero';
 import {
   IconBuilding,
-  IconAward,
+  IconChevronLeft,
+  IconChevronRight,
 } from '../../components/common/Icons';
 import './FacilitiesPage.css';
+
+const SLIDE_MS = 5000;
+
+const YOUTH_WINGS = [
+  {
+    tag: 'National Cadet Corps (NCC)',
+    title: 'NCC Unit — 4(TN) Engr Coy NCC',
+    image: nccImg,
+    alt: 'NCC Cadets 4(TN) Engr Coy',
+    paragraphs: [
+      <>
+        The NCC unit of St. Britto Higher Secondary School, Madurai, plays a cornerstone role in cultivating discipline, national unity, and leadership among youth. Operating under the expert mentorship of <strong>4(TN) Engr Coy NCC</strong>, cadets actively participate in social service campaigns, flood relief assistance, drill competitions, and ceremonial guard-of-honor presentations.
+      </>,
+    ],
+    meta: (
+      <>
+        <strong>Unit Information:</strong> Total Strength: 100 Cadets • Troop No: 355 • Motto: <em>“Unity and Discipline”</em> • Troop Commander: <strong>P. Paul Peter Arulanathan</strong>.
+      </>
+    ),
+  },
+  {
+    tag: 'Bharat Scouts Movement',
+    title: 'Scout Movement — St. Britto Troop',
+    image: scoutsImg,
+    alt: 'Bharat Scouts Movement',
+    paragraphs: [
+      'More than 100 Scout boys actively engage in the Bharat Scout Movement. Founded globally in 1907 by Lt. Gen. Robert Baden-Powell, scouting instills self-reliance, moral integrity, environmental care, and first-aid readiness. Regular training sessions are conducted every Friday during the 8th period.',
+      <>
+        Living by the motto <em>"Helping Others"</em>, Scouts arrive before 8:30 a.m. each morning to guide students orderly to classrooms. At noon, they supervise lunch hall cleanliness, assist school visitors, and lead march-pasts on Republic Day and Sports Day.
+      </>,
+    ],
+    meta: (
+      <>
+        <strong>Honors & Coordination:</strong> Intensive preparation for <strong>Tritiya Sopan</strong> & the prestigious <strong>Rajya Puraskar</strong> Governor's Award. Coordinated by <strong>Mr. S. Ponraj</strong>, Graduate Teacher.
+      </>
+    ),
+  },
+  {
+    tag: 'School Band Troupe',
+    title: 'St. Britto Band Troupe (Estd. 1994)',
+    image: bandImg,
+    alt: 'Britto Band Troupe',
+    paragraphs: [
+      <>
+        Founded in <strong>1994</strong>, the Britto Band Troupe inaugurates major school functions with musical grandeur and rhythmic majesty. Welcoming eminent dignitaries, leading march-past contingents, and adding solemn glory to celebrations are the central mission of this beloved ensemble.
+      </>,
+    ],
+    meta: (
+      <>
+        <strong>Band Master History</strong>
+        <ul className="club-meta-list">
+          <li>1994–1999: Teacher Mr. A. Stanislaus Justin</li>
+          <li>1999–2008: Teacher Mr. A. Louis Amalraj</li>
+          <li>2008–2017: Teacher Mr. M. S. Ackle Britto</li>
+          <li>2017–Present: Teacher <strong>Mr. K. Jayaseelan</strong></li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    tag: 'Athletic Wings',
+    title: 'Sports, Basketball & Football',
+    image: sportsImg,
+    alt: 'Sports and Football Tournament',
+    paragraphs: [
+      'Our athletic department nurtures championship basketball squads, football teams, and track athletes. Renowned for capturing 3rd place in the State-Level Chief Minister\'s Trophy (₹3,00,000 cash prize), our athletic programs build team camaraderie, physical stamina, and competitive sportsmanship.',
+    ],
+    meta: (
+      <>
+        <strong>Coaching Regimen:</strong> Supervised daily by Physical Directors, conducting morning stamina workouts, tactical strategy, and inter-school matches.
+      </>
+    ),
+  },
+];
+
+const SERVICE_WINGS = [
+  {
+    tag: 'JRC Wing',
+    title: 'Junior Red Cross (JRC)',
+    image: jrcImg,
+    alt: 'Junior Red Cross Cadets',
+    paragraphs: [
+      'Cadets are formed in health awareness, disaster first-aid, sanitation, and humanitarian service — training that supports empathy and an immediate relief response in the school community.',
+    ],
+  },
+  {
+    tag: 'NSS Unit',
+    title: 'National Service Scheme (NSS)',
+    image: nssImg,
+    alt: 'NSS Community Volunteers',
+    paragraphs: [
+      'Volunteers take part in rural literacy workshops, tree-planting, blood-donation awareness, and civic sanitation. The unit’s work is campus service, not a substitute for the detailed NCC and Scouts programmes above.',
+    ],
+  },
+  {
+    tag: 'RRC Movement',
+    title: 'Red Ribbon Club (RRC)',
+    image: rrcImg,
+    alt: 'Red Ribbon Club',
+    paragraphs: [
+      'A youth health wing that promotes positive lifestyles, health awareness, peer counselling, and adolescent hygiene on campus.',
+    ],
+  },
+];
+
+const WingSlider = ({ items, ariaLabel }) => {
+  const [index, setIndex] = useState(0);
+  const pausedRef = useRef(false);
+  const touchX = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      if (pausedRef.current) return;
+      setIndex((current) => (current + 1) % items.length);
+    }, SLIDE_MS);
+    return () => window.clearInterval(timer);
+  }, [items.length]);
+
+  const goTo = (nextIndex) => {
+    setIndex((nextIndex + items.length) % items.length);
+  };
+
+  const active = items[index];
+
+  return (
+    <div
+      className="wing-carousel"
+      onMouseEnter={() => {
+        pausedRef.current = true;
+      }}
+      onMouseLeave={() => {
+        pausedRef.current = false;
+      }}
+      onPointerEnter={() => {
+        pausedRef.current = true;
+      }}
+      onPointerLeave={() => {
+        pausedRef.current = false;
+      }}
+      onTouchStart={(event) => {
+        touchX.current = event.changedTouches[0].clientX;
+      }}
+      onTouchEnd={(event) => {
+        if (touchX.current == null) return;
+        const delta = event.changedTouches[0].clientX - touchX.current;
+        touchX.current = null;
+        if (delta > 40) goTo(index - 1);
+        if (delta < -40) goTo(index + 1);
+      }}
+    >
+      <button
+        type="button"
+        className="wing-nav prev"
+        onClick={() => goTo(index - 1)}
+        aria-label={`Previous ${ariaLabel}`}
+      >
+        <IconChevronLeft size={22} />
+      </button>
+
+      <article className="wing-slide" key={active.tag} aria-live="polite">
+        <div className="wing-slide-media">
+          <img src={active.image} alt={active.alt} />
+        </div>
+        <div className="wing-slide-copy">
+          <span className="wing-slide-tag">{active.tag}</span>
+          <h3 className="wing-slide-title">{active.title}</h3>
+          <div className="wing-slide-rule" aria-hidden="true" />
+          {active.paragraphs.map((paragraph, paragraphIndex) => (
+            <p key={paragraphIndex} className="wing-slide-desc">
+              {paragraph}
+            </p>
+          ))}
+          {active.meta ? <div className="club-meta-box">{active.meta}</div> : null}
+        </div>
+      </article>
+
+      <button
+        type="button"
+        className="wing-nav next"
+        onClick={() => goTo(index + 1)}
+        aria-label={`Next ${ariaLabel}`}
+      >
+        <IconChevronRight size={22} />
+      </button>
+
+      <div className="wing-dots" role="tablist" aria-label={ariaLabel}>
+        {items.map((item, itemIndex) => (
+          <button
+            key={item.tag}
+            type="button"
+            role="tab"
+            className={`wing-dot${itemIndex === index ? ' is-active' : ''}`}
+            aria-selected={itemIndex === index}
+            aria-label={`Show ${item.title}`}
+            onClick={() => goTo(itemIndex)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const FacilitiesPage = () => {
   useScrollReveal();
@@ -41,6 +243,8 @@ export const FacilitiesPage = () => {
         badge="Campus & Co-Curricular Excellence"
         title="Infrastructure & Student Wings"
         subtitle="State-of-the-art educational infrastructure paired with 11+ dynamic student wings fostering civic duty, physical stamina, leadership, and moral character."
+        backgroundImage={groundImg}
+        backgroundPosition="center 45%"
       />
 
       {/* =========================================================================
@@ -51,7 +255,7 @@ export const FacilitiesPage = () => {
           <div className="section-header-center">
             <span className="section-tag">Campus Amenities</span>
             <h2 className="section-heading">School Infrastructure Facilities</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>
+            <p className="facilities-section-lead">
               Expansive play arenas, ventilated digital classrooms, administrative complexes, and tranquil prayer spaces.
             </p>
           </div>
@@ -145,165 +349,16 @@ export const FacilitiesPage = () => {
             </p>
           </div>
 
-          {/* 1. NCC */}
-          <article className="club-feature-card reveal-init">
-            <div className="club-img-col">
-              <img src={nccImg} alt="NCC Cadets 4(TN) Engr Coy" className="club-feature-img" loading="lazy" />
-            </div>
-            <div className="club-content-col">
-              <span className="club-tag">National Cadet Corps (NCC)</span>
-              <h3 className="club-title">NCC Unit — 4(TN) Engr Coy NCC</h3>
-              <p className="club-desc">
-                The NCC unit of St. Britto Higher Secondary School, Madurai, plays a cornerstone role in cultivating discipline, national unity, and leadership among youth. Operating under the expert mentorship of <strong>4(TN) Engr Coy NCC</strong>, cadets actively participate in social service campaigns, flood relief assistance, drill competitions, and ceremonial guard-of-honor presentations.
-              </p>
-              <div className="club-meta-box">
-                <strong>Unit Information:</strong> Total Strength: 100 Cadets • Troop No: 355 • Motto: <em>“Unity and Discipline”</em> • Troop Commander: <strong>P. Paul Peter Arulanathan</strong>.
-              </div>
-            </div>
-          </article>
-
-          {/* 2. BHARAT SCOUTS */}
-          <article className="club-feature-card reverse reveal-init">
-            <div className="club-img-col">
-              <img src={scoutsImg} alt="Bharat Scouts Movement" className="club-feature-img" loading="lazy" />
-            </div>
-            <div className="club-content-col">
-              <span className="club-tag">Bharat Scouts Movement</span>
-              <h3 className="club-title">Scout Movement — St. Britto Troop</h3>
-              <p className="club-desc">
-                More than 100 Scout boys actively engage in the Bharat Scout Movement. Founded globally in 1907 by Lt. Gen. Robert Baden-Powell, scouting instills self-reliance, moral integrity, environmental care, and first-aid readiness. Regular training sessions are conducted every Friday during the 8th period.
-              </p>
-              <p className="club-desc">
-                Living by the motto <em>"Helping Others"</em>, Scouts arrive before 8:30 a.m. each morning to guide students orderly to classrooms. At noon, they supervise lunch hall cleanliness, assist school visitors, and lead march-pasts on Republic Day and Sports Day.
-              </p>
-              <div className="club-meta-box">
-                <strong>Honors & Coordination:</strong> Intensive preparation for <strong>Tritiya Sopan</strong> & the prestigious <strong>Rajya Puraskar</strong> Governor's Award. Coordinated by <strong>Mr. S. Ponraj</strong>, Graduate Teacher.
-              </div>
-            </div>
-          </article>
-
-          {/* 3. BRITTO BAND TROUPE */}
-          <article className="club-feature-card reveal-init">
-            <div className="club-img-col">
-              <img src={bandImg} alt="Britto Band Troupe" className="club-feature-img" loading="lazy" />
-            </div>
-            <div className="club-content-col">
-              <span className="club-tag">School Band Troupe</span>
-              <h3 className="club-title">St. Britto Band Troupe (Estd. 1994)</h3>
-              <p className="club-desc">
-                Founded in <strong>1994</strong>, the Britto Band Troupe inaugurates major school functions with musical grandeur and rhythmic majesty. Welcoming eminent dignitaries, leading march-past contingents, and adding solemn glory to celebrations are the central mission of this beloved ensemble.
-              </p>
-              <div className="club-meta-box">
-                <strong>Band Master History:</strong>
-                <br />
-                • 1994–1999: Teacher Mr. A. Stanislaus Justin
-                <br />
-                • 1999–2008: Teacher Mr. A. Louis Amalraj
-                <br />
-                • 2008–2017: Teacher Mr. M. S. Ackle Britto
-                <br />
-                • 2017–Present: Teacher <strong>Mr. K. Jayaseelan</strong>
-              </div>
-            </div>
-          </article>
-
-          {/* 4. SPORTS DEPARTMENT */}
-          <article className="club-feature-card reverse reveal-init">
-            <div className="club-img-col">
-              <img src={sportsImg} alt="Sports and Football Tournament" className="club-feature-img" loading="lazy" />
-            </div>
-            <div className="club-content-col">
-              <span className="club-tag">Athletic Wings</span>
-              <h3 className="club-title">Sports, Basketball & Football</h3>
-              <p className="club-desc">
-                Our athletic department nurtures championship basketball squads, football teams, and track athletes. Renowned for capturing 3rd place in the State-Level Chief Minister's Trophy (₹3,00,000 cash prize), our athletic programs build team camaraderie, physical stamina, and competitive sportsmanship.
-              </p>
-              <div className="club-meta-box">
-                <strong>Coaching Regimen:</strong> Supervised daily by Physical Directors, conducting morning stamina workouts, tactical strategy, and inter-school matches.
-              </div>
-            </div>
-          </article>
-
-          {/* =========================================================================
-              MAJOR SPORTS ACHIEVEMENT: CM TROPHY STATE LEVEL BASKETBALL
-              ========================================================================= */}
-          <div className="facilities-spotlight-block reveal-init" aria-label="Major Sports Achievement">
-            <div className="spotlight-card">
-              <div>
-                <div className="spotlight-badge">
-                  <IconAward size={18} />
-                  <span>State Level Triumph • 3rd Place</span>
-                </div>
-                <h3 className="spotlight-title">
-                  State-Level Chief Minister's Trophy Basketball Tournament
-                </h3>
-                <p className="spotlight-desc">
-                  In an extraordinary showcase of athletic stamina, team synergy, and competitive discipline, students from the Madurai district participated in the prestigious <strong>State-Level Chief Minister's Trophy Basketball Tournament</strong> held in Coimbatore and proudly captured <strong>Third Place at the State Level</strong>.
-                </p>
-
-                <div className="trophy-pills-row">
-                  <div className="trophy-pill">
-                    <span style={{ color: 'var(--brown-700)' }}>🏆</span>
-                    <span>State 3rd Place Honor</span>
-                  </div>
-                  <div className="trophy-pill">
-                    <span style={{ color: 'var(--brown-700)' }}>💰</span>
-                    <span>Total Cash Prize: ₹3,00,000</span>
-                  </div>
-                  <div className="trophy-pill">
-                    <span style={{ color: 'var(--brown-700)' }}>🎖️</span>
-                    <span>12 Players (₹25,000 each)</span>
-                  </div>
-                  <div className="trophy-pill highlighted">
-                    <span>⭐</span>
-                    <span><strong>R. Dilip Akash</strong> (St. Britto): ₹25,000 Award</span>
-                  </div>
-                </div>
-
-                <div className="congrats-box">
-                  <strong>School's Heartfelt Congratulations:</strong>
-                  <br />
-                  On behalf of our school's Rev. Father Correspondent, Rev. Father Headmaster, teachers, Physical Director, physical education teachers, and staff, we extend our most heartfelt congratulations to our champion student <strong>R. Dilip Akash</strong> and the victorious team for bringing laurels to St. Britto and Madurai district!
-                </div>
-              </div>
-
-              <div className="spotlight-image-grid">
-                <img
-                  src={stateLevImg}
-                  alt="State Level Award Presentation"
-                  className="spotlight-img"
-                  loading="lazy"
-                />
-                <img
-                  src={pricesImg}
-                  alt="CM Trophy Award Prize Distribution"
-                  className="spotlight-img"
-                  loading="lazy"
-                />
-                <img
-                  src={basketballImg}
-                  alt="Basketball team action"
-                  className="spotlight-img"
-                  loading="lazy"
-                />
-                <img
-                  src={basketball1Img}
-                  alt="Basketball court practice"
-                  className="spotlight-img"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-          </div>
+          <WingSlider items={YOUTH_WINGS} ariaLabel="youth movement" />
 
           {/* =========================================================================
               SPORTS DEVELOPMENT & ATHLETIC ACHIEVEMENTS
               ========================================================================= */}
-          <div className="achievements-gallery-block reveal-init" style={{ marginTop: '3.5rem', marginBottom: '3.5rem' }}>
+          <div className="achievements-gallery-block reveal-init">
             <div className="section-header-center">
               <span className="section-tag">Athletic Distinction</span>
               <h2 className="section-heading">Sports Development & Championships</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>
+              <p className="facilities-section-lead">
                 St. Britto has consistently dominated inter-school, zonal, district, and state athletic meets across basketball, football, and track and field.
               </p>
             </div>
@@ -359,52 +414,19 @@ export const FacilitiesPage = () => {
             </div>
           </div>
 
-          {/* =========================================================================
-              SECTION 3: SERVICE WINGS (JRC, NSS, RRC)
-              ========================================================================= */}
-          <article className="club-feature-card reveal-init">
-            <div className="club-img-col">
-              <img src={jrcImg} alt="Junior Red Cross Cadets" className="club-feature-img" loading="lazy" />
-            </div>
-            <div className="club-content-col">
-              <span className="club-tag">JRC Wing</span>
-              <h3 className="club-title">Junior Red Cross (JRC)</h3>
-              <p className="club-desc">
-                Cadets are formed in health awareness, disaster first-aid, sanitation, and humanitarian service — training that supports empathy and an immediate relief response in the school community.
-              </p>
-            </div>
-          </article>
+          <div className="section-header-center facilities-subhead">
+            <span className="section-tag">Service Wings</span>
+            <h2 className="section-heading">JRC, NSS &amp; Red Ribbon Club</h2>
+          </div>
 
-          <article className="club-feature-card reverse reveal-init">
-            <div className="club-img-col">
-              <img src={nssImg} alt="NSS Community Volunteers" className="club-feature-img" loading="lazy" />
-            </div>
-            <div className="club-content-col">
-              <span className="club-tag">NSS Unit</span>
-              <h3 className="club-title">National Service Scheme (NSS)</h3>
-              <p className="club-desc">
-                Volunteers take part in rural literacy workshops, tree-planting, blood-donation awareness, and civic sanitation. The unit’s work is campus service, not a substitute for the detailed NCC and Scouts programmes above.
-              </p>
-            </div>
-          </article>
+          <WingSlider items={SERVICE_WINGS} ariaLabel="service wing" />
 
-          <article className="club-feature-card reveal-init">
-            <div className="club-img-col">
-              <img src={rrcImg} alt="Red Ribbon Club" className="club-feature-img" loading="lazy" />
-            </div>
-            <div className="club-content-col">
-              <span className="club-tag">RRC Movement</span>
-              <h3 className="club-title">Red Ribbon Club (RRC)</h3>
-              <p className="club-desc">
-                A youth health wing that promotes positive lifestyles, health awareness, peer counselling, and adolescent hygiene on campus.
-              </p>
-            </div>
-          </article>
+          <div className="section-header-center facilities-subhead">
+            <span className="section-tag">Campus Clubs</span>
+            <h2 className="section-heading">Specialised Student Clubs</h2>
+          </div>
 
-          {/* =========================================================================
-              SECTION 4: SPECIALIZED STUDENT CLUBS
-              ========================================================================= */}
-          <div className="secondary-clubs-grid" style={{ marginTop: '2.5rem' }}>
+          <div className="secondary-clubs-grid">
             <article className="secondary-club-card reveal-init stagger-1">
               <div className="secondary-club-img-wrap">
                 <img src={prayerImg} alt="YCS and YSM student gathering" className="secondary-club-img" loading="lazy" />

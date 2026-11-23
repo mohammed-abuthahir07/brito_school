@@ -37,18 +37,6 @@ import './HomePage.css';
 
 const LEADERS = [
   {
-    role: 'School Manager',
-    name: 'Most Rev. Dr. Antonysamy Savarimuthu',
-    subtitle: 'Metropolitan Archbishop of the Roman Catholic Archdiocese of Madurai',
-    image: managerImg,
-    alt: 'Most Rev. Dr. Antonysamy Savarimuthu - Manager',
-    paragraphs: [
-      'The Metropolitan Archbishop of the Roman Catholic Archdiocese of Madurai, Most Rev. Dr. Antonysamy Savarimuthu serves as the Manager of the school.',
-      'He, as the Manager, designs the policy decisions, oversees the implementation of the archdiocesan educational policies and presides over the board meetings of the Education Council.',
-      'Being the Manager he safeguards the religious character, values of the church and the national integrity imparted in the minds of the youth who are catered in our school.',
-    ],
-  },
-  {
     role: 'Correspondent',
     name: 'Rev. Fr. Louis A.',
     subtitle: 'A Visionary Leader – An Innovative Thinker – A Spiritual Guide',
@@ -56,11 +44,8 @@ const LEADERS = [
     image: corresImg,
     alt: 'Rev. Fr. Louis A. - Correspondent',
     paragraphs: [
-      'Rev. Fr. Louis A is a visionary leader and dedicated priest committed to the academic, moral and spiritual development of students. With his progressive vision, he has worked towards increasing student strength and enhancing the quality of education at St. Britto Hr. Sec. School, Madurai.',
-      'His notable initiatives include introducing smart board facilities for the Middle, High and Higher Secondary sections, special cursive writing classes and innovative reading sessions with the guidance of experts. He takes an active role in academic improvement through regular classroom visits, monitoring teaching practices and assessing students’ learning progress.',
-      'He provides continuous guidance and motivation to teachers, encouraging effective teaching strategies and quality classroom instruction. Through regular interaction with students, he identifies their learning needs, inspires them to overcome challenges and motivates them to achieve their fullest potential. He constantly motivates teachers to work towards achieving 100% results in both Class X and Class XII examinations.',
-      'As a spiritual guide, he emphasizes faith, discipline, prayer, compassion and moral values, ensuring that education goes beyond academics to shape responsible and value-driven individuals.',
-    ],
+      'Rev. Fr. Louis A is a visionary leader and dedicated priest committed to the academic, moral and spiritual development of students. With his progressive vision, he has worked towards increasing student strength and enhancing the quality of education at St. Britto Hr. Sec. School, Madurai.  His notable initiatives include introducing smart board facilities for the Middle, High and Higher Secondary sections, special cursive writing classes and innovative reading sessions with the guidance of experts. He takes an active role in academic improvement through regular classroom visits, monitoring teaching practices and assessing students’ learning progress. He provides continuous guidance and motivation to teachers, encouraging effective teaching strategies and quality classroom instruction. Through regular interaction with students, he identifies their learning needs, inspires them to overcome challenges and motivates them to achieve their fullest potential.',
+    ],  
   },
   {
     role: 'Headmaster',
@@ -71,8 +56,17 @@ const LEADERS = [
     alt: 'Rev. Fr. Maria Arul Selvam - Headmaster',
     paragraphs: [
       '“Be perfect, therefore, as your heavenly Father is perfect.”',
-      'Rev. Fr. Maria Arul Selvam is a devoted educational leader whose path demonstrates commitment, tenacity, and an unwavering love of learning. In 2015, he started working at St. Britto Hr Sec. School as a Post Graduate Assistant (PG Assistant). In 2023, he received a promotion to Assistant Headmaster (AHM) in recognition of his leadership abilities and devotion to the teaching profession. He assumed the role of Headmaster in 2025 after years of outstanding service and administrative expertise.',
-      'As the headmaster of St. Britto Hr. Sec. School in Madurai, he feels that education encompasses both the formation and the acquisition of information. He motivates teachers to strive for excellence, encourages innovative teaching practices and inspires students to develop confidence, responsibility and respect for others. Guided by Christian values and a spirit of service, he strongly believes in nurturing young minds through knowledge, discipline, integrity and humanity.',
+      'Rev. Fr. Maria Arul Selvam is a devoted educational leader whose path demonstrates commitment, tenacity, and an unwavering love of learning. In 2015, he started working at St. Britto Hr Sec. School as a Post Graduate Assistant (PG Assistant). In 2023, he received a promotion to Assistant Headmaster (AHM) in recognition of his leadership abilities and devotion to the teaching profession. He assumed the role of Headmaster in 2025 after years of outstanding service and administrative expertise. As the headmaster of St. Britto Hr. Sec. School in Madurai, he feels that education encompasses both the formation and the acquisition of information. He motivates teachers to strive for excellence, encourages innovative teaching practices and inspires students to develop confidence, responsibility and respect for others.',
+    ],
+  },
+  {
+    role: 'School Manager',
+    name: 'Most Rev. Dr. Antonysamy Savarimuthu',
+    subtitle: 'Metropolitan Archbishop of the Roman Catholic Archdiocese of Madurai',
+    image: managerImg,
+    alt: 'Most Rev. Dr. Antonysamy Savarimuthu - Manager',
+    paragraphs: [
+      'The Metropolitan Archbishop of the Roman Catholic Archdiocese of Madurai, Most Rev. Dr. Antonysamy Savarimuthu serves as the Manager of the school.He, as the Manager, designs the policy decisions, oversees the implementation of the archdiocesan educational policies and presides over the board meetings of the Education Council.Being the Manager he safeguards the religious character, values of the church and the national integrity imparted in the minds of the youth who are catered in our school.Under his visionary guidance and pastoral leadership, the institution remains steadfast in its commitment to holistic education, blending academic rigor with moral and spiritual formation. He actively encourages innovation in teaching methodologies, infrastructural growth, and inclusive outreach so that students from all walks of life receive equal opportunities to excel. Through his unwavering support, the school continues to nurture compassionate, disciplined, and socially responsible citizens dedicated to serving both God and the nation.',
     ],
   },
 ];
@@ -195,7 +189,7 @@ export const HomePage = () => {
               <span className="hero-stat-label">Active Students</span>
             </div>
             <div className="hero-stat-item">
-              <span className="hero-stat-number">58+</span>
+              <span className="hero-stat-number">50+</span>
               <span className="hero-stat-label">Years of Eminence</span>
             </div>
             <div className="hero-stat-item">
@@ -498,82 +492,77 @@ export const HomePage = () => {
 
       <section className="home-kural-section reveal-init" aria-label="Today's Thirukkural">
         <div className="container">
-          <div className="home-kural-card">
-            <div className="home-kural-header">
-              <div className="home-kural-badge">
-                <IconBookOpen size={18} />
-                <span>Today’s Thirukkural • இன்றைய திருக்குறள்</span>
-              </div>
-              {kural && kural.kural_number && (
-                <span className="kural-num-pill">குறள் எண் {kural.kural_number}</span>
-              )}
-            </div>
-
-            {kuralLoading ? (
-              <div className="home-kural-loading">
-                <LoadingSpinner text="Retrieving today's sacred Thirukkural verse..." />
-              </div>
-            ) : kural ? (
-              <div className="home-kural-content">
-                <div className="home-kural-main-grid">
-                  <aside className="home-kural-portrait-col">
-                    <div className="home-kural-portrait-frame">
-                      <img
-                        src={thiruImg}
-                        alt="Ayyan Thiruvalluvar"
-                        className="home-kural-portrait-img"
-                        loading="lazy"
-                      />
-                      <div className="home-kural-portrait-tag">
-                        <span>அய்யன் திருவள்ளுவர்</span>
-                        <small>Thiruvalluvar</small>
-                      </div>
-                    </div>
-                  </aside>
-
-                  <div className="home-kural-verses-col">
-                    <p className="kural-eyebrow">Verse of the day</p>
-                    <blockquote className="home-kural-tamil-box">
-                      <span className="home-kural-quote" aria-hidden="true">“</span>
-                      <p className="home-kural-tamil-text">{kural.tamil_text}</p>
-                    </blockquote>
-
-                    <div className="home-kural-readings">
-                      <div className="home-kural-detail-card">
-                        <span className="kural-sublabel">English translation</span>
-                        <p className="kural-translation-text">“{kural.english_meaning}”</p>
-                      </div>
-
-                      {kural.explanation && (
-                        <div className="home-kural-detail-card">
-                          <span className="kural-sublabel">விளக்கம் • Meaning</span>
-                          <p className="kural-explanation-text">{kural.explanation}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="home-kural-footer-row">
-                  <span className="home-kural-subtext">
-                    Daily moral philosophy inspiring righteous character, discipline, and compassion at St. Britto.
-                  </span>
-                  <button
-                    type="button"
-                    className="home-kural-popup-btn"
-                    onClick={openModal}
-                  >
-                    <IconEye size={17} />
-                    <span>Open full reading</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="home-kural-empty">
-                <p>Today's Thirukkural will be updated shortly by the school administrator.</p>
-              </div>
+          <div className="section-header-center">
+            <span className="section-tag">
+              <IconBookOpen size={14} />
+              Today’s Thirukkural • இன்றைய திருக்குறள்
+            </span>
+            {kural && kural.kural_number && (
+              <p className="home-kural-number">குறள் எண் {kural.kural_number}</p>
             )}
           </div>
+
+          {kuralLoading ? (
+            <div className="home-kural-loading">
+              <LoadingSpinner text="Retrieving today's sacred Thirukkural verse..." />
+            </div>
+          ) : kural ? (
+            <div className="home-kural-layout">
+              <aside className="home-kural-portrait-col">
+                <div className="home-kural-portrait-frame">
+                  <img
+                    src={thiruImg}
+                    alt="Ayyan Thiruvalluvar"
+                    className="home-kural-portrait-img"
+                    loading="lazy"
+                  />
+                  <div className="home-kural-portrait-tag">
+                    <span>அய்யன் திருவள்ளுவர்</span>
+                    <small>Thiruvalluvar</small>
+                  </div>
+                </div>
+              </aside>
+
+              <div className="home-kural-body">
+                <blockquote className="home-kural-couplet">
+                  <p className="home-kural-tamil-text">{kural.tamil_text}</p>
+                </blockquote>
+
+                <div className="home-kural-readings">
+                  <div className="home-kural-reading">
+                    <h3 className="kural-sublabel">English translation</h3>
+                    <p className="kural-translation-text">“{kural.english_meaning}”</p>
+                  </div>
+                  {kural.explanation && (
+                    <div className="home-kural-reading">
+                      <h3 className="kural-sublabel">விளக்கம் • Meaning</h3>
+                      <p className="kural-explanation-text">{kural.explanation}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="home-kural-empty">
+              <p>Today's Thirukkural will be updated shortly by the school administrator.</p>
+            </div>
+          )}
+
+          {kural && (
+            <div className="home-kural-footer-row">
+              <span className="home-kural-subtext">
+                Daily moral philosophy inspiring righteous character, discipline, and compassion at St. Britto.
+              </span>
+              <button
+                type="button"
+                className="home-kural-popup-btn"
+                onClick={openModal}
+              >
+                <IconEye size={17} />
+                <span>Open full reading</span>
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

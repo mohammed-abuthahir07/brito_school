@@ -38,8 +38,20 @@
 /* ==========================================================================
    INFRASTRUCTURE GRID
    ========================================================================== */
+.facilities-section-lead {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.facilities-subhead {
+  margin: 3.25rem 0 1.75rem;
+}
+
 .infra-section {
-  padding: 5.5rem 0;
+  padding: 4.75rem 0 5rem;
   background-color: #ffffff;
 }
 
@@ -69,7 +81,7 @@
 
 .infra-img-wrapper {
   position: relative;
-  height: 230px;
+  height: 210px;
   overflow: hidden;
   background-color: var(--sandal-100);
 }
@@ -109,7 +121,7 @@
    CLUBS & FEATURE CARDS
    ========================================================================== */
 .clubs-section {
-  padding: 5.5rem 0 6.5rem;
+  padding: 4.75rem 0 5.5rem;
   background-color: var(--sandal-50);
 }
 
@@ -127,9 +139,9 @@
   border: 1.5px solid var(--sandal-300);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  margin-bottom: 3.5rem;
+  margin-bottom: 2.25rem;
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
   transition: box-shadow 0.3s, transform 0.3s;
 }
 
@@ -152,7 +164,7 @@
 
 .club-img-col {
   position: relative;
-  min-height: 350px;
+  min-height: 320px;
   background-color: var(--sandal-100);
 }
 
@@ -163,7 +175,7 @@
 }
 
 .club-content-col {
-  padding: 3rem;
+  padding: 2.35rem 2.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -185,10 +197,10 @@
 }
 
 .club-title {
-  font-size: 1.85rem;
-  font-weight: 900;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 800;
   color: #000000;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
   line-height: 1.25;
 }
 
@@ -202,7 +214,7 @@
 .club-meta-box {
   background-color: var(--sandal-50);
   border-left: 4px solid var(--brown-700);
-  padding: 1rem 1.25rem;
+  padding: 0.95rem 1.15rem;
   border-radius: var(--radius-sm);
   font-size: 0.92rem;
   color: #000000;
@@ -211,11 +223,21 @@
   border-left-width: 4px;
 }
 
+.club-meta-list {
+  margin: 0.45rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.club-meta-list li {
+  margin-bottom: 0.25rem;
+}
+
 /* ==========================================================================
    ACHIEVEMENTS GALLERY & SPORTS CHAMPIONSHIPS
    ========================================================================== */
 .achievements-gallery-block {
   width: 100%;
+  margin: 3rem 0 2.5rem;
 }
 
 .achievements-grid {
@@ -278,12 +300,174 @@
 }
 
 /* ==========================================================================
+   SERVICE WINGS SLIDER
+   ========================================================================== */
+.wing-carousel {
+  position: relative;
+  width: 100%;
+  margin: 0 auto 2.35rem;
+  cursor: pointer;
+}
+
+.wing-slide {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  background: #ffffff;
+  border: 1.5px solid var(--sandal-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  animation: wingFade 0.5s ease;
+}
+
+@keyframes wingFade {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+.wing-slide-media {
+  width: 300px;
+  height: 280px;
+  margin: 1.35rem 0 1.35rem 1.35rem;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--sandal-50);
+}
+
+.wing-slide-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.wing-slide-copy {
+  padding: 1.75rem 4.25rem 1.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wing-slide-tag {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brown-700);
+  margin-bottom: 0.55rem;
+}
+
+.wing-slide-title {
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 0.75rem;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.wing-slide-rule {
+  width: 44px;
+  height: 3px;
+  background: var(--brown-700);
+  margin: 0 auto 1rem;
+}
+
+.wing-slide-desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #3a3a3a;
+  text-align: center;
+  max-width: 42rem;
+}
+
+.wing-slide-desc + .wing-slide-desc {
+  margin-top: 0.75rem;
+}
+
+.wing-slide-copy .club-meta-box {
+  margin-top: 1.1rem;
+  text-align: left;
+  width: 100%;
+  max-width: 36rem;
+}
+
+.wing-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--sandal-200);
+  background: #ffffff;
+  color: #3a3a3a;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.wing-nav:hover,
+.wing-nav:focus-visible {
+  background: var(--brown-800);
+  color: #ffffff;
+  border-color: var(--brown-800);
+  outline: none;
+}
+
+.wing-nav.prev {
+  left: 0.65rem;
+}
+
+.wing-nav.next {
+  right: 0.65rem;
+}
+
+.wing-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+}
+
+.wing-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  background: var(--sandal-300);
+  cursor: pointer;
+}
+
+.wing-dot.is-active {
+  background: var(--brown-800);
+  width: 22px;
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wing-slide {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
    SECONDARY CLUBS GRID
    ========================================================================== */
 .secondary-clubs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.75rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
 }
 
 .secondary-club-card {
@@ -354,7 +538,27 @@
 /* ==========================================================================
    RESPONSIVE DESIGN (320px - 1920px)
    ========================================================================== */
+@media (max-width: 1100px) {
+  .secondary-clubs-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 1024px) {
+  .wing-slide {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .wing-slide-media {
+    width: 210px;
+    height: 230px;
+    margin: 1.1rem 0 1.1rem 1.1rem;
+  }
+
+  .wing-slide-copy {
+    padding: 1.35rem 3.5rem 1.35rem 0.35rem;
+  }
+
   .infra-grid,
   .achievements-grid {
     grid-template-columns: 1fr 1fr;
@@ -370,171 +574,104 @@
     order: 2;
   }
   .club-img-col {
-    min-height: 300px;
+    min-height: 240px;
+    max-height: 280px;
   }
   .club-content-col {
-    padding: 2rem;
+    padding: 1.6rem 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
-  .facilities-hero-title {
-    font-size: 2.25rem;
+  .wing-slide {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .wing-slide-media {
+    width: calc(100% - 2rem);
+    height: 240px;
+    margin: 1.1rem auto 0;
+  }
+
+  .wing-slide-copy {
+    padding: 1.15rem 1.35rem 1.4rem;
+    text-align: center;
+  }
+
+  .wing-nav {
+    top: 132px;
+    transform: none;
+    width: 38px;
+    height: 38px;
+  }
+
+  .infra-section,
+  .clubs-section {
+    padding: 3.25rem 0 3.5rem;
   }
   .infra-grid,
-  .achievements-grid {
-    grid-template-columns: 1fr;
-  }
+  .achievements-grid,
   .secondary-clubs-grid {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
-  .club-title {
-    font-size: 1.6rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .facilities-hero-title {
-    font-size: 1.85rem;
-  }
-  .facilities-hero-subtitle {
-    font-size: 0.98rem;
-  }
-  .club-content-col {
-    padding: 1.5rem 1.25rem;
+  .infra-img-wrapper,
+  .achievement-img,
+  .secondary-club-img-wrap {
+    height: 190px;
   }
   .club-img-col {
-    min-height: 240px;
+    min-height: 210px;
+    max-height: 220px;
   }
-}
-
-/* ==========================================================================
-   ACHIEVEMENT SPOTLIGHT (CM TROPHY)
-   ========================================================================== */
-.facilities-spotlight-block {
-  margin: 3.5rem 0;
-}
-
-.spotlight-card {
-  background-color: #ffffff;
-  border-radius: var(--radius-xl);
-  border: 2px solid var(--sandal-300);
-  box-shadow: var(--shadow-xl);
-  padding: 3.5rem;
-  display: grid;
-  grid-template-columns: 1.25fr 1fr;
-  gap: 3.5rem;
-  align-items: center;
-}
-
-.spotlight-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: var(--brown-700);
-  color: #ffffff;
-  padding: 0.45rem 1.1rem;
-  border-radius: var(--radius-full);
-  font-weight: 800;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  margin-bottom: 1.25rem;
-  border: 1px solid var(--sandal-300);
-}
-
-.spotlight-title {
-  font-size: 2.15rem;
-  font-weight: 900;
-  color: #000000;
-  line-height: 1.25;
-  margin-bottom: 1.25rem;
-  letter-spacing: -0.01em;
-}
-
-.spotlight-desc {
-  font-size: 1.05rem;
-  line-height: 1.75;
-  color: #2b2b2b;
-  margin-bottom: 1.75rem;
-}
-
-.trophy-pills-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.trophy-pill {
-  background-color: var(--sandal-50);
-  color: #000000;
-  border: 1.5px solid var(--sandal-300);
-  padding: 0.55rem 1.1rem;
-  border-radius: var(--radius-md);
-  font-size: 0.95rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.trophy-pill.highlighted {
-  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
-  color: #ffffff;
-  border-color: var(--sandal-300);
-}
-
-.congrats-box {
-  background-color: var(--sandal-50);
-  border-left: 4px solid var(--brown-700);
-  padding: 1.25rem 1.5rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
-  color: #000000;
-  line-height: 1.65;
-  border: 1px solid var(--sandal-200);
-  border-left-width: 4px;
-}
-
-.spotlight-image-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.spotlight-img {
-  width: 100%;
-  height: 195px;
-  object-fit: cover;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  border: 2px solid var(--sandal-200);
-  transition: transform 0.3s ease;
-}
-
-.spotlight-img:hover {
-  transform: scale(1.04);
-  border-color: var(--brown-500);
-}
-
-@media (max-width: 992px) {
-  .spotlight-card {
-    grid-template-columns: 1fr;
-    padding: 2.5rem;
+  .club-feature-card {
+    margin-bottom: 1.5rem;
+  }
+  .facilities-subhead {
+    margin: 2.25rem 0 1.25rem;
+  }
+  .achievements-gallery-block {
+    margin: 2rem 0 1.75rem;
   }
 }
 
 @media (max-width: 480px) {
-  .spotlight-card {
-    padding: 1.75rem 1.25rem;
+  .wing-slide-media {
+    height: 190px;
   }
-  .spotlight-title {
-    font-size: 1.65rem;
+
+  .wing-nav {
+    top: 108px;
   }
-  .spotlight-image-grid {
-    grid-template-columns: 1fr;
+
+  .wing-slide-desc {
+    font-size: 0.94rem;
   }
-  .spotlight-img {
-    height: 180px;
+
+  .club-content-col {
+    padding: 1.2rem 1.1rem 1.35rem;
+  }
+  .club-img-col {
+    min-height: 180px;
+    max-height: 190px;
+  }
+  .infra-body,
+  .achievement-card-body,
+  .secondary-club-body {
+    padding: 1.15rem 1.1rem 1.25rem;
+  }
+  .facilities-section-lead,
+  .facilities-clubs-lead {
+    font-size: 0.95rem;
+  }
+}
+
+@media (hover: none) {
+  .infra-card:hover,
+  .club-feature-card:hover,
+  .achievement-card:hover,
+  .secondary-club-card:hover {
+    transform: none;
   }
 }

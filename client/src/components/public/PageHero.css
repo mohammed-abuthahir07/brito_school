@@ -75,7 +75,7 @@
 
 @media (max-width: 768px) {
   .page-hero {
-    min-height: auto;
+    min-height: 0;
     padding: 3.25rem 1.15rem 2.75rem;
     background-position: center;
   }

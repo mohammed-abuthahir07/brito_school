@@ -293,67 +293,38 @@
    2. DEDICATED "TODAY'S THIRUKKURAL" SECTION
    ========================================================================== */
 .home-kural-section {
-  padding: 4.5rem 0 3rem;
-  background-color: #ffffff;
+  padding: 5.5rem 0 4.5rem;
+  background-color: var(--sandal-50);
+  width: 100%;
 }
 
-.home-kural-card {
-  background-color: #ffffff;
-  border: 1px solid var(--sandal-200);
-  border-radius: var(--radius-xl);
-  box-shadow: 0 18px 40px -18px rgba(56, 26, 5, 0.18);
-  overflow: hidden;
-  position: relative;
-}
-
-.home-kural-header {
-  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
-  color: #ffffff;
-  padding: 1rem 1.85rem;
-  display: flex;
+.home-kural-section .section-tag {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.4rem;
 }
 
-.home-kural-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.98rem;
-  font-weight: 800;
+.home-kural-number {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brown-700);
   letter-spacing: 0.04em;
-  color: #ffffff;
-}
-
-.kural-num-pill {
-  background-color: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  padding: 0.32rem 0.85rem;
-  border-radius: var(--radius-full);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
 }
 
 .home-kural-loading,
 .home-kural-empty {
-  padding: 3rem 2rem;
+  padding: 2.5rem 0;
   text-align: center;
   color: var(--text-muted);
 }
 
-.home-kural-content {
-  padding: 2rem 2.1rem 1.85rem;
-}
-
-.home-kural-main-grid {
+.home-kural-layout {
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
-  gap: 2.15rem;
-  align-items: stretch;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 3rem;
+  align-items: start;
+  width: 100%;
 }
 
 .home-kural-portrait-col {
@@ -362,7 +333,6 @@
 
 .home-kural-portrait-frame {
   width: 100%;
-  height: 100%;
   background: linear-gradient(180deg, var(--brown-900) 0%, var(--brown-700) 100%);
   border-radius: var(--radius-lg);
   padding: 1rem 1rem 1.1rem;
@@ -387,10 +357,6 @@
   color: #fff;
   text-align: center;
   width: 100%;
-  background: none;
-  border: none;
-  padding: 0;
-  white-space: normal;
 }
 
 .home-kural-portrait-tag span {
@@ -411,86 +377,52 @@
   font-weight: 700;
 }
 
-.home-kural-verses-col {
+.home-kural-body {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  padding-top: 0.15rem;
 }
 
-.kural-eyebrow {
-  margin: 0 0 0.55rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--brown-700);
-}
-
-.home-kural-tamil-box {
-  position: relative;
-  background: linear-gradient(180deg, var(--sandal-50) 0%, #fff 100%);
-  border: 1px solid var(--sandal-200);
-  border-left: 4px solid var(--brown-800);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  padding: 1.35rem 1.5rem 1.25rem 1.7rem;
-  margin: 0 0 1.35rem;
-  text-align: left;
-}
-
-.home-kural-quote {
-  position: absolute;
-  top: -0.15rem;
-  left: 0.55rem;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 3.2rem;
-  line-height: 1;
-  color: var(--sandal-300);
-  pointer-events: none;
+.home-kural-couplet {
+  margin: 0 0 2rem;
+  padding: 0 0 1.75rem;
+  border-bottom: 1px solid var(--sandal-300);
 }
 
 .home-kural-tamil-text {
   font-family: var(--font-tamil), 'Inter', sans-serif;
-  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-size: clamp(1.45rem, 2.6vw, 2.05rem);
   line-height: 2.05;
   color: #111111;
   font-weight: 700;
   white-space: pre-line;
   margin: 0;
-  position: relative;
 }
 
 .home-kural-readings {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.95rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem 3rem;
+  width: 100%;
 }
 
-.home-kural-detail-card {
-  background-color: transparent;
-  border: none;
-  border-top: 1px solid var(--sandal-200);
-  border-radius: 0;
-  box-shadow: none;
-  padding: 0.85rem 0.15rem 0.15rem;
-  display: flex;
-  flex-direction: column;
+.home-kural-reading {
+  min-width: 0;
 }
 
 .kural-sublabel {
-  display: block;
-  font-size: 0.72rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--brown-700);
-  margin-bottom: 0.4rem;
 }
 
 .kural-translation-text {
   margin: 0;
-  font-size: 1.02rem;
-  line-height: 1.75;
+  font-size: 1.08rem;
+  line-height: 1.8;
   color: #1a1a1a;
   font-style: italic;
 }
@@ -498,8 +430,8 @@
 .kural-explanation-text {
   margin: 0;
   font-family: var(--font-tamil), 'Inter', sans-serif;
-  font-size: 1.02rem;
-  line-height: 1.9;
+  font-size: 1.08rem;
+  line-height: 1.95;
   color: #2a2a2a;
 }
 
@@ -509,16 +441,15 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-top: 1.5rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid var(--sandal-200);
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--sandal-300);
 }
 
 .home-kural-subtext {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   color: var(--text-muted);
-  font-style: normal;
-  line-height: 1.55;
+  line-height: 1.6;
   flex: 1;
   min-width: 220px;
 }
@@ -1202,9 +1133,9 @@
   .home-setting-grid {
     grid-template-columns: 1fr 1fr;
   }
-  .home-kural-main-grid {
+  .home-kural-layout {
     grid-template-columns: 180px minmax(0, 1fr);
-    gap: 1.5rem;
+    gap: 2rem;
   }
   .hero-history-content {
     max-width: 760px;
@@ -1275,9 +1206,9 @@
   .home-setting-card p {
     margin-bottom: 1rem;
   }
-  .home-kural-main-grid {
+  .home-kural-layout {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+    gap: 1.5rem;
   }
   .home-kural-portrait-frame {
     flex-direction: row;
@@ -1296,8 +1227,13 @@
   .home-kural-portrait-tag {
     text-align: left;
   }
-  .home-kural-tamil-box {
-    padding: 1.2rem 1.15rem 1.1rem 1.35rem;
+  .home-kural-readings {
+    grid-template-columns: 1fr;
+    gap: 1.35rem;
+  }
+  .home-kural-couplet {
+    margin-bottom: 1.35rem;
+    padding-bottom: 1.2rem;
   }
   .leadership-carousel {
     width: calc(100% - 1.25rem);
@@ -1391,14 +1327,8 @@
   .hero-stat-number {
     font-size: 1.3rem;
   }
-  .home-kural-content {
-    padding: 1.5rem 1.1rem;
-  }
-  .home-kural-tamil-box {
-    padding: 1.25rem 1rem;
-  }
   .home-kural-tamil-text {
-    font-size: 1.15rem;
+    font-size: 1.22rem;
     line-height: 1.95;
   }
   .home-kural-footer-row {

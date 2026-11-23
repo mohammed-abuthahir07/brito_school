@@ -71,39 +71,6 @@
   color: var(--brown-900);
 }
 
-.gallery-status-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--sandal-50);
-  border-radius: var(--radius-lg);
-  border: 1.5px solid var(--sandal-200);
-  padding: 1.1rem 1.75rem;
-  margin-bottom: 2.5rem;
-  box-shadow: var(--shadow-sm);
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.gallery-count-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.95rem;
-  color: #000000;
-  font-weight: 600;
-}
-
-.gallery-capacity-pill {
-  background-color: var(--sandal-200);
-  color: var(--brown-900);
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: 0.8rem;
-  font-weight: 800;
-  border: 1px solid var(--sandal-300);
-}
-
 /* ==========================================================================
    GALLERY GRID & CARDS
    ========================================================================== */
@@ -357,11 +324,6 @@
   }
   .gallery-grid {
     grid-template-columns: 1fr;
-  }
-  .gallery-status-bar {
-    padding: 1rem 1.25rem;
-    flex-direction: column;
-    align-items: flex-start;
   }
   .lightbox-caption {
     padding: 1rem;

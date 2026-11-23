@@ -1,25 +1,32 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+
+const revealElement = (el, observer) => {
+  if (!el || el.classList.contains('reveal-visible')) return;
+  el.classList.add('reveal-visible');
+  observer?.unobserve(el);
+};
+
+const isInOrNearViewport = (el) => {
+  const rect = el.getBoundingClientRect();
+  const viewHeight = window.innerHeight || document.documentElement.clientHeight;
+  return rect.top < viewHeight && rect.bottom > 0;
+};
 
 /**
  * useScrollReveal
- * Automatically attaches an IntersectionObserver to any elements with `.reveal-init`
- * inside the given container ref or the entire document.
- * Elements smoothly transition into view when scrolled into view.
+ * Reveals `.reveal-init` elements as they enter the viewport.
+ * Elements already on screen (especially the first section under a page hero
+ * on mobile) are shown immediately so the first paint is not a blank gap.
  */
 export const useScrollReveal = (dependency = null) => {
-  useEffect(() => {
-    // If user prefers reduced motion, make all elements visible immediately
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.querySelectorAll('.reveal-init').forEach((el) => {
-        el.classList.add('reveal-visible');
-      });
-      return;
-    }
+  const { pathname } = useLocation();
 
-    if (!('IntersectionObserver' in window)) {
-      document.querySelectorAll('.reveal-init').forEach((el) => {
-        el.classList.add('reveal-visible');
-      });
+  useEffect(() => {
+    const nodes = () => document.querySelectorAll('.reveal-init:not(.reveal-visible)');
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+      nodes().forEach((el) => el.classList.add('reveal-visible'));
       return;
     }
 
@@ -27,23 +34,35 @@ export const useScrollReveal = (dependency = null) => {
       (entries, obs) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('reveal-visible');
-            obs.unobserve(entry.target);
+            revealElement(entry.target, obs);
           }
         });
       },
       {
         root: null,
-        rootMargin: '0px 0px -40px 0px',
-        threshold: 0.12,
+        rootMargin: '80px 0px 80px 0px',
+        threshold: 0.01,
       }
     );
 
-    const elements = document.querySelectorAll('.reveal-init:not(.reveal-visible)');
-    elements.forEach((el) => observer.observe(el));
+    const attach = () => {
+      nodes().forEach((el) => {
+        if (isInOrNearViewport(el)) {
+          revealElement(el, observer);
+        } else {
+          observer.observe(el);
+        }
+      });
+    };
+
+    attach();
+    const frame = window.requestAnimationFrame(attach);
+    const timer = window.setTimeout(attach, 150);
 
     return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
       observer.disconnect();
     };
-  }, [dependency]);
+  }, [dependency, pathname]);
 };

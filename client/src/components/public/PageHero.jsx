@@ -8,11 +8,15 @@ export const PageHero = ({
   title,
   subtitle,
   backgroundImage = entranceImg,
+  backgroundPosition = 'center 28%',
 }) => {
   return (
     <section
       className="page-hero"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundPosition,
+      }}
       aria-label={title}
     >
       <div className="page-hero-overlay" />

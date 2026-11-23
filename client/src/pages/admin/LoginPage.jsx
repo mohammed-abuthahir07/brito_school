@@ -91,7 +91,7 @@ export const LoginPage = () => {
               <span>Scholars</span>
             </div>
             <div className="login-stat-chip">
-              <strong>Archdiocese</strong>
+              <strong>Aarappalayam</strong>
               <span>Madurai</span>
             </div>
           </div>
