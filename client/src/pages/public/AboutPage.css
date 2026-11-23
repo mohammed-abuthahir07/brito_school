@@ -1,0 +1,408 @@
+/* AboutPage.css - St. Britto Legacy & History */
+.about-page {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* ==========================================================================
+   HERO BANNER
+   ========================================================================== */
+.about-hero {
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+  color: #ffffff;
+  padding: 5rem 0 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 4px solid var(--sandal-300);
+}
+
+.about-hero-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.85rem;
+  font-weight: 900;
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.about-hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--sandal-100);
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ==========================================================================
+   OVERVIEW & PHILOSOPHY
+   ========================================================================== */
+.about-overview-section {
+  padding: 5.5rem 0;
+  background-color: #ffffff;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.overview-text-block h2 {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #000000;
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+}
+
+.overview-lead {
+  font-size: 1.12rem;
+  color: var(--brown-800);
+  font-weight: 700;
+  line-height: 1.75;
+  margin-bottom: 1.25rem;
+}
+
+.overview-paragraph {
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: #2b2b2b;
+  margin-bottom: 1.25rem;
+}
+
+.vision-feature-pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.vision-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  color: var(--brown-900);
+  background-color: var(--sandal-50);
+  padding: 0.65rem 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--sandal-200);
+  font-size: 0.92rem;
+}
+
+.overview-image-stack {
+  position: relative;
+}
+
+.overview-main-img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 3px solid var(--sandal-200);
+}
+
+.overview-float-card {
+  position: absolute;
+  bottom: -20px;
+  left: -20px;
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+  color: #ffffff;
+  padding: 1.35rem 1.85rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border-left: 5px solid var(--sandal-300);
+}
+
+.float-stat-number {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--sandal-300);
+  line-height: 1;
+}
+
+.float-stat-label {
+  font-size: 0.85rem;
+  color: var(--sandal-100);
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+/* ==========================================================================
+   ACHIEVEMENT SPOTLIGHT (CM TROPHY)
+   ========================================================================== */
+.achievement-spotlight-section {
+  padding: 5.5rem 0;
+  background-color: var(--sandal-50);
+}
+
+.spotlight-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--sandal-300);
+  box-shadow: var(--shadow-xl);
+  padding: 3.5rem;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.spotlight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--brown-700);
+  color: #ffffff;
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--sandal-300);
+}
+
+.spotlight-title {
+  font-size: 2.15rem;
+  font-weight: 900;
+  color: #000000;
+  line-height: 1.25;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.spotlight-desc {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #2b2b2b;
+  margin-bottom: 1.75rem;
+}
+
+.trophy-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.trophy-pill {
+  background-color: var(--sandal-50);
+  color: #000000;
+  border: 1.5px solid var(--sandal-300);
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trophy-pill.highlighted {
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+  color: #ffffff;
+  border-color: var(--sandal-300);
+}
+
+.congrats-box {
+  background-color: var(--sandal-50);
+  border-left: 4px solid var(--brown-700);
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  color: #000000;
+  line-height: 1.65;
+  border: 1px solid var(--sandal-200);
+  border-left-width: 4px;
+}
+
+.spotlight-image-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.spotlight-img {
+  width: 100%;
+  height: 195px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--sandal-200);
+  transition: transform 0.3s ease;
+}
+
+.spotlight-img:hover {
+  transform: scale(1.04);
+  border-color: var(--brown-500);
+}
+
+/* ==========================================================================
+   FACULTY SECTION
+   ========================================================================== */
+.faculty-section {
+  padding: 5.5rem 0;
+  background-color: var(--sandal-50);
+}
+
+.faculty-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.faculty-image-col {
+  position: relative;
+}
+
+.faculty-img {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 3px solid #ffffff;
+}
+
+.faculty-badge {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--sandal-300);
+}
+
+.faculty-content-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   TIMELINE SECTION
+   ========================================================================== */
+.timeline-section {
+  padding: 5.5rem 0 6.5rem;
+  background-color: #ffffff;
+}
+
+.timeline-container {
+  max-width: 860px;
+  margin: 3.5rem auto 0;
+  position: relative;
+  padding-left: 2.5rem;
+  border-left: 3px solid var(--sandal-300);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2.75rem;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -3.35rem;
+  top: 0.25rem;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--brown-700);
+  border: 4px solid #ffffff;
+  box-shadow: 0 0 0 2px var(--sandal-300);
+}
+
+.timeline-year {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--brown-700);
+  margin-bottom: 0.35rem;
+}
+
+.timeline-title {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-desc {
+  font-size: 0.98rem;
+  color: #3b3b3b;
+  line-height: 1.7;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (320px - 1920px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .overview-grid,
+  .spotlight-card,
+  .faculty-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-hero-title {
+    font-size: 2.25rem;
+  }
+  .spotlight-card {
+    padding: 2.25rem 1.75rem;
+  }
+  .spotlight-title {
+    font-size: 1.75rem;
+  }
+  .vision-feature-pills {
+    grid-template-columns: 1fr;
+  }
+  .spotlight-image-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-hero-title {
+    font-size: 1.85rem;
+  }
+  .about-hero-subtitle {
+    font-size: 0.98rem;
+  }
+  .overview-text-block h2 {
+    font-size: 1.75rem;
+  }
+  .spotlight-image-grid {
+    grid-template-columns: 1fr;
+  }
+  .overview-float-card {
+    position: static;
+    margin-top: 1rem;
+  }
+  .timeline-container {
+    padding-left: 1.75rem;
+  }
+  .timeline-dot {
+    left: -2.55rem;
+    width: 18px;
+    height: 18px;
+  }
+  .faculty-img {
+    height: 280px;
+  }
+}

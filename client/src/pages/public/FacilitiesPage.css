@@ -1,0 +1,510 @@
+/* FacilitiesPage.css - Campus Infrastructure & Co-Curricular Wings */
+.facilities-page {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* ==========================================================================
+   HERO BANNER
+   ========================================================================== */
+.facilities-hero {
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+  color: #ffffff;
+  padding: 5rem 0 4rem;
+  text-align: center;
+  position: relative;
+  border-bottom: 4px solid var(--sandal-300);
+}
+
+.facilities-hero-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.85rem;
+  font-weight: 900;
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.facilities-hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--sandal-100);
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ==========================================================================
+   INFRASTRUCTURE GRID
+   ========================================================================== */
+.infra-section {
+  padding: 5.5rem 0;
+  background-color: #ffffff;
+}
+
+.infra-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+.infra-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--sandal-200);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.infra-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--brown-400);
+}
+
+.infra-img-wrapper {
+  position: relative;
+  height: 230px;
+  overflow: hidden;
+  background-color: var(--sandal-100);
+}
+
+.infra-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.infra-card:hover .infra-img {
+  transform: scale(1.05);
+}
+
+.infra-body {
+  padding: 1.65rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.infra-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.infra-desc {
+  font-size: 0.94rem;
+  color: #3b3b3b;
+  line-height: 1.65;
+}
+
+/* ==========================================================================
+   CLUBS & FEATURE CARDS
+   ========================================================================== */
+.clubs-section {
+  padding: 5.5rem 0 6.5rem;
+  background-color: var(--sandal-50);
+}
+
+.club-feature-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 1.5px solid var(--sandal-300);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: 3.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.club-feature-card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+.club-feature-card.reverse {
+  grid-template-columns: 1.3fr 1fr;
+}
+
+.club-feature-card.reverse .club-img-col {
+  order: 2;
+}
+
+.club-feature-card.reverse .club-content-col {
+  order: 1;
+}
+
+.club-img-col {
+  position: relative;
+  min-height: 350px;
+  background-color: var(--sandal-100);
+}
+
+.club-feature-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.club-content-col {
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.club-tag {
+  display: inline-block;
+  background-color: var(--sandal-100);
+  color: var(--brown-900);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  width: fit-content;
+  border: 1px solid var(--sandal-200);
+}
+
+.club-title {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #000000;
+  margin-bottom: 1rem;
+  line-height: 1.25;
+}
+
+.club-desc {
+  font-size: 1rem;
+  color: #2b2b2b;
+  line-height: 1.75;
+  margin-bottom: 1.25rem;
+}
+
+.club-meta-box {
+  background-color: var(--sandal-50);
+  border-left: 4px solid var(--brown-700);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  color: #000000;
+  line-height: 1.6;
+  border: 1px solid var(--sandal-200);
+  border-left-width: 4px;
+}
+
+/* ==========================================================================
+   ACHIEVEMENTS GALLERY & SPORTS CHAMPIONSHIPS
+   ========================================================================== */
+.achievements-gallery-block {
+  width: 100%;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+.achievement-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--sandal-200);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.achievement-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--brown-400);
+}
+
+.achievement-img {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+}
+
+.achievement-card-body {
+  padding: 1.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.vibrancy-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--brown-700);
+  margin-bottom: 0.35rem;
+}
+
+.achievement-card-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.achievement-card-text {
+  font-size: 0.94rem;
+  color: #3b3b3b;
+  line-height: 1.65;
+}
+
+/* ==========================================================================
+   SECONDARY CLUBS GRID
+   ========================================================================== */
+.secondary-clubs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.75rem;
+}
+
+.secondary-club-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--sandal-200);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.secondary-club-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--brown-400);
+}
+
+.secondary-club-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  background-color: var(--sandal-100);
+  color: var(--brown-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--sandal-200);
+}
+
+.secondary-club-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.secondary-club-desc {
+  font-size: 0.94rem;
+  color: #3b3b3b;
+  line-height: 1.65;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (320px - 1920px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .infra-grid,
+  .achievements-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .club-feature-card,
+  .club-feature-card.reverse {
+    grid-template-columns: 1fr;
+  }
+  .club-feature-card.reverse .club-img-col {
+    order: 1;
+  }
+  .club-feature-card.reverse .club-content-col {
+    order: 2;
+  }
+  .club-img-col {
+    min-height: 300px;
+  }
+  .club-content-col {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .facilities-hero-title {
+    font-size: 2.25rem;
+  }
+  .infra-grid,
+  .achievements-grid {
+    grid-template-columns: 1fr;
+  }
+  .secondary-clubs-grid {
+    grid-template-columns: 1fr;
+  }
+  .club-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .facilities-hero-title {
+    font-size: 1.85rem;
+  }
+  .facilities-hero-subtitle {
+    font-size: 0.98rem;
+  }
+  .club-content-col {
+    padding: 1.5rem 1.25rem;
+  }
+  .club-img-col {
+    min-height: 240px;
+  }
+}
+
+/* ==========================================================================
+   ACHIEVEMENT SPOTLIGHT (CM TROPHY)
+   ========================================================================== */
+.facilities-spotlight-block {
+  margin: 3.5rem 0;
+}
+
+.spotlight-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--sandal-300);
+  box-shadow: var(--shadow-xl);
+  padding: 3.5rem;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.spotlight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--brown-700);
+  color: #ffffff;
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--sandal-300);
+}
+
+.spotlight-title {
+  font-size: 2.15rem;
+  font-weight: 900;
+  color: #000000;
+  line-height: 1.25;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.spotlight-desc {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #2b2b2b;
+  margin-bottom: 1.75rem;
+}
+
+.trophy-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.trophy-pill {
+  background-color: var(--sandal-50);
+  color: #000000;
+  border: 1.5px solid var(--sandal-300);
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trophy-pill.highlighted {
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+  color: #ffffff;
+  border-color: var(--sandal-300);
+}
+
+.congrats-box {
+  background-color: var(--sandal-50);
+  border-left: 4px solid var(--brown-700);
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  color: #000000;
+  line-height: 1.65;
+  border: 1px solid var(--sandal-200);
+  border-left-width: 4px;
+}
+
+.spotlight-image-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.spotlight-img {
+  width: 100%;
+  height: 195px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--sandal-200);
+  transition: transform 0.3s ease;
+}
+
+.spotlight-img:hover {
+  transform: scale(1.04);
+  border-color: var(--brown-500);
+}
+
+@media (max-width: 992px) {
+  .spotlight-card {
+    grid-template-columns: 1fr;
+    padding: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .spotlight-card {
+    padding: 1.75rem 1.25rem;
+  }
+  .spotlight-title {
+    font-size: 1.65rem;
+  }
+  .spotlight-image-grid {
+    grid-template-columns: 1fr;
+  }
+  .spotlight-img {
+    height: 180px;
+  }
+}

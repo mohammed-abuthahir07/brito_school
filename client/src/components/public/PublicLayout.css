@@ -1,0 +1,50 @@
+/* PublicLayout.css */
+.public-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  width: 100%;
+}
+
+/* Unified Sticky Navigation Container */
+.public-sticky-header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: #ffffff;
+}
+
+.public-main-content {
+  flex: 1;
+  width: 100%;
+}
+
+/* Subtle Developer Credit Below Footer */
+.developer-credit-bar {
+  background-color: #ffffff;
+  padding: 0.65rem 1rem;
+  text-align: center;
+  border-top: 1px solid var(--sandal-200);
+  width: 100%;
+}
+
+.developer-credit-text {
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  color: #4a4a4a;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.developer-credit-text .dev-handle {
+  color: var(--brown-700);
+  font-weight: 700;
+}

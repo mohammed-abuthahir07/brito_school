@@ -1,0 +1,378 @@
+/* AlumniPage.css - Britto Alumni Association */
+.alumni-page {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* ==========================================================================
+   HERO BANNER
+   ========================================================================== */
+.alumni-hero {
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+  color: #ffffff;
+  padding: 5rem 0 4rem;
+  text-align: center;
+  position: relative;
+  border-bottom: 4px solid var(--sandal-300);
+}
+
+.alumni-hero-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.85rem;
+  font-weight: 900;
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.alumni-hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--sandal-100);
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ==========================================================================
+   INTRODUCTION & PHOTOS
+   ========================================================================== */
+.alumni-intro-section {
+  padding: 5.5rem 0;
+  background-color: #ffffff;
+}
+
+.alumni-intro-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.alumni-text-block h2 {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #000000;
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+}
+
+.alumni-lead {
+  font-size: 1.12rem;
+  color: var(--brown-800);
+  font-weight: 700;
+  line-height: 1.75;
+  margin-bottom: 1.25rem;
+}
+
+.alumni-desc {
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: #2b2b2b;
+  margin-bottom: 1.25rem;
+}
+
+.alumni-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1.5px solid var(--sandal-200);
+}
+
+.alumni-stat-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.alumni-stat-val {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: var(--brown-700);
+}
+
+.alumni-stat-lbl {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #555555;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.alumni-photos-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.alumni-photo-frame {
+  background-color: #ffffff;
+  border: 1.5px solid var(--sandal-300);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.alumni-photo-frame:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.alumni-card-img {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+}
+
+.alumni-photo-caption {
+  display: block;
+  padding: 0.75rem 1rem;
+  background-color: var(--sandal-50);
+  color: var(--brown-900);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+  border-top: 1px solid var(--sandal-200);
+}
+
+/* ==========================================================================
+   ALUMNI PILLARS SECTION
+   ========================================================================== */
+.alumni-pillars-section {
+  padding: 5.5rem 0;
+  background-color: var(--sandal-50);
+}
+
+.pillars-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.pillar-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--sandal-200);
+  padding: 2.25rem 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.pillar-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--brown-400);
+}
+
+.pillar-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background-color: var(--sandal-100);
+  color: var(--brown-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--sandal-200);
+}
+
+.pillar-card h4 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 0.65rem;
+}
+
+.pillar-card p {
+  font-size: 0.95rem;
+  color: #3b3b3b;
+  line-height: 1.65;
+}
+
+/* ==========================================================================
+   REGISTRATION FORM SECTION
+   ========================================================================== */
+.alumni-form-section {
+  padding: 5.5rem 0 6.5rem;
+  background-color: #ffffff;
+}
+
+.alumni-form-wrapper {
+  max-width: 840px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--sandal-300);
+  box-shadow: var(--shadow-xl);
+  padding: 3.5rem;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.form-title {
+  font-size: 2.15rem;
+  font-weight: 900;
+  color: #000000;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.form-subtitle {
+  color: #444444;
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.alumni-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #000000;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background-color: #ffffff;
+  color: #000000;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--brown-600);
+  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.18);
+}
+
+.form-input.error {
+  border-color: var(--danger);
+  background-color: #fffafb;
+}
+
+.field-error-msg {
+  font-size: 0.82rem;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.form-success-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.submitted-summary-card {
+  background-color: var(--sandal-50);
+  border: 1px solid var(--sandal-200);
+  border-radius: var(--radius-md);
+  padding: 1.5rem 1.75rem;
+}
+
+.submitted-summary-card h4 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--brown-900);
+  margin-bottom: 0.75rem;
+}
+
+.submitted-summary-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  font-size: 0.92rem;
+  color: #2b2b2b;
+}
+
+.alumni-limitation-box {
+  background-color: var(--warning-bg);
+  border: 1px dashed var(--warning);
+  border-radius: var(--radius-md);
+  padding: 1.35rem 1.65rem;
+  font-size: 0.92rem;
+  color: #78350f;
+  line-height: 1.65;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (320px - 1920px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .alumni-intro-grid {
+    grid-template-columns: 1fr;
+  }
+  .pillars-cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .alumni-hero-title {
+    font-size: 2.25rem;
+  }
+  .alumni-form-wrapper {
+    padding: 2.25rem 1.75rem;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .pillars-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .submitted-summary-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .alumni-hero-title {
+    font-size: 1.85rem;
+  }
+  .alumni-hero-subtitle {
+    font-size: 0.98rem;
+  }
+  .alumni-text-block h2 {
+    font-size: 1.75rem;
+  }
+  .alumni-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .form-title {
+    font-size: 1.75rem;
+  }
+}

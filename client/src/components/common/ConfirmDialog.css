@@ -1,0 +1,22 @@
+/* ConfirmDialog.css */
+.confirm-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.confirm-dialog-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.confirm-item-preview {
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-secondary);
+  border-left: 3px solid var(--brown-600);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}

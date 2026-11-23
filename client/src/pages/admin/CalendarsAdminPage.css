@@ -1,0 +1,30 @@
+/* CalendarsAdminPage.css */
+.calendar-upload-dropzone {
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background-color: var(--bg-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.calendar-upload-dropzone:hover {
+  border-color: var(--brown-600);
+  background-color: var(--brown-50);
+}
+
+.calendar-file-name {
+  font-weight: 600;
+  color: var(--brown-800);
+  word-break: break-all;
+}
+
+.calendar-file-size {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}

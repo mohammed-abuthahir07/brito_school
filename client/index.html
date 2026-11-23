@@ -2,9 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/jpeg" href="/src/assets/Logo/Schoollogo.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>client</title>
+    <meta name="description" content="St. Britto Higher Secondary School, Madurai – Established in 1968. Let Justice and Love Prevail. Temple of Learning, Character and Discipline." />
+    <title>St. Britto Higher Secondary School, Madurai – Estd. 1968</title>
+    <!-- Google Fonts: Inter (Global Font) and Mukta Malar (Tamil Fallback) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        if ('scrollRestoration' in history) {
+          history.scrollRestoration = 'manual';
+        }
+        var navEntries = performance.getEntriesByType('navigation');
+        var isReload = (navEntries.length > 0 && navEntries[0].type === 'reload') ||
+                       (window.performance && window.performance.navigation && window.performance.navigation.type === 1) ||
+                       sessionStorage.getItem('brito_reloaded') === 'true';
+
+        sessionStorage.removeItem('brito_reloaded');
+
+        if (isReload) {
+          window.scrollTo(0, 0);
+          var path = window.location.pathname;
+          if (!path.startsWith('/admin') && path !== '/') {
+            window.location.replace('/');
+          }
+        }
+
+        window.addEventListener('beforeunload', function() {
+          if (!window.location.pathname.startsWith('/admin')) {
+            sessionStorage.setItem('brito_reloaded', 'true');
+          }
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
