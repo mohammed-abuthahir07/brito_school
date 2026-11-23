@@ -78,7 +78,7 @@
 .hero-motto-callout {
   font-family: 'Inter', sans-serif;
   font-size: clamp(1.15rem, 2.2vw, 1.45rem);
-  font-style: italic;
+  /* font-style: italic; */
   color: var(--sandal-200);
   margin-bottom: 1.5rem;
   font-weight: 600;

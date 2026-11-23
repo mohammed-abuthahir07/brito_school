@@ -37,7 +37,7 @@ export const PublicNavbar = () => {
           <div className="school-brand-text">
             <span className="school-name">St. Britto Hr. Sec. School</span>
             <span className="school-location">Madurai – 625 016, Tamil Nadu</span>
-            <span className="school-motto">“Let Justice and Love Prevail”</span>
+            <span className="school-motto">நீதியும் அன்பும் மேலோங்கட்டும்</span>
           </div>
         </Link>
 

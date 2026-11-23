@@ -62,7 +62,7 @@
 
 .school-motto {
   font-size: 0.72rem;
-  font-style: italic;
+  /* font-style: italic; */
   color: var(--brown-600);
   font-weight: 700;
   margin-top: 0.08rem;

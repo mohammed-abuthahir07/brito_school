@@ -152,9 +152,9 @@ export const HomePage = () => {
             St. Britto Higher<br />Secondary School
           </h1>
 
-          <div className="hero-motto-callout">
-            “Let Justice and Love Prevail”
-          </div>
+          {/* <div className="hero-motto-callout">
+           Good Morning !!!
+          </div> */}
 
           <div className="hero-history-copy">
             <p className="hero-history-text">
