@@ -41,17 +41,14 @@ export const AdminSidebar = ({ isOpen = false, onClose = () => {} }) => {
           <span className="admin-brand-name">St. Britto Portal</span>
           <span className="admin-brand-badge">Administrative Suite</span>
         </div>
-        {isOpen && (
-          <button
-            type="button"
-            className="modal-close-btn"
-            onClick={onClose}
-            style={{ marginLeft: 'auto', color: '#fff' }}
-            aria-label="Close sidebar"
-          >
-            <IconX size={20} />
-          </button>
-        )}
+        <button
+          type="button"
+          className="modal-close-btn admin-sidebar-close"
+          onClick={onClose}
+          aria-label="Close sidebar"
+        >
+          <IconX size={20} />
+        </button>
       </div>
 
       <nav className="admin-nav-list">

@@ -1,18 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../services/adminService';
+import { isAbortError } from '../../utils/userFacingError';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/common/Button';
 import { Alert } from '../../components/common/Alert';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
-import { IconUser } from '../../components/common/Icons';
+import { RetryPanel } from '../../components/common/RetryPanel';
+import schoolLogo from '../../assets/Logo/SchoolLogo.jpg';
 import './ProfileAdminPage.css';
 
 export const ProfileAdminPage = () => {
   const { setAdmin } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [alert, setAlert] = useState(null);
+  const redirectTimer = useRef(null);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -22,9 +29,11 @@ export const ProfileAdminPage = () => {
     School_location: '',
   });
 
-  const fetchProfile = () => {
+  const fetchProfile = (signal) => {
     setLoading(true);
-    adminService.getProfile()
+    setLoadError(null);
+    adminService
+      .getProfile({ signal })
       .then((res) => {
         if (res.success && res.profile) {
           setProfile(res.profile);
@@ -35,10 +44,13 @@ export const ProfileAdminPage = () => {
             phone_secondary: res.profile.phone_secondary || '',
             School_location: res.profile.School_location || '',
           });
+        } else {
+          setLoadError('Profile details could not be loaded.');
         }
       })
       .catch((err) => {
-        setAlert({ type: 'danger', message: err.message || 'Failed to fetch administrator profile.' });
+        if (isAbortError(err)) return;
+        setLoadError(err.message || 'Failed to fetch administrator profile.');
       })
       .finally(() => {
         setLoading(false);
@@ -46,7 +58,14 @@ export const ProfileAdminPage = () => {
   };
 
   useEffect(() => {
-    fetchProfile();
+    const controller = new AbortController();
+    fetchProfile(controller.signal);
+    return () => {
+      controller.abort();
+      if (redirectTimer.current) {
+        window.clearTimeout(redirectTimer.current);
+      }
+    };
   }, []);
 
   const handleChange = (e) => {
@@ -56,18 +75,37 @@ export const ProfileAdminPage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (saving || redirecting) return;
     setAlert(null);
+
+    if (formData.alternative_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.alternative_email.trim())) {
+      setAlert({ type: 'danger', message: 'Please enter a valid alternative email address.' });
+      return;
+    }
 
     setSaving(true);
     try {
       const res = await adminService.updateProfile(formData);
       if (res.success && res.profile) {
         setProfile(res.profile);
-        setAdmin((prev) => ({
-          ...prev,
-          full_name: res.profile.full_name,
-        }));
-        setAlert({ type: 'success', message: 'Profile details saved successfully!' });
+        setAdmin((prev) => {
+          const next = { ...prev, full_name: res.profile.full_name };
+          try {
+            localStorage.setItem('brito_admin_info', JSON.stringify(next));
+          } catch {
+            /* ignore quota */
+          }
+          return next;
+        });
+        setRedirecting(true);
+        setAlert({
+          type: 'success',
+          message: 'Profile details saved successfully. Opening the dashboard…',
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        redirectTimer.current = window.setTimeout(() => {
+          navigate('/admin/dashboard');
+        }, 2000);
       }
     } catch (err) {
       setAlert({ type: 'danger', message: err.message || 'Failed to update profile.' });
@@ -78,6 +116,14 @@ export const ProfileAdminPage = () => {
 
   if (loading) {
     return <LoadingSpinner text="Retrieving administrator profile..." />;
+  }
+
+  if (loadError && !profile) {
+    return (
+      <div className="admin-page-container">
+        <RetryPanel message={loadError} onRetry={() => fetchProfile()} />
+      </div>
+    );
   }
 
   return (
@@ -95,7 +141,7 @@ export const ProfileAdminPage = () => {
         <div className="profile-card">
           <div className="profile-summary-header">
             <div className="profile-avatar-circle">
-              <IconUser size={38} />
+              <img src={schoolLogo} alt="St. Britto school emblem" />
             </div>
             <h2 className="profile-admin-name">{profile?.full_name || 'School Administrator'}</h2>
             <div className="profile-role-tag">Primary Administrator</div>
@@ -137,7 +183,7 @@ export const ProfileAdminPage = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <form onSubmit={handleSave} className="profile-form" noValidate>
             <div className="form-group">
               <label htmlFor="adminFullNameInput" className="form-label">
                 Administrator Full Name
@@ -150,6 +196,7 @@ export const ProfileAdminPage = () => {
                 placeholder="e.g. School Administrator / Father Headmaster"
                 value={formData.full_name}
                 onChange={handleChange}
+                disabled={saving || redirecting}
               />
             </div>
 
@@ -165,6 +212,7 @@ export const ProfileAdminPage = () => {
                 placeholder="e.g. altadmin@britoschool.com"
                 value={formData.alternative_email}
                 onChange={handleChange}
+                disabled={saving || redirecting}
               />
             </div>
 
@@ -179,9 +227,10 @@ export const ProfileAdminPage = () => {
                   type="tel"
                   className="form-input"
                   placeholder="e.g. 9876543210"
-                  value={formData.phone_primary}
-                  onChange={handleChange}
-                />
+                value={formData.phone_primary}
+                onChange={handleChange}
+                disabled={saving || redirecting}
+              />
               </div>
 
               <div className="form-group">
@@ -194,9 +243,10 @@ export const ProfileAdminPage = () => {
                   type="tel"
                   className="form-input"
                   placeholder="e.g. 9876543211"
-                  value={formData.phone_secondary}
-                  onChange={handleChange}
-                />
+                value={formData.phone_secondary}
+                onChange={handleChange}
+                disabled={saving || redirecting}
+              />
               </div>
             </div>
 
@@ -212,12 +262,13 @@ export const ProfileAdminPage = () => {
                 placeholder="e.g. Madurai, Tamil Nadu"
                 value={formData.School_location}
                 onChange={handleChange}
+                disabled={saving || redirecting}
               />
             </div>
 
-            <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
-              <Button type="submit" variant="primary" size="md" loading={saving}>
-                Save Profile Changes
+            <div className="profile-form-actions">
+              <Button type="submit" variant="primary" size="md" loading={saving || redirecting}>
+                {redirecting ? 'Opening dashboard…' : 'Save Profile Changes'}
               </Button>
             </div>
           </form>

@@ -8,23 +8,22 @@ export const AnnouncementTicker = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    publicService.getAnnouncements({ limit: 10 })
+    const controller = new AbortController();
+    publicService
+      .getAnnouncements({ limit: 10 }, { signal: controller.signal })
       .then((res) => {
-        if (mounted && res.success && Array.isArray(res.announcements)) {
+        if (res.success && Array.isArray(res.announcements)) {
           setAnnouncements(res.announcements);
         }
       })
-      .catch((err) => {
-        console.warn('Could not fetch announcements for ticker:', err.message);
+      .catch(() => {
+        // Ticker is non-critical; hide quietly on failure.
       })
       .finally(() => {
-        if (mounted) setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       });
 
-    return () => {
-      mounted = false;
-    };
+    return () => controller.abort();
   }, []);
 
   if (loading || announcements.length === 0) {
@@ -42,7 +41,7 @@ export const AnnouncementTicker = () => {
       <div className="ticker-inner">
         <div className="ticker-label">
           <IconBell size={14} />
-          <span>Announcements</span>
+          <span>School Announcements</span>
         </div>
         <div className="ticker-track-container">
           <div className="ticker-track">

@@ -1,9 +1,11 @@
 /* AdminSidebar.css */
 .admin-sidebar {
   width: 260px;
+  flex-shrink: 0;
   background-color: var(--brown-900);
   color: #f3efe6;
   height: 100vh;
+  height: 100dvh;
   position: sticky;
   top: 0;
   display: flex;
@@ -11,6 +13,14 @@
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 60;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-sidebar .admin-sidebar-close {
+  margin-left: auto;
+  color: #fff;
+  display: none;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .admin-sidebar-header {
@@ -126,10 +136,18 @@
     top: 0;
     bottom: 0;
     left: 0;
+    width: min(280px, 88vw);
     transform: translateX(-100%);
+    box-shadow: var(--shadow-xl);
   }
 
   .admin-sidebar.open {
     transform: translateX(0);
+  }
+
+  .admin-sidebar .admin-sidebar-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }

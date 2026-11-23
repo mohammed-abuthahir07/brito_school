@@ -131,4 +131,8 @@
   .data-table-card {
     overflow-x: auto;
   }
+
+  .search-filter-wrapper {
+    max-width: none;
+  }
 }

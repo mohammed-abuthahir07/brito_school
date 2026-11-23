@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { IconAlertCircle, IconCheck, IconX } from './Icons';
 import './Alert.css';
 
@@ -7,8 +7,15 @@ export const Alert = ({
   title = '',
   message,
   onClose = null,
+  autoHideMs = 0,
   className = '',
 }) => {
+  useEffect(() => {
+    if (!autoHideMs || !onClose || !message) return undefined;
+    const timer = window.setTimeout(onClose, autoHideMs);
+    return () => window.clearTimeout(timer);
+  }, [autoHideMs, onClose, message]);
+
   if (!message) return null;
 
   const renderIcon = () => {

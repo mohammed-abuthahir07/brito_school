@@ -1,9 +1,16 @@
 /**
- * Centralized API Client for Brito School Management System
- * Base URL defaults to VITE_API_BASE_URL or http://localhost:5000
+ * Centralized API client for Brito School.
+ * Base URL is VITE_API_BASE_URL (build-time). Never embed secrets here.
  */
+import { isAbortError, toUserFacingMessage } from '../utils/userFacingError';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const DEFAULT_TIMEOUT_MS = 20000;
+const AUTH_EXPIRED_SKIP = [
+  '/api/admin/login',
+  '/api/admin/forgot-password',
+  '/api/admin/reset-password',
+];
 
 export { API_BASE_URL };
 
@@ -13,19 +20,12 @@ export class ApiError extends Error {
     this.name = 'ApiError';
     this.status = status;
     this.data = data;
+    this.aborted = false;
   }
 }
 
-/**
- * Get stored auth token
- */
-export const getStoredToken = () => {
-  return localStorage.getItem('brito_admin_token') || '';
-};
+export const getStoredToken = () => localStorage.getItem('brito_admin_token') || '';
 
-/**
- * Set auth token
- */
 export const setStoredToken = (token) => {
   if (token) {
     localStorage.setItem('brito_admin_token', token);
@@ -34,36 +34,57 @@ export const setStoredToken = (token) => {
   }
 };
 
-/**
- * Core request dispatcher
- */
-export async function request(endpoint, options = {}) {
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-  const headers = { ...options.headers };
+function shouldSkipAuthExpired(endpoint) {
+  return AUTH_EXPIRED_SKIP.some((path) => endpoint.includes(path));
+}
 
-  // Inject Bearer token if available
+export async function request(endpoint, options = {}) {
+  const {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    signal: externalSignal,
+    headers: extraHeaders,
+    ...fetchOptions
+  } = options;
+
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+  const headers = { ...extraHeaders };
+
   const token = getStoredToken();
-  if (token && !headers['Authorization']) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (token && !headers.Authorization) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  // Handle FormData vs JSON
-  const isFormData = options.body instanceof FormData;
-  if (!isFormData && options.body && typeof options.body === 'object') {
+  const isFormData = fetchOptions.body instanceof FormData;
+  if (!isFormData && fetchOptions.body && typeof fetchOptions.body === 'object') {
     headers['Content-Type'] = 'application/json';
-    options.body = JSON.stringify(options.body);
+    fetchOptions.body = JSON.stringify(fetchOptions.body);
   } else if (isFormData) {
-    // Let browser set the multipart boundary automatically
     delete headers['Content-Type'];
+  }
+
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort('timeout'), timeoutMs);
+
+  const onExternalAbort = () => controller.abort();
+  const hasAbortSignal =
+    externalSignal &&
+    typeof externalSignal.aborted === 'boolean' &&
+    typeof externalSignal.addEventListener === 'function';
+  if (hasAbortSignal) {
+    if (externalSignal.aborted) {
+      controller.abort();
+    } else {
+      externalSignal.addEventListener('abort', onExternalAbort);
+    }
   }
 
   try {
     const response = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       headers,
+      signal: controller.signal,
     });
 
-    // 304 Not Modified
     if (response.status === 304) {
       return { success: true, notModified: true };
     }
@@ -71,26 +92,45 @@ export async function request(endpoint, options = {}) {
     let data;
     const contentType = response.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
-      data = await response.json();
+      try {
+        data = await response.json();
+      } catch {
+        data = { success: response.ok, message: 'Invalid response from server.' };
+      }
     } else {
       const text = await response.text();
-      data = { success: response.ok, message: text };
+      data = { success: response.ok, message: text || undefined };
     }
 
     if (!response.ok) {
-      const message = data?.message || `Request failed with status ${response.status}`;
-      if (response.status === 401) {
-        // Trigger auth expired event
+      const message = toUserFacingMessage(response.status, data?.message);
+      if (response.status === 401 && token && !shouldSkipAuthExpired(endpoint)) {
         window.dispatchEvent(new CustomEvent('brito_auth_expired'));
       }
       throw new ApiError(message, response.status, data);
     }
 
-    return data;
+    return data ?? { success: true };
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError(error.message || 'Network connection failed. Please check your internet or server status.', 0);
+    if (isAbortError(error) || error?.name === 'AbortError') {
+      const abortedByCaller = Boolean(externalSignal?.aborted);
+      const apiError = new ApiError(
+        abortedByCaller
+          ? 'Request cancelled'
+          : toUserFacingMessage(408),
+        abortedByCaller ? 0 : 408,
+      );
+      apiError.aborted = abortedByCaller;
+      throw apiError;
+    }
+    throw new ApiError(toUserFacingMessage(0), 0);
+  } finally {
+    window.clearTimeout(timeoutId);
+    if (hasAbortSignal) {
+      externalSignal.removeEventListener('abort', onExternalAbort);
+    }
   }
 }

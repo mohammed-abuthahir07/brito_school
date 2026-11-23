@@ -295,11 +295,20 @@
 }
 
 @media (max-width: 360px) {
+  .school-brand {
+    gap: 0.55rem;
+  }
+
+  .school-logo-img {
+    width: 40px;
+    height: 40px;
+  }
+
   .school-name {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .school-location {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
   }
 }

@@ -117,6 +117,184 @@
   color: var(--success);
 }
 
+.gallery-year-chart {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  padding: 1.75rem;
+  min-width: 0;
+}
+
+.chart-subtitle {
+  margin: 0.3rem 0 0;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.chart-year-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brown-800);
+}
+
+.chart-year-field select {
+  min-height: 40px;
+  border: 1px solid var(--sandal-300);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  color: var(--brown-900);
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+}
+
+.line-chart {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 1rem;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.line-chart-frame {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.line-chart-frame svg {
+  width: 100%;
+  min-width: 520px;
+  height: auto;
+  display: block;
+}
+
+.chart-grid-line {
+  stroke: #efe8dc;
+  stroke-width: 1;
+}
+
+.chart-axis-label,
+.chart-month-label {
+  fill: #8a8174;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart-area {
+  fill: rgba(184, 134, 11, 0.14);
+  stroke: none;
+  opacity: 0;
+  animation: chartAreaIn 0.7s ease 0.75s forwards;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--brown-700);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: chartLineDraw 1.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.chart-dot {
+  fill: #ffffff;
+  stroke: var(--brown-700);
+  stroke-width: 2;
+  pointer-events: none;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: chartDotIn 0.35s ease forwards;
+}
+
+@keyframes chartLineDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chartAreaIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes chartDotIn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-area,
+  .chart-line,
+  .chart-dot {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+    transform: none;
+  }
+}
+
+.chart-dot.is-active {
+  fill: var(--accent-gold);
+  stroke: var(--brown-800);
+}
+
+.chart-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.chart-month-panel {
+  border: 1px solid var(--sandal-200);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  padding: 1rem;
+  min-width: 0;
+}
+
+.chart-month-panel-title {
+  font-weight: 800;
+  color: var(--brown-900);
+  margin-bottom: 0.75rem;
+}
+
+.chart-month-metrics {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.chart-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.chart-metric strong {
+  color: var(--brown-900);
+  font-size: 1.05rem;
+}
+
+.chart-month-hint {
+  margin: 0.85rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 /* Middle Analytics Section */
 .dashboard-details-grid {
   display: grid;
@@ -247,10 +425,44 @@
   .dashboard-details-grid {
     grid-template-columns: 1fr;
   }
+
+  .line-chart {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {
+  .gallery-year-chart {
+    padding: 1.15rem;
+  }
+
+  .gallery-year-chart .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
   .stat-cards-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-welcome h2 {
+    font-size: 1.28rem;
+  }
+
+  .dashboard-panel-card,
+  .quick-actions-bar,
+  .stat-card {
+    padding: 1.15rem;
+  }
+
+  .recent-record-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .quick-buttons-row .btn {
+    flex: 1 1 100%;
   }
 }

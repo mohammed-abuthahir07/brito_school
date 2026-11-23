@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminService } from '../../services/adminService';
+import { isAbortError } from '../../utils/userFacingError';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
@@ -33,9 +34,10 @@ export const AnnouncementsAdminPage = () => {
   const [deleteItem, setDeleteItem] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchAnnouncements = () => {
+  const fetchAnnouncements = (signal) => {
     setLoading(true);
-    adminService.getAnnouncements()
+    adminService
+      .getAnnouncements({}, { signal })
       .then((res) => {
         if (res.success && Array.isArray(res.announcements)) {
           setAnnouncements(res.announcements);
@@ -44,6 +46,7 @@ export const AnnouncementsAdminPage = () => {
         }
       })
       .catch((err) => {
+        if (isAbortError(err)) return;
         setAlert({ type: 'danger', message: err.message || 'Failed to fetch announcements.' });
       })
       .finally(() => {
@@ -52,7 +55,9 @@ export const AnnouncementsAdminPage = () => {
   };
 
   useEffect(() => {
-    fetchAnnouncements();
+    const controller = new AbortController();
+    fetchAnnouncements(controller.signal);
+    return () => controller.abort();
   }, []);
 
   const openAddModal = () => {
@@ -85,6 +90,7 @@ export const AnnouncementsAdminPage = () => {
     e.preventDefault();
     if (!validate()) return;
 
+    if (submitting) return;
     setSubmitting(true);
     try {
       if (editingItem) {
@@ -104,7 +110,7 @@ export const AnnouncementsAdminPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!deleteItem) return;
+    if (!deleteItem || deleting) return;
     setDeleting(true);
     try {
       await adminService.deleteAnnouncement(deleteItem.id);
@@ -149,7 +155,7 @@ export const AnnouncementsAdminPage = () => {
           />
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="admin-action-buttons">
           <Button
             variant="outline"
             size="md"
@@ -202,16 +208,16 @@ export const AnnouncementsAdminPage = () => {
             <tbody>
               {filteredAnnouncements.map((item) => (
                 <tr key={item.id}>
-                  <td>
+                  <td data-label="Category">
                     <span className="table-category-badge">{item.category || 'General'}</span>
                   </td>
-                  <td>
+                  <td data-label="Title">
                     <div className="table-title">{item.title}</div>
                   </td>
-                  <td>
+                  <td data-label="Content">
                     <div className="table-content-preview">{item.content}</div>
                   </td>
-                  <td>
+                  <td data-label="Date">
                     <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                       {item.created_at
                         ? new Date(item.created_at).toLocaleDateString('en-IN', {
@@ -221,7 +227,7 @@ export const AnnouncementsAdminPage = () => {
                         : '—'}
                     </span>
                   </td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td data-label="Actions" style={{ textAlign: 'right' }}>
                     <div className="table-actions" style={{ justifyContent: 'flex-end' }}>
                       <button
                         type="button"

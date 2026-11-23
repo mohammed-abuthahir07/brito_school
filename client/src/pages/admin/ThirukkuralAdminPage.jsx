@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminService } from '../../services/adminService';
+import { isAbortError } from '../../utils/userFacingError';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
@@ -37,9 +38,10 @@ export const ThirukkuralAdminPage = () => {
   const [deleteItem, setDeleteItem] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchKurals = () => {
+  const fetchKurals = (signal) => {
     setLoading(true);
-    adminService.getKurals()
+    adminService
+      .getKurals({ signal })
       .then((res) => {
         if (res.success && Array.isArray(res.kurals)) {
           setKurals(res.kurals);
@@ -48,6 +50,7 @@ export const ThirukkuralAdminPage = () => {
         }
       })
       .catch((err) => {
+        if (isAbortError(err)) return;
         setAlert({ type: 'danger', message: err.message || 'Failed to fetch Thirukkural records.' });
       })
       .finally(() => {
@@ -56,7 +59,9 @@ export const ThirukkuralAdminPage = () => {
   };
 
   useEffect(() => {
-    fetchKurals();
+    const controller = new AbortController();
+    fetchKurals(controller.signal);
+    return () => controller.abort();
   }, []);
 
   const openAddModal = () => {
@@ -100,7 +105,7 @@ export const ThirukkuralAdminPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate() || submitting) return;
 
     setSubmitting(true);
     try {
@@ -128,7 +133,7 @@ export const ThirukkuralAdminPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!deleteItem) return;
+    if (!deleteItem || deleting) return;
     setDeleting(true);
     try {
       await adminService.deleteKural(deleteItem.id);
@@ -174,7 +179,7 @@ export const ThirukkuralAdminPage = () => {
           />
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="admin-action-buttons">
           <Button
             variant="outline"
             size="md"
@@ -216,7 +221,7 @@ export const ThirukkuralAdminPage = () => {
           {filteredKurals.map((k) => (
             <article key={k.id} className="kural-card-admin">
               <div className="kural-admin-header">
-                <span className="kural-number-badge">குறள் #{k.kural_number}</span>
+                <span className="kural-number-badge">குறள் {k.kural_number}</span>
                 <div className="table-actions">
                   <button
                     type="button"

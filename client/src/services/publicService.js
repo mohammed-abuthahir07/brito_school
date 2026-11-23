@@ -1,53 +1,35 @@
 import { request } from './api';
 
 export const publicService = {
-  /**
-   * Fetch public announcements
-   */
-  async getAnnouncements(params = {}) {
+  async getAnnouncements(params = {}, options = {}) {
     const query = new URLSearchParams(params).toString();
     const endpoint = `/api/public/announcements${query ? `?${query}` : ''}`;
-    return request(endpoint, { method: 'GET' });
+    return request(endpoint, { method: 'GET', ...options });
   },
 
-  /**
-   * Fetch public calendars
-   */
-  async getCalendars(params = {}) {
+  async getCalendars(params = {}, options = {}) {
     const query = new URLSearchParams(params).toString();
     const endpoint = `/api/public/calendars${query ? `?${query}` : ''}`;
-    return request(endpoint, { method: 'GET' });
+    return request(endpoint, { method: 'GET', ...options });
   },
 
-  /**
-   * Fetch public galleries (max 30)
-   */
-  async getGalleries(params = {}) {
+  async getGalleries(params = {}, options = {}) {
     const query = new URLSearchParams(params).toString();
     const endpoint = `/api/public/galleries${query ? `?${query}` : ''}`;
-    return request(endpoint, { method: 'GET' });
+    return request(endpoint, { method: 'GET', ...options });
   },
 
-  /**
-   * Fetch daily Thirukkural
-   */
-  async getDailyKural() {
-    return request('/api/public/thirukkural/daily', { method: 'GET' });
+  async getDailyKural(options = {}) {
+    return request('/api/public/thirukkural/daily', { method: 'GET', ...options });
   },
 
-  /**
-   * Fetch public Thirukkural list
-   */
-  async getKurals(params = {}) {
+  async getKurals(params = {}, options = {}) {
     const query = new URLSearchParams(params).toString();
     const endpoint = `/api/public/thirukkural${query ? `?${query}` : ''}`;
-    return request(endpoint, { method: 'GET' });
+    return request(endpoint, { method: 'GET', ...options });
   },
 
-  /**
-   * Check backend server health
-   */
-  async checkHealth() {
-    return request('/health', { method: 'GET' });
+  async checkHealth(options = {}) {
+    return request('/health', { method: 'GET', timeoutMs: 8000, ...options });
   },
 };

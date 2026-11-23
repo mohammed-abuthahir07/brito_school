@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { publicService } from '../../services/publicService';
 import { API_BASE_URL } from '../../services/api';
+import { isAbortError } from '../../utils/userFacingError';
 import { useScrollReveal } from '../../utils/useScrollReveal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { EmptyState } from '../../components/common/EmptyState';
-import { Alert } from '../../components/common/Alert';
+import { RetryPanel } from '../../components/common/RetryPanel';
 import { PageHero } from '../../components/public/PageHero';
 import independenceImg from '../../assets/School/independenceday.jpg';
 import { Button } from '../../components/common/Button';
@@ -25,10 +26,11 @@ export const GalleryPage = () => {
 
   useScrollReveal(galleries.length);
 
-  const fetchGalleries = () => {
+  const fetchGalleries = (signal) => {
     setLoading(true);
     setError(null);
-    publicService.getGalleries()
+    publicService
+      .getGalleries({}, { signal })
       .then((res) => {
         if (res.success && Array.isArray(res.galleries)) {
           setGalleries(res.galleries);
@@ -37,6 +39,7 @@ export const GalleryPage = () => {
         }
       })
       .catch((err) => {
+        if (isAbortError(err)) return;
         setError(err.message || 'Failed to load gallery images from the server.');
       })
       .finally(() => {
@@ -45,7 +48,9 @@ export const GalleryPage = () => {
   };
 
   useEffect(() => {
-    fetchGalleries();
+    const controller = new AbortController();
+    fetchGalleries(controller.signal);
+    return () => controller.abort();
   }, []);
 
   const getImageSrc = (item) => {
@@ -106,11 +111,10 @@ export const GalleryPage = () => {
           </div>
 
           {error && (
-            <Alert
-              type="danger"
-              title="Gallery Loading Failed"
+            <RetryPanel
+              title="Gallery loading failed"
               message={error}
-              onClose={() => setError(null)}
+              onRetry={() => fetchGalleries()}
             />
           )}
 
@@ -152,6 +156,7 @@ export const GalleryPage = () => {
                       alt={item.title || 'School photograph'}
                       className="gallery-card-img"
                       loading="lazy"
+                      decoding="async"
                     />
                     <div className="gallery-card-overlay">
                       <span className="gallery-view-pill">

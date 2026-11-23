@@ -99,3 +99,31 @@
     transform: translateY(0) scale(1);
   }
 }
+
+@media (max-width: 600px) {
+  .modal-overlay {
+    padding: 0.65rem;
+    align-items: flex-end;
+  }
+
+  .modal-dialog {
+    max-height: min(92dvh, 92vh);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .modal-footer .btn {
+    flex: 1 1 auto;
+  }
+}

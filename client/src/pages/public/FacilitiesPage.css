@@ -667,6 +667,23 @@
   }
 }
 
+@media (max-width: 360px) {
+  .wing-slide-media {
+    width: calc(100% - 1.25rem);
+    height: 168px;
+  }
+
+  .wing-nav {
+    top: 92px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .section-heading {
+    font-size: 1.45rem;
+  }
+}
+
 @media (hover: none) {
   .infra-card:hover,
   .club-feature-card:hover,

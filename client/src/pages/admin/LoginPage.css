@@ -5,7 +5,7 @@
   display: flex;
   background-color: #ffffff;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Prominent Top X Close Button to Return to Home */
@@ -401,5 +401,15 @@
   .login-close-corner-btn {
     top: 1rem;
     right: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-form-panel {
+    padding: 4rem 0.85rem 2rem;
+  }
+
+  .login-heading {
+    font-size: 1.5rem;
   }
 }

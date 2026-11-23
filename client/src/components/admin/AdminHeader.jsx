@@ -4,18 +4,43 @@ import { publicService } from '../../services/publicService';
 import { IconMenu, IconUser } from '../common/Icons';
 import './AdminHeader.css';
 
+const HEALTH_CACHE_KEY = 'brito_api_health';
+const HEALTH_TTL_MS = 30000;
+
 export const AdminHeader = ({ title = 'Administration', onToggleSidebar }) => {
   const { admin } = useAuth();
   const [serverHealthy, setServerHealthy] = useState(true);
 
   useEffect(() => {
-    publicService.checkHealth()
+    let cancelled = false;
+    const cached = sessionStorage.getItem(HEALTH_CACHE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.at < HEALTH_TTL_MS) {
+          setServerHealthy(Boolean(parsed.ok));
+          return undefined;
+        }
+      } catch {
+        sessionStorage.removeItem(HEALTH_CACHE_KEY);
+      }
+    }
+
+    publicService
+      .checkHealth()
       .then((res) => {
-        setServerHealthy(res.status === 'UP');
+        const ok = res.status === 'UP';
+        if (!cancelled) setServerHealthy(ok);
+        sessionStorage.setItem(HEALTH_CACHE_KEY, JSON.stringify({ ok, at: Date.now() }));
       })
       .catch(() => {
-        setServerHealthy(false);
+        if (!cancelled) setServerHealthy(false);
+        sessionStorage.setItem(HEALTH_CACHE_KEY, JSON.stringify({ ok: false, at: Date.now() }));
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -42,7 +67,7 @@ export const AdminHeader = ({ title = 'Administration', onToggleSidebar }) => {
           <div className="admin-avatar-icon">
             <IconUser size={15} />
           </div>
-          <span className="admin-user-email">{admin?.email || 'admin@britoschool.com'}</span>
+          <span className="admin-user-email">{admin?.email || 'Administrator'}</span>
         </div>
       </div>
     </header>

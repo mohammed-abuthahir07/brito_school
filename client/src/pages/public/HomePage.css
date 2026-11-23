@@ -451,7 +451,7 @@
   color: var(--text-muted);
   line-height: 1.6;
   flex: 1;
-  min-width: 220px;
+  min-width: 0;
 }
 
 .home-kural-popup-btn {
@@ -1365,5 +1365,18 @@
   }
   .hero-cta-group {
     flex-direction: column;
+  }
+  .hero-stats-strip {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+  }
+  .leadership-slide-media {
+    width: min(100% - 1.5rem, 200px);
+    height: 240px;
+  }
+  .leadership-nav {
+    top: 130px;
+    width: 34px;
+    height: 34px;
   }
 }

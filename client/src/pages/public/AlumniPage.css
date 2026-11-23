@@ -440,4 +440,19 @@
   .form-title {
     font-size: 1.75rem;
   }
+  .alumni-form-wrapper {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .alumni-stats-grid {
+    gap: 0.28rem;
+  }
+  .alumni-stat-box {
+    padding: 0.45rem 0.15rem;
+  }
+  .alumni-form-section {
+    padding: 2.5rem 0 3.5rem;
+  }
 }

@@ -1,47 +1,77 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { publicService } from '../services/publicService';
+import { isAbortError } from '../utils/userFacingError';
 
 const DailyKuralContext = createContext(null);
+const FIVE_MINUTES_MS = 5 * 60 * 1000;
+
+const pickKural = (payload) => {
+  if (!payload) return null;
+  if (payload.kural && (payload.kural.tamil_text || payload.kural.kural_number)) {
+    return payload.kural;
+  }
+  if (Array.isArray(payload.kurals) && payload.kurals[0]) {
+    return payload.kurals[0];
+  }
+  if (payload.tamil_text || payload.kural_number) {
+    return payload;
+  }
+  return null;
+};
 
 export const DailyKuralProvider = ({ children }) => {
   const [kural, setKural] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const fetchInitiated = useRef(false);
+  const kuralRef = useRef(null);
 
-  // Fetch daily kural once and share between modal and Home page
-  const fetchDailyKural = () => {
-    publicService.getDailyKural()
-      .then((res) => {
-        if (res.success && res.kural) {
-          setKural(res.kural);
-          // Show modal immediately on website open / refresh
+  useEffect(() => {
+    kuralRef.current = kural;
+  }, [kural]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadDailyKural = async () => {
+      try {
+        const daily = await publicService.getDailyKural({ signal: controller.signal });
+        let verse = pickKural(daily);
+
+        if (!verse) {
+          const list = await publicService.getKurals({}, { signal: controller.signal });
+          verse = pickKural(list);
+        }
+
+        if (controller.signal.aborted) return;
+
+        if (verse) {
+          setKural(verse);
           setModalOpen(true);
         } else {
           setKural(null);
         }
-      })
-      .catch((err) => {
-        console.warn('Could not fetch daily kural:', err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+      } catch (err) {
+        if (isAbortError(err) || controller.signal.aborted) return;
+        setKural(null);
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
 
-  useEffect(() => {
-    if (!fetchInitiated.current) {
-      fetchInitiated.current = true;
-      fetchDailyKural();
-    }
+    loadDailyKural();
 
-    // Interval: Trigger modal display every 5 minutes (300,000 ms)
-    const FIVE_MINUTES_MS = 5 * 60 * 1000;
-    const intervalId = setInterval(() => {
-      setModalOpen(true);
+    const intervalId = window.setInterval(() => {
+      if (kuralRef.current) {
+        setModalOpen(true);
+      }
     }, FIVE_MINUTES_MS);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      controller.abort();
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   const closeModal = () => {
@@ -49,7 +79,9 @@ export const DailyKuralProvider = ({ children }) => {
   };
 
   const openModal = () => {
-    setModalOpen(true);
+    if (kuralRef.current) {
+      setModalOpen(true);
+    }
   };
 
   return (

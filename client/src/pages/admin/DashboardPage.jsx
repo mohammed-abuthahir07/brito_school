@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminService } from '../../services/adminService';
+import { isAbortError } from '../../utils/userFacingError';
+import { activityYears, monthlyGalleryActivity } from '../../utils/galleryActivity';
+import { GalleryActivityChart } from '../../components/admin/GalleryActivityChart';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
-import { Alert } from '../../components/common/Alert';
+import { RetryPanel } from '../../components/common/RetryPanel';
 import { Button } from '../../components/common/Button';
 import {
   IconBell,
@@ -17,21 +20,39 @@ import './DashboardPage.css';
 
 export const DashboardPage = () => {
   const [dashboard, setDashboard] = useState(null);
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [chartYear, setChartYear] = useState(new Date().getFullYear());
+  const [chartPlayKey, setChartPlayKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchDashboardData = () => {
+  const fetchDashboardData = (signal) => {
+    const abortSignal = signal instanceof AbortSignal ? signal : undefined;
     setLoading(true);
     setError(null);
-    adminService.getDashboard()
-      .then((res) => {
-        if (res.success && res.dashboard) {
-          setDashboard(res.dashboard);
+    Promise.all([
+      adminService.getDashboard({ signal: abortSignal }),
+      adminService.getGalleries({ signal: abortSignal }).catch((err) => {
+        if (isAbortError(err)) throw err;
+        return { success: false, galleries: [] };
+      }),
+    ])
+      .then(([dashRes, galleryRes]) => {
+        if (dashRes.success && dashRes.dashboard) {
+          setDashboard(dashRes.dashboard);
         } else {
-          setError('Unexpected dashboard response format.');
+          setError('Dashboard data could not be read. Please try again.');
         }
+        const list = Array.isArray(galleryRes?.galleries) ? galleryRes.galleries : [];
+        setGalleryItems(list);
+        const years = activityYears(list);
+        if (years.length && !years.includes(new Date().getFullYear())) {
+          setChartYear(years[0]);
+        }
+        setChartPlayKey(Date.now());
       })
       .catch((err) => {
+        if (isAbortError(err)) return;
         setError(err.message || 'Failed to fetch dashboard metrics.');
       })
       .finally(() => {
@@ -40,8 +61,17 @@ export const DashboardPage = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    const controller = new AbortController();
+    fetchDashboardData(controller.signal);
+    return () => controller.abort();
   }, []);
+
+  const availableYears = useMemo(() => activityYears(galleryItems), [galleryItems]);
+  const monthStats = useMemo(
+    () => monthlyGalleryActivity(galleryItems, Number(chartYear)),
+    [galleryItems, chartYear],
+  );
+  const yearUploadTotal = monthStats.reduce((sum, row) => sum + row.uploads, 0);
 
   if (loading) {
     return <LoadingSpinner text="Aggregating school database metrics..." />;
@@ -49,15 +79,12 @@ export const DashboardPage = () => {
 
   if (error) {
     return (
-      <div style={{ padding: '2rem 0' }}>
-        <Alert
-          type="danger"
-          title="Dashboard Unavailable"
+      <div className="admin-page-container">
+        <RetryPanel
+          title="Dashboard unavailable"
           message={error}
+          onRetry={() => fetchDashboardData()}
         />
-        <Button variant="primary" onClick={fetchDashboardData}>
-          Try Again
-        </Button>
       </div>
     );
   }
@@ -80,7 +107,7 @@ export const DashboardPage = () => {
           variant="outline"
           size="sm"
           icon={<IconRefresh size={16} />}
-          onClick={fetchDashboardData}
+          onClick={() => fetchDashboardData()}
         >
           Refresh Statistics
         </Button>
@@ -164,6 +191,37 @@ export const DashboardPage = () => {
         </div>
       </div>
 
+      <section className="gallery-year-chart" aria-label="Gallery uploads by month">
+        <div className="panel-header">
+          <div>
+            <h3 className="panel-title">Gallery Uploads · January to December</h3>
+            <p className="chart-subtitle">
+              {yearUploadTotal} photograph{yearUploadTotal === 1 ? '' : 's'} uploaded in {chartYear}. Click a month
+              on the line for upload, update and delete counts.
+            </p>
+          </div>
+          <label className="chart-year-field">
+            <span>Year</span>
+            <select
+              value={chartYear}
+              onChange={(event) => setChartYear(Number(event.target.value))}
+              aria-label="Select gallery upload year"
+            >
+              {availableYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <GalleryActivityChart
+          key={`${chartYear}-${chartPlayKey}`}
+          months={monthStats}
+          year={chartYear}
+        />
+      </section>
+
       {/* Middle Details: Categories & Recent Activity */}
       <div className="dashboard-details-grid">
         {/* Panel 1: Announcement Categories */}
@@ -234,7 +292,7 @@ export const DashboardPage = () => {
             <div className="recent-record-item">
               <div className="record-meta-col">
                 <span className="record-primary-title">
-                  {thirukkural?.latest ? `Kural #${thirukkural.latest.kural_number}` : 'No verse published'}
+                  {thirukkural?.latest ? `Kural ${thirukkural.latest.kural_number}` : 'No verse published'}
                 </span>
                 <span className="record-secondary-info">Daily Thirukkural</span>
               </div>

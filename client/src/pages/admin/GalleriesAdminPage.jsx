@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { adminService } from '../../services/adminService';
+import { isAbortError } from '../../utils/userFacingError';
+import { recordGalleryActivity } from '../../utils/galleryActivity';
 import { API_BASE_URL } from '../../services/api';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
@@ -46,9 +48,10 @@ export const GalleriesAdminPage = () => {
 
   const fileInputRef = useRef(null);
 
-  const fetchGalleries = () => {
+  const fetchGalleries = (signal) => {
     setLoading(true);
-    adminService.getGalleries()
+    adminService
+      .getGalleries({ signal })
       .then((res) => {
         if (res.success && Array.isArray(res.galleries)) {
           setGalleries(res.galleries);
@@ -57,6 +60,7 @@ export const GalleriesAdminPage = () => {
         }
       })
       .catch((err) => {
+        if (isAbortError(err)) return;
         setAlert({ type: 'danger', message: err.message || 'Failed to fetch galleries.' });
       })
       .finally(() => {
@@ -65,7 +69,9 @@ export const GalleriesAdminPage = () => {
   };
 
   useEffect(() => {
-    fetchGalleries();
+    const controller = new AbortController();
+    fetchGalleries(controller.signal);
+    return () => controller.abort();
   }, []);
 
   // Upload handling
@@ -120,9 +126,11 @@ export const GalleriesAdminPage = () => {
     }
     formData.append('image', imageFile);
 
+    if (uploading) return;
     setUploading(true);
     try {
       await adminService.uploadGallery(formData);
+      recordGalleryActivity('upload');
       setAlert({ type: 'success', message: 'Gallery photograph uploaded successfully!' });
       setUploadModalOpen(false);
       fetchGalleries();
@@ -152,12 +160,14 @@ export const GalleriesAdminPage = () => {
       return;
     }
 
+    if (updating) return;
     setUpdating(true);
     try {
       await adminService.updateGallery(editingItem.id, {
         title: editTitle.trim(),
         description: editDescription.trim(),
       });
+      recordGalleryActivity('update');
       setAlert({ type: 'success', message: 'Gallery details updated successfully.' });
       setEditModalOpen(false);
       fetchGalleries();
@@ -170,10 +180,11 @@ export const GalleriesAdminPage = () => {
 
   // Delete handling
   const handleDelete = async () => {
-    if (!deleteItem) return;
+    if (!deleteItem || deleting) return;
     setDeleting(true);
     try {
       await adminService.deleteGallery(deleteItem.id);
+      recordGalleryActivity('delete');
       setAlert({ type: 'success', message: 'Gallery photograph deleted and removed from storage.' });
       setDeleteItem(null);
       fetchGalleries();
@@ -231,7 +242,7 @@ export const GalleriesAdminPage = () => {
           <span>Active Memories</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="admin-action-buttons">
           <Button
             variant="outline"
             size="md"

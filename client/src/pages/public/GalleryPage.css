@@ -325,6 +325,16 @@
   .gallery-grid {
     grid-template-columns: 1fr;
   }
+  .lightbox-overlay {
+    padding: 0.65rem;
+    align-items: flex-end;
+  }
+  .lightbox-nav-btn.prev {
+    left: 0.4rem;
+  }
+  .lightbox-nav-btn.next {
+    right: 0.4rem;
+  }
   .lightbox-caption {
     padding: 1rem;
   }

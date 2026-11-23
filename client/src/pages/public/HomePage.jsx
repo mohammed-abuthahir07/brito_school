@@ -23,6 +23,7 @@ import { useDailyKural } from '../../context/DailyKuralContext';
 import { useScrollReveal } from '../../utils/useScrollReveal';
 import { EmptyState } from '../../components/common/EmptyState';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { RetryPanel } from '../../components/common/RetryPanel';
 import {
   IconCalendar,
   IconDownload,
@@ -84,6 +85,7 @@ const calendarFileMeta = (fileUrl = '') => {
 export const HomePage = () => {
   const [calendars, setCalendars] = useState([]);
   const [calendarsLoading, setCalendarsLoading] = useState(true);
+  const [calendarsError, setCalendarsError] = useState(null);
   const [leaderIndex, setLeaderIndex] = useState(0);
   const leaderPausedRef = useRef(false);
   const leaderTouchX = useRef(null);
@@ -92,18 +94,23 @@ export const HomePage = () => {
   useScrollReveal(calendars.length);
 
   useEffect(() => {
-    publicService.getCalendars()
+    const controller = new AbortController();
+    publicService
+      .getCalendars({}, { signal: controller.signal })
       .then((res) => {
         if (res.success && Array.isArray(res.calendars)) {
           setCalendars(res.calendars);
+          setCalendarsError(null);
         }
       })
       .catch((err) => {
-        console.warn('Could not load calendars:', err.message);
+        if (err?.aborted) return;
+        setCalendarsError('The academic calendar could not be loaded right now.');
       })
       .finally(() => {
-        setCalendarsLoading(false);
+        if (!controller.signal.aborted) setCalendarsLoading(false);
       });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -578,6 +585,27 @@ export const HomePage = () => {
 
           {calendarsLoading ? (
             <LoadingSpinner text="Retrieving academic calendar schedules..." />
+          ) : calendarsError ? (
+            <RetryPanel
+              title="Calendar unavailable"
+              message={calendarsError}
+              onRetry={() => {
+                setCalendarsLoading(true);
+                publicService
+                  .getCalendars()
+                  .then((res) => {
+                    if (res.success && Array.isArray(res.calendars)) {
+                      setCalendars(res.calendars);
+                      setCalendarsError(null);
+                    }
+                  })
+                  .catch((err) => {
+                    if (err?.aborted) return;
+                    setCalendarsError('The academic calendar could not be loaded right now.');
+                  })
+                  .finally(() => setCalendarsLoading(false));
+              }}
+            />
           ) : calendars.length === 0 ? (
             <EmptyState
               icon={<IconCalendar size={32} />}

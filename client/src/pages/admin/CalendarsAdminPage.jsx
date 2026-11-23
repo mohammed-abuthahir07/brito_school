@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { adminService } from '../../services/adminService';
+import { isAbortError } from '../../utils/userFacingError';
 import { API_BASE_URL } from '../../services/api';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
@@ -38,9 +39,10 @@ export const CalendarsAdminPage = () => {
 
   const fileInputRef = useRef(null);
 
-  const fetchCalendars = () => {
+  const fetchCalendars = (signal) => {
     setLoading(true);
-    adminService.getCalendars()
+    adminService
+      .getCalendars({ signal })
       .then((res) => {
         if (res.success && Array.isArray(res.calendars)) {
           setCalendars(res.calendars);
@@ -49,6 +51,7 @@ export const CalendarsAdminPage = () => {
         }
       })
       .catch((err) => {
+        if (isAbortError(err)) return;
         setAlert({ type: 'danger', message: err.message || 'Failed to fetch calendars.' });
       })
       .finally(() => {
@@ -57,7 +60,9 @@ export const CalendarsAdminPage = () => {
   };
 
   useEffect(() => {
-    fetchCalendars();
+    const controller = new AbortController();
+    fetchCalendars(controller.signal);
+    return () => controller.abort();
   }, []);
 
   const openUploadModal = () => {
@@ -100,6 +105,7 @@ export const CalendarsAdminPage = () => {
     }
     formData.append('file', selectedFile);
 
+    if (uploading) return;
     setUploading(true);
     try {
       await adminService.uploadCalendar(formData);
@@ -114,7 +120,7 @@ export const CalendarsAdminPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!deleteItem) return;
+    if (!deleteItem || deleting) return;
     setDeleting(true);
     try {
       await adminService.deleteCalendar(deleteItem.id);
@@ -144,7 +150,7 @@ export const CalendarsAdminPage = () => {
           Total Published Calendars: <strong>{calendars.length}</strong>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="admin-action-buttons">
           <Button
             variant="outline"
             size="md"
@@ -178,76 +184,64 @@ export const CalendarsAdminPage = () => {
           }
         />
       ) : (
-        <div className="data-table-card">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th style={{ width: '30%' }}>Calendar Title</th>
-                <th style={{ width: '35%' }}>Description</th>
-                <th style={{ width: '15%' }}>Upload Date</th>
-                <th style={{ width: '20%', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {calendars.map((cal) => {
-                const fileUrl = cal.file_url?.startsWith('http')
-                  ? cal.file_url
-                  : `${API_BASE_URL}${cal.file_url || `/uploads/calendars/${cal.file_path}`}`;
+        <div className="calendar-admin-list">
+          {calendars.map((cal) => {
+            const fileUrl = cal.file_url?.startsWith('http')
+              ? cal.file_url
+              : `${API_BASE_URL}${cal.file_url || `/uploads/calendars/${cal.file_path}`}`;
+            const fileName = (cal.file_path || fileUrl || '').split('/').pop() || '';
+            const ext = (fileName.split('.').pop() || 'FILE').toUpperCase();
+            const typeLabel = ext === 'JPEG' ? 'JPG' : ext.slice(0, 4);
+            const published = cal.created_at
+              ? new Date(cal.created_at).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })
+              : 'Date not recorded';
 
-                return (
-                  <tr key={cal.id}>
-                    <td>
-                      <div className="table-title">{cal.title}</div>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                        {cal.file_path ? cal.file_path.split('/').pop() : 'Attached document'}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="table-content-preview">
-                        {cal.description || '—'}
-                      </div>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        {cal.created_at
-                          ? new Date(cal.created_at).toLocaleDateString('en-IN')
-                          : '—'}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="table-actions" style={{ justifyContent: 'flex-end' }}>
-                        <a
-                          href={fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="action-icon-btn edit"
-                          title="Open Calendar File in New Tab"
-                        >
-                          <IconExternalLink size={16} />
-                        </a>
-                        <a
-                          href={fileUrl}
-                          download
-                          className="action-icon-btn edit"
-                          title="Download Calendar File"
-                        >
-                          <IconDownload size={16} />
-                        </a>
-                        <button
-                          type="button"
-                          className="action-icon-btn delete"
-                          onClick={() => setDeleteItem(cal)}
-                          title="Delete Calendar"
-                        >
-                          <IconTrash size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+            return (
+              <article key={cal.id} className="calendar-admin-card">
+                <div className="calendar-admin-file-badge" aria-hidden="true">
+                  <IconCalendar size={18} />
+                  <span>{typeLabel}</span>
+                </div>
+                <div className="calendar-admin-body">
+                  <h3 className="calendar-admin-title">{cal.title}</h3>
+                  <p className="calendar-admin-desc">
+                    {cal.description || 'Official academic calendar document for students and parents.'}
+                  </p>
+                  <div className="calendar-admin-meta">
+                    <span>Published {published}</span>
+                    <span>Downloadable file</span>
+                  </div>
+                </div>
+                <div className="calendar-admin-actions">
+                  <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline btn-sm"
+                  >
+                    <IconExternalLink size={15} />
+                    <span>View</span>
+                  </a>
+                  <a href={fileUrl} download className="btn btn-secondary btn-sm">
+                    <IconDownload size={15} />
+                    <span>Download</span>
+                  </a>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setDeleteItem(cal)}
+                  >
+                    <IconTrash size={15} />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
 

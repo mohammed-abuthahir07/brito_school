@@ -24,6 +24,7 @@ export const ForgotPasswordPage = () => {
     e.preventDefault();
     setAlert(null);
 
+    if (loading) return;
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setAlert({ type: 'danger', message: 'Please provide a valid registered email address.' });
       return;
@@ -49,6 +50,7 @@ export const ForgotPasswordPage = () => {
     e.preventDefault();
     setAlert(null);
 
+    if (loading) return;
     if (!otp.trim()) {
       setAlert({ type: 'danger', message: 'Please enter the 6-digit OTP code received.' });
       return;
@@ -143,7 +145,7 @@ export const ForgotPasswordPage = () => {
             </form>
           ) : (
             <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="forgot-email-row">
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   Sent to: <strong>{email}</strong>
                 </span>

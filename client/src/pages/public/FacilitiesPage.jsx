@@ -116,7 +116,7 @@ const SERVICE_WINGS = [
     image: nssImg,
     alt: 'NSS Community Volunteers',
     paragraphs: [
-      'Volunteers take part in rural literacy workshops, tree-planting, blood-donation awareness, and civic sanitation. The unit’s work is campus service, not a substitute for the detailed NCC and Scouts programmes above.',
+      '1. Road Safety:Students carefully provide safety assistance to ensure that fellow students cross and travel along the road safely when arriving at school in the morning.Medical Camp:They organize medical camps both at the school and during the special camp, providing various forms of assistance.Anti-Drug Awareness Camp:For school students, they collaborate with police officers and the Singapenn (Womens Safety) wing police personnel to conduct awareness programs against drug abuse..',
     ],
   },
   {

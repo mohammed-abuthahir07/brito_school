@@ -25,13 +25,20 @@ export const LoginPage = () => {
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/admin/dashboard';
+  const sessionEnded = Boolean(location.state?.sessionEnded);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     setErrorMsg('');
 
     if (!email.trim() || !password) {
       setErrorMsg('Please enter both email and password.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMsg('Please enter a valid administrator email address.');
       return;
     }
 
@@ -121,6 +128,9 @@ export const LoginPage = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="login-full-form" noValidate>
+            {sessionEnded && !errorMsg && (
+              <Alert type="warning" message="Your session ended. Please sign in again to continue." />
+            )}
             {errorMsg && (
               <Alert
                 type="danger"

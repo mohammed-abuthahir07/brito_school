@@ -1,0 +1,63 @@
+.route-fallback {
+  min-height: 55vh;
+  background: #ffffff;
+}
+
+.route-fallback-bar {
+  height: 6px;
+  background: linear-gradient(90deg, var(--sandal-200), var(--brown-600), var(--sandal-200));
+  background-size: 200% 100%;
+  animation: route-shimmer 1.2s linear infinite;
+}
+
+.route-fallback-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.skeleton-line {
+  height: 0.9rem;
+  border-radius: 6px;
+  background: var(--sandal-100);
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-wide {
+  width: 70%;
+  height: 1.4rem;
+}
+
+.skeleton-mid {
+  width: 45%;
+}
+
+.skeleton-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.skeleton-card {
+  height: 7.5rem;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--sandal-200);
+}
+
+@keyframes route-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-fallback-bar {
+    animation: none;
+    background: var(--brown-700);
+  }
+}

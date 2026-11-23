@@ -7,7 +7,9 @@
   align-items: center;
   justify-content: center;
   padding: max(0.75rem, env(safe-area-inset-top)) max(0.85rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.85rem, env(safe-area-inset-left));
-  z-index: 1050;
+  z-index: 1200;
+  overflow: hidden;
+  overscroll-behavior: contain;
   animation: kuralFadeIn 0.3s ease;
 }
 
@@ -17,7 +19,7 @@
   border-radius: 18px;
   box-shadow: 0 24px 48px rgba(56, 26, 5, 0.28);
   width: min(100%, 640px);
-  max-height: min(90dvh, 720px);
+  max-height: min(calc(100dvh - 1.5rem), 720px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -260,6 +262,11 @@
 }
 
 @media (max-width: 380px) {
+  .kural-continue-btn {
+    min-width: 0;
+    width: 100%;
+  }
+
   .kural-kural-badge {
     font-size: 0.68rem;
     padding: 0.22rem 0.5rem;

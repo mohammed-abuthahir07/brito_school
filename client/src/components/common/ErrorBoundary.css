@@ -1,0 +1,48 @@
+.app-error-boundary {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: #ffffff;
+}
+
+.app-error-card {
+  max-width: 28rem;
+  width: 100%;
+  border: 1px solid var(--sandal-200, #e9dccb);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 10px 24px rgba(56, 26, 5, 0.08);
+  text-align: center;
+}
+
+.app-error-kicker {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--brown-700, #6d3811);
+  margin-bottom: 0.75rem;
+}
+
+.app-error-card h1 {
+  font-size: 1.35rem;
+  color: #000000;
+  margin-bottom: 0.75rem;
+}
+
+.app-error-card p {
+  color: #2b2b2b;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.app-error-reload {
+  min-height: 44px;
+  padding: 0.65rem 1.25rem;
+  background: var(--brown-700, #6d3811);
+  color: #ffffff;
+  border-radius: 8px;
+  font-weight: 700;
+}

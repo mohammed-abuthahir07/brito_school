@@ -7,7 +7,13 @@ export const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    return (
+      <Navigate
+        to="/admin/login"
+        state={{ from: location, sessionEnded: location.pathname.startsWith('/admin') }}
+        replace
+      />
+    );
   }
 
   return children;
