@@ -4,11 +4,11 @@ import { API_BASE_URL } from '../../services/api';
 import { isAbortError } from '../../utils/userFacingError';
 import { useScrollReveal } from '../../utils/useScrollReveal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
-import { EmptyState } from '../../components/common/EmptyState';
 import { RetryPanel } from '../../components/common/RetryPanel';
 import { PageHero } from '../../components/public/PageHero';
-import independenceImg from '../../assets/School/independenceday.jpg';
+import studentsImg from '../../assets/School/students.jpg';
 import { Button } from '../../components/common/Button';
+import { SafeImage } from '../../components/common/SafeImage';
 import {
   IconImage,
   IconEye,
@@ -17,6 +17,17 @@ import {
   IconChevronLeft,
 } from '../../components/common/Icons';
 import './GalleryPage.css';
+
+const formatPhotoDate = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+};
 
 export const GalleryPage = () => {
   const [galleries, setGalleries] = useState([]);
@@ -81,7 +92,7 @@ export const GalleryPage = () => {
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [activeIndex, galleries.length]);
 
@@ -93,21 +104,24 @@ export const GalleryPage = () => {
     <div className="gallery-page page-enter">
       <PageHero
         icon={<IconImage size={16} />}
-        badge="School Photo Archives"
-        title="School Moments & Visual Archives"
-        subtitle="Photographs of campus life, ceremonies, sports and student activities — published by the school administration."
-        backgroundImage={independenceImg}
-        backgroundPosition="center 35%"
+        badge="Official School Gallery"
+        title="School Gallery"
+        subtitle="A curated archive of campus life, assemblies, sports, and student celebrations — published by the school administration."
+        backgroundImage={studentsImg}
+        backgroundPosition="center 40%"
       />
 
       <section className="gallery-content-section reveal-init">
         <div className="container">
           <div className="gallery-intro">
-            <span className="section-tag">Published gallery</span>
-            <h2 className="section-heading">School photographs</h2>
+            <span className="section-tag">Photo archive</span>
+            <h2 className="section-heading">Campus photographs</h2>
             <p>
-              Each picture, title and description is added from the staff gallery. When a new photo is published, it appears here in the same card layout.
+              Every photograph on this page is uploaded from the school office. New pictures appear here as soon as they are published.
             </p>
+            {!loading && galleries.length > 0 && (
+              <p className="gallery-count">{galleries.length} photograph{galleries.length === 1 ? '' : 's'} in the archive</p>
+            )}
           </div>
 
           {error && (
@@ -120,59 +134,65 @@ export const GalleryPage = () => {
 
           {loading ? (
             <div className="gallery-loading">
-              <LoadingSpinner text="Retrieving school photographs..." />
+              <LoadingSpinner text="Opening the school gallery..." />
             </div>
           ) : galleries.length === 0 ? (
-            <EmptyState
-              icon={<IconImage size={36} />}
-              title="No photographs published yet"
-              description="When the school administration uploads a photo with a title and description, it will appear in this gallery."
-              action={
-                <Button variant="primary" size="sm" onClick={fetchGalleries}>
-                  Check Again
-                </Button>
-              }
-            />
+            <div className="gallery-awaiting">
+              <h3>Photographs will appear here</h3>
+              <p>
+                The gallery is ready for official school photographs. When the administrator uploads a photo with a title, it will display in this album.
+              </p>
+              <div className="gallery-placeholder-grid" aria-hidden="true">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="gallery-placeholder-frame">
+                    <IconImage size={28} />
+                    <span>Awaiting photo</span>
+                  </div>
+                ))}
+              </div>
+              <Button variant="secondary" size="sm" onClick={() => fetchGalleries()}>
+                Check for new photographs
+              </Button>
+            </div>
           ) : (
-            <div className="gallery-grid">
-              {galleries.map((item, index) => (
-                <article
-                  key={item.id}
-                  className="gallery-card reveal-init"
-                  onClick={() => openLightbox(index)}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`View photo: ${item.title}`}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      openLightbox(index);
-                    }
-                  }}
-                >
-                  <div className="gallery-card-img-wrapper">
-                    <img
-                      src={getImageSrc(item)}
-                      alt={item.title || 'School photograph'}
-                      className="gallery-card-img"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    <div className="gallery-card-overlay">
-                      <span className="gallery-view-pill">
-                        <IconEye size={16} />
-                        <span>Enlarge Photo</span>
-                      </span>
+            <div className={`gallery-grid${galleries.length >= 3 ? ' has-feature' : ''}`}>
+              {galleries.map((item, index) => {
+                const dateLabel = formatPhotoDate(item.created_at || item.updated_at);
+                return (
+                  <article
+                    key={item.id}
+                    className="gallery-card reveal-init"
+                    onClick={() => openLightbox(index)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`View photo: ${item.title || 'School photograph'}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openLightbox(index);
+                      }
+                    }}
+                  >
+                    <div className="gallery-card-img-wrapper">
+                      <SafeImage
+                        src={getImageSrc(item)}
+                        alt={item.title || 'School photograph'}
+                        className="gallery-card-img"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div className="gallery-card-caption">
+                        <span className="gallery-view-pill">
+                          <IconEye size={14} />
+                          View
+                        </span>
+                        <h3 className="gallery-card-title">{item.title || 'School photograph'}</h3>
+                        {dateLabel && <p className="gallery-card-date">{dateLabel}</p>}
+                      </div>
                     </div>
-                  </div>
-                  <div className="gallery-card-body">
-                    <h3 className="gallery-card-title">{item.title}</h3>
-                    {item.description && (
-                      <p className="gallery-card-desc">{item.description}</p>
-                    )}
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           )}
         </div>
@@ -183,7 +203,7 @@ export const GalleryPage = () => {
           className="lightbox-overlay"
           role="dialog"
           aria-modal="true"
-          aria-label={currentItem.title}
+          aria-label={currentItem.title || 'School photograph'}
           onClick={(e) => {
             if (e.target === e.currentTarget) setActiveIndex(null);
           }}
@@ -220,18 +240,18 @@ export const GalleryPage = () => {
             )}
 
             <div className="lightbox-image-container">
-              <img
+              <SafeImage
                 src={getImageSrc(currentItem)}
-                alt={currentItem.title}
+                alt={currentItem.title || 'School photograph'}
                 className="lightbox-img"
               />
             </div>
 
             <div className="lightbox-caption">
               <div className="lightbox-counter">
-                {activeIndex + 1} of {galleries.length}
+                {activeIndex + 1} / {galleries.length}
               </div>
-              <h3 className="lightbox-title">{currentItem.title}</h3>
+              <h3 className="lightbox-title">{currentItem.title || 'School photograph'}</h3>
               {currentItem.description && (
                 <p className="lightbox-desc">{currentItem.description}</p>
               )}

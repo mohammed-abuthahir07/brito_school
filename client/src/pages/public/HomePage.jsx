@@ -19,6 +19,7 @@ import stateLevImg from '../../assets/Achievements/StateLev.png';
 import thiruImg from '../../assets/thiru.webp';
 import { publicService } from '../../services/publicService';
 import { API_BASE_URL } from '../../services/api';
+import { isAbortError } from '../../utils/userFacingError';
 import { useDailyKural } from '../../context/DailyKuralContext';
 import { useScrollReveal } from '../../utils/useScrollReveal';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -104,7 +105,7 @@ export const HomePage = () => {
         }
       })
       .catch((err) => {
-        if (err?.aborted) return;
+        if (isAbortError(err)) return;
         setCalendarsError('The academic calendar could not be loaded right now.');
       })
       .finally(() => {
@@ -135,8 +136,6 @@ export const HomePage = () => {
   const goToLeader = (nextIndex) => {
     setLeaderIndex((nextIndex + LEADERS.length) % LEADERS.length);
   };
-
-  const activeLeader = LEADERS[leaderIndex];
 
   return (
     <div className="home-page page-enter">
@@ -320,23 +319,33 @@ export const HomePage = () => {
               <IconChevronLeft size={22} />
             </button>
 
-            <article className="leadership-slide" key={activeLeader.role} aria-live="polite">
-              <div className="leadership-slide-media">
-                <img src={activeLeader.image} alt={activeLeader.alt} />
-              </div>
-              <div className="leadership-slide-copy">
-                <span className="leadership-slide-tag">{activeLeader.role}</span>
-                <h3 className="leadership-slide-name">{activeLeader.name}</h3>
-                <div className="leadership-slide-rule" aria-hidden="true" />
-                <p className="leadership-slide-subtitle">{activeLeader.subtitle}</p>
-                {activeLeader.quote && (
-                  <blockquote className="leadership-slide-quote">{activeLeader.quote}</blockquote>
-                )}
-                {activeLeader.paragraphs.map((text) => (
-                  <p key={text} className="leadership-slide-desc">{text}</p>
-                ))}
-              </div>
-            </article>
+            <div className="leadership-stage" aria-live="polite">
+              {LEADERS.map((leader, index) => (
+                <article
+                  key={leader.role}
+                  className={`leadership-slide${index === leaderIndex ? ' is-active' : ''}`}
+                  aria-hidden={index !== leaderIndex}
+                >
+                  <div className="leadership-slide-media">
+                    <img src={leader.image} alt={leader.alt} />
+                  </div>
+                  <div className="leadership-slide-copy">
+                    <span className="leadership-slide-tag">{leader.role}</span>
+                    <h3 className="leadership-slide-name">{leader.name}</h3>
+                    <div className="leadership-slide-rule" aria-hidden="true" />
+                    <p className="leadership-slide-subtitle">{leader.subtitle}</p>
+                    <blockquote className={`leadership-slide-quote${leader.quote ? '' : ' is-empty'}`}>
+                      {leader.quote || '\u00a0'}
+                    </blockquote>
+                    <div className="leadership-slide-text">
+                      {leader.paragraphs.map((text) => (
+                        <p key={text} className="leadership-slide-desc">{text}</p>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
 
             <button
               type="button"
@@ -600,7 +609,7 @@ export const HomePage = () => {
                     }
                   })
                   .catch((err) => {
-                    if (err?.aborted) return;
+                    if (isAbortError(err)) return;
                     setCalendarsError('The academic calendar could not be loaded right now.');
                   })
                   .finally(() => setCalendarsLoading(false));

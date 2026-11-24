@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
     "dev": "nodemon server.js",
+    "start:prod": "node server.js",
     "test": "node --test tests/api.test.js && node --test tests/rateLimit.security.test.js",
     "test:load": "node scripts/load_test.js",
     "test:load:public": "node scripts/load_test_public.js",

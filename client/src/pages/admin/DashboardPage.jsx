@@ -18,10 +18,12 @@ import {
 } from '../../components/common/Icons';
 import './DashboardPage.css';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export const DashboardPage = () => {
   const [dashboard, setDashboard] = useState(null);
   const [galleryItems, setGalleryItems] = useState([]);
-  const [chartYear, setChartYear] = useState(new Date().getFullYear());
+  const [chartYear, setChartYear] = useState(CURRENT_YEAR);
   const [chartPlayKey, setChartPlayKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,7 +48,7 @@ export const DashboardPage = () => {
         const list = Array.isArray(galleryRes?.galleries) ? galleryRes.galleries : [];
         setGalleryItems(list);
         const years = activityYears(list);
-        if (years.length && !years.includes(new Date().getFullYear())) {
+        if (years.length && !years.includes(CURRENT_YEAR)) {
           setChartYear(years[0]);
         }
         setChartPlayKey(Date.now());

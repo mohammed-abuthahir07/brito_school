@@ -7,23 +7,29 @@ import './AdminHeader.css';
 const HEALTH_CACHE_KEY = 'brito_api_health';
 const HEALTH_TTL_MS = 30000;
 
+function readCachedHealth() {
+  try {
+    const cached = sessionStorage.getItem(HEALTH_CACHE_KEY);
+    if (!cached) return { known: false, ok: true };
+    const parsed = JSON.parse(cached);
+    if (Date.now() - parsed.at < HEALTH_TTL_MS) {
+      return { known: true, ok: Boolean(parsed.ok) };
+    }
+  } catch {
+    sessionStorage.removeItem(HEALTH_CACHE_KEY);
+  }
+  return { known: false, ok: true };
+}
+
 export const AdminHeader = ({ title = 'Administration', onToggleSidebar }) => {
   const { admin } = useAuth();
-  const [serverHealthy, setServerHealthy] = useState(true);
+  const initialHealth = readCachedHealth();
+  const [serverHealthy, setServerHealthy] = useState(initialHealth.ok);
 
   useEffect(() => {
     let cancelled = false;
-    const cached = sessionStorage.getItem(HEALTH_CACHE_KEY);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (Date.now() - parsed.at < HEALTH_TTL_MS) {
-          setServerHealthy(Boolean(parsed.ok));
-          return undefined;
-        }
-      } catch {
-        sessionStorage.removeItem(HEALTH_CACHE_KEY);
-      }
+    if (initialHealth.known) {
+      return undefined;
     }
 
     publicService

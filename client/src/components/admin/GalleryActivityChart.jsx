@@ -18,8 +18,8 @@ export const GalleryActivityChart = ({ months, year }) => {
       .map((row, index) => ({ index, total: row.uploads + row.updates + row.deletes }))
       .reverse()
       .find((row) => row.total > 0);
-    return lastActive ? lastActive.index : new Date().getMonth();
-  }, [months, year]);
+    return lastActive ? lastActive.index : 0;
+  }, [months]);
 
   const [selected, setSelected] = useState(defaultMonth);
   const stats = months[selected] || { uploads: 0, updates: 0, deletes: 0 };

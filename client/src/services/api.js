@@ -4,7 +4,11 @@
  */
 import { isAbortError, toUserFacingMessage } from '../utils/userFacingError';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const configuredBase = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL =
+  typeof configuredBase === 'string' && configuredBase.trim()
+    ? configuredBase.trim().replace(/\/$/, '')
+    : '';
 const DEFAULT_TIMEOUT_MS = 20000;
 const AUTH_EXPIRED_SKIP = [
   '/api/admin/login',

@@ -1030,12 +1030,24 @@ describe("Brito School Backend API Test Suite", () => {
 
     test("uploads succeed through the 30th image and reject the 31st", async () => {
       await pool.query("DELETE FROM galleries WHERE title LIKE ?", [`${CAPACITY_TITLE_PREFIX}%`]);
+      const [[{ total: existing }]] = await pool.query(
+        "SELECT COUNT(*) AS total FROM galleries WHERE title NOT LIKE ?",
+        [`${CAPACITY_TITLE_PREFIX}%`]
+      );
+      const existingCount = Number(existing || 0);
+      const seedNeeded = Math.max(0, 29 - existingCount);
 
-      for (let i = 1; i <= 29; i += 1) {
+      for (let i = 1; i <= seedNeeded; i += 1) {
         await pool.query(
           "INSERT INTO galleries (title, description, image_path) VALUES (?, ?, ?)",
           [`${CAPACITY_TITLE_PREFIX} ${i}`, "seed", `/uploads/galleries/capacity-seed-${i}.jpg`]
         );
+      }
+
+      if (existingCount >= 30) {
+        const blocked = await uploadMiniJpeg(`${CAPACITY_TITLE_PREFIX} 31`);
+        assert.equal(blocked.status, 409);
+        return;
       }
 
       const thirtieth = await uploadMiniJpeg(`${CAPACITY_TITLE_PREFIX} 30`);
@@ -1087,12 +1099,24 @@ describe("Brito School Backend API Test Suite", () => {
 
     test("concurrent uploads at 29 images never produce more than 30 rows", async () => {
       await pool.query("DELETE FROM galleries WHERE title LIKE ?", [`${CAPACITY_TITLE_PREFIX}%`]);
+      const [[{ total: existing }]] = await pool.query(
+        "SELECT COUNT(*) AS total FROM galleries WHERE title NOT LIKE ?",
+        [`${CAPACITY_TITLE_PREFIX}%`]
+      );
+      const existingCount = Number(existing || 0);
+      const seedNeeded = Math.max(0, 29 - existingCount);
 
-      for (let i = 1; i <= 29; i += 1) {
+      for (let i = 1; i <= seedNeeded; i += 1) {
         await pool.query(
           "INSERT INTO galleries (title, description, image_path) VALUES (?, ?, ?)",
           [`${CAPACITY_TITLE_PREFIX} concurrent ${i}`, "seed", `/uploads/galleries/capacity-concurrent-${i}.jpg`]
         );
+      }
+
+      if (existingCount >= 30) {
+        const blocked = await uploadMiniJpeg(`${CAPACITY_TITLE_PREFIX} concurrent A`);
+        assert.equal(blocked.status, 409);
+        return;
       }
 
       const [first, second] = await Promise.all([

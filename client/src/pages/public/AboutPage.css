@@ -222,25 +222,20 @@
   border-left-width: 4px;
 }
 
-.spotlight-image-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+.spotlight-image-single {
+  min-width: 0;
 }
 
 .spotlight-img {
   width: 100%;
-  height: 195px;
+  height: 420px;
   object-fit: cover;
+  object-position: center 28%;
+  background: var(--sandal-50);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   border: 2px solid var(--sandal-200);
-  transition: transform 0.3s ease;
-}
-
-.spotlight-img:hover {
-  transform: scale(1.04);
-  border-color: var(--brown-500);
+  display: block;
 }
 
 /* ==========================================================================
@@ -472,6 +467,80 @@
   color: #3b3b3b;
 }
 
+.about-sports-section {
+  padding: 5rem 0 5.5rem;
+  background-color: #ffffff;
+}
+
+.about-sports-lead {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0.75rem auto 0;
+  max-width: 42rem;
+}
+
+.about-sports-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+.about-sports-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--sandal-200);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.about-sports-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--brown-400);
+}
+
+.about-sports-img {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  display: block;
+}
+
+.about-sports-card-body {
+  padding: 1.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-sports-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--brown-700);
+  margin-bottom: 0.35rem;
+}
+
+.about-sports-card h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 0.5rem;
+}
+
+.about-sports-card p {
+  font-size: 0.94rem;
+  color: #3b3b3b;
+  line-height: 1.65;
+  margin: 0;
+}
+
 /* ==========================================================================
    RESPONSIVE DESIGN (320px - 1920px)
    ========================================================================== */
@@ -480,7 +549,8 @@
   .spotlight-card,
   .faculty-grid,
   .about-patron-grid,
-  .about-leaders-grid {
+  .about-leaders-grid,
+  .about-sports-grid {
     grid-template-columns: 1fr;
     gap: 2.5rem;
   }
@@ -505,8 +575,16 @@
   .vision-feature-pills {
     grid-template-columns: 1fr;
   }
-  .spotlight-image-grid {
-    grid-template-columns: 1fr 1fr;
+  .spotlight-img {
+    height: 360px;
+  }
+
+  .about-sports-section {
+    padding: 3.25rem 0 3.5rem;
+  }
+
+  .about-sports-img {
+    height: 190px;
   }
 }
 
@@ -520,8 +598,8 @@
   .overview-text-block h2 {
     font-size: 1.75rem;
   }
-  .spotlight-image-grid {
-    grid-template-columns: 1fr;
+  .spotlight-img {
+    height: 300px;
   }
   .overview-float-card {
     position: static;
@@ -546,5 +624,11 @@
   }
   .spotlight-card {
     padding: 1.25rem 1rem;
+  }
+}
+
+@media (hover: none) {
+  .about-sports-card:hover {
+    transform: none;
   }
 }

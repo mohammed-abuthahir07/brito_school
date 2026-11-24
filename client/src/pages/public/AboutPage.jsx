@@ -3,8 +3,10 @@ import classroomImg from '../../assets/School/classrooms.jpg';
 import staffsImg from '../../assets/Staffs/img1.jpg';
 import britoImg from '../../assets/Brito/brito.jpeg';
 import britoPortraitImg from '../../assets/Brito/img4.jpg';
-import stateLevImg from '../../assets/Achievements/SportDev.png';
-import DistrictLev from '../../assets/Achievements/DistrictLevel.jpeg';
+import sportDevImg from '../../assets/Achievements/SportDev.png';
+import districtLevImg from '../../assets/Achievements/DistrictLevel.jpeg';
+import stateLevImg from '../../assets/Achievements/StateLev.png';
+import achievementImg from '../../assets/Sports/achivement.jpeg';
 import sideviewImg from '../../assets/Infrastracture/Schoolsideview.jpg';
 import { useScrollReveal } from '../../utils/useScrollReveal';
 import { PageHero } from '../../components/public/PageHero';
@@ -241,17 +243,84 @@ export const AboutPage = () => {
                 <IconAward size={18} />
                 <span>Student accomplishment</span>
               </div>
-              <h2 className="spotlight-title">Chief Minister’s Trophy — Basketball, 3rd Place</h2>
+              <h2 className="spotlight-title">Madurai District Triple Jump — First Place</h2>
               <p className="spotlight-desc">
-                1. Madurai district students won third place at the state-level tournament in Coimbatore. The award total was <strong>₹3,00,000</strong>, with twelve players receiving ₹25,000 each. St. Britto student <strong>R. Dilip Akash</strong> was among those honoured . <br />2. 100mts  Dash zonal level  1st place sabarimalaikannan 9A1
-3rd place Beemaragul 9F, 
+                Class 12 student <strong>M. Harish</strong> (எம். ஹரிஷ்) of St. Britto Higher Secondary School won <strong>first place</strong> for Madurai district in the <strong>triple jump</strong> (மும்முறை தடடி தாவும் போட்டி). He was honoured with a gold medal and a certificate of merit, and the victory was featured on the front page of <em>Dinamalar</em> (Madurai edition) on <strong>16 September 2026</strong>.
               </p>
+              <div className="congrats-box">
+                <strong>His words:</strong> “முயற்சி மட்டும் தான் முழுவைய தீர்வாகிக்கும்.” — M. Harish
+              </div>
             </div>
-            <div className="spotlight-image-grid">
-              <img src={stateLevImg} alt="State-level award presentation" className="spotlight-img" loading="lazy" />
-              <img src={DistrictLev} alt="State-level award presentation" className="spotlight-img" loading="lazy" />
-            
+            <div className="spotlight-image-single">
+              <img
+                src={achievementImg}
+                alt="Dinamalar front page honouring M. Harish for first place in Madurai district triple jump"
+                className="spotlight-img"
+                loading="lazy"
+              />
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="about-sports-section reveal-init" aria-label="Sports development and championships">
+        <div className="container">
+          <div className="section-header-center">
+            <span className="section-tag">Athletic Distinction</span>
+            <h2 className="section-heading">Sports Development & Championships</h2>
+            <p className="about-sports-lead">
+              St. Britto has consistently dominated inter-school, zonal, district, and state athletic meets across basketball, football, and track and field.
+            </p>
+          </div>
+
+          <div className="about-sports-grid">
+            <article className="about-sports-card reveal-init stagger-1">
+              <img
+                src={sportDevImg}
+                alt="Sports Development Program and Team Felicitation"
+                className="about-sports-img"
+                loading="lazy"
+              />
+              <div className="about-sports-card-body">
+                <span className="about-sports-tag">Comprehensive Training</span>
+                <h3>Sports Development Initiatives</h3>
+                <p>
+                  Daily specialized morning and evening coaching sessions overseen by qualified Physical Directors, emphasizing physical endurance, agility, and fair play.
+                </p>
+              </div>
+            </article>
+
+            <article className="about-sports-card reveal-init stagger-2">
+              <img
+                src={districtLevImg}
+                alt="District Level Sports Accolades"
+                className="about-sports-img"
+                loading="lazy"
+              />
+              <div className="about-sports-card-body">
+                <span className="about-sports-tag">District Tournaments</span>
+                <h3>District Level Trophies & Medals</h3>
+                <p>
+                  Consistently securing top ranks in Madurai Revenue District athletic meets, inter-school tournaments, and zonal athletic championships.
+                </p>
+              </div>
+            </article>
+
+            <article className="about-sports-card reveal-init stagger-3">
+              <img
+                src={stateLevImg}
+                alt="State Level Commendation"
+                className="about-sports-img"
+                loading="lazy"
+              />
+              <div className="about-sports-card-body">
+                <span className="about-sports-tag">State Prominence</span>
+                <h3>State Level Felicitations</h3>
+                <p>
+                  Representing Madurai district at Tamil Nadu state-level championships, earning cash prizes, government merit awards, and sports quota certificates.
+                </p>
+              </div>
+            </article>
           </div>
         </div>
       </section>

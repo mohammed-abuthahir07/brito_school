@@ -4,8 +4,10 @@ import schoolLogo from '../../assets/Logo/Schoollogo.jpg';
 import { IconMapPin, IconPhone, IconMail, IconLock } from '../common/Icons';
 import './PublicFooter.css';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export const PublicFooter = () => {
-  const currentYear = new Date().getFullYear();
+  const currentYear = CURRENT_YEAR;
 
   return (
     <footer className="public-footer">

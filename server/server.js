@@ -301,6 +301,30 @@ app.use("/api/admin", galleryRoutes);
 app.use("/api/admin", profileRoutes);
 app.use("/api/admin", dashboardRoutes);
 
+if (process.env.SERVE_CLIENT === "true" || process.env.SERVE_CLIENT === "1") {
+  const clientDist = path.join(__dirname, "..", "client", "dist");
+  app.use(express.static(clientDist, { index: false, maxAge: "1h" }));
+  app.use((req, res, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      return next();
+    }
+    const requestPath = req.path || "";
+    if (
+      requestPath.startsWith("/api") ||
+      requestPath.startsWith("/uploads") ||
+      requestPath.startsWith("/health") ||
+      requestPath.startsWith("/docs")
+    ) {
+      return next();
+    }
+    return res.sendFile(path.join(clientDist, "index.html"), (err) => {
+      if (err) {
+        return next();
+      }
+    });
+  });
+}
+
 app.use((req, res, next) => {
   if (res.headersSent) {
     return next();

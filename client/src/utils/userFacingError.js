@@ -8,7 +8,10 @@ export function isAbortError(error) {
 
 export function toUserFacingMessage(status, serverMessage) {
   const raw = typeof serverMessage === 'string' ? serverMessage.replace(/\s+/g, ' ').trim() : '';
-  const looksInternal = /stack|sql|errno|exception|econnrefused|etimedout|at \w+\(/i.test(raw);
+  const looksInternal =
+    /stack|sql|errno|exception|econnrefused|etimedout|er_[a-z0-9_]+|unknown column|at \w+\(/i.test(
+      raw,
+    );
   const brief = !looksInternal && raw.length > 0 && raw.length <= 180 ? raw : '';
 
   switch (status) {

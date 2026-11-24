@@ -75,7 +75,12 @@ export const PublicNavbar = () => {
         />
       )}
 
-      <aside className={`mobile-drawer ${mobileOpen ? 'open' : ''}`}>
+      <aside
+        className={`mobile-drawer ${mobileOpen ? 'open' : ''}`}
+        hidden={!mobileOpen}
+        aria-hidden={!mobileOpen}
+        inert={!mobileOpen ? true : undefined}
+      >
         <div className="mobile-drawer-header">
           <div className="mobile-drawer-brand">
             <img src={schoolLogo} alt="St. Britto Higher Secondary School Logo" />

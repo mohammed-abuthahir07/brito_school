@@ -268,8 +268,11 @@
     display: flex;
   }
 
-  .mobile-drawer-overlay,
-  .mobile-drawer {
+  .mobile-drawer-overlay {
+    display: block;
+  }
+
+  .mobile-drawer.open {
     display: flex;
   }
 }

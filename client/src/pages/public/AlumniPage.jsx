@@ -8,8 +8,10 @@ import { Alert } from '../../components/common/Alert';
 import { IconUsers, IconAward, IconSparkles } from '../../components/common/Icons';
 import './AlumniPage.css';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export const AlumniPage = () => {
-  const currentYear = new Date().getFullYear();
+  const currentYear = CURRENT_YEAR;
   useScrollReveal();
 
   const [formData, setFormData] = useState({

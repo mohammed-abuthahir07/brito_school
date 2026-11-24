@@ -8,11 +8,7 @@ import studentsImg from '../../assets/School/students.jpg';
 import nccImg from '../../assets/NCC/ncc.jpeg';
 import scoutsImg from '../../assets/Scouts/Scouts.jpg';
 import bandImg from '../../assets/Band/Band.jpeg';
-import sportsImg from '../../assets/Sports/Football.jpg';
-import sportDevImg from '../../assets/Achievements/SportDev.png';
-import districtLevImg from '../../assets/Achievements/DistrictLevel.jpeg';
-import stateLevImg from '../../assets/Achievements/StateLev.png';
-import jrcImg from '../../assets/JRC/JRC-Cadets.jpg';
+import jrcImg from '../../assets/JRC/JRC-Cadets.png';
 import nssImg from '../../assets/NSS/nss.jpg';
 import nss1Img from '../../assets/NSS/nss1.png';
 import rrcImg from '../../assets/RRC/rcc.jpg';
@@ -35,15 +31,13 @@ const YOUTH_WINGS = [
     image: nccImg,
     alt: 'NCC Cadets 4(TN) Engr Coy',
     paragraphs: [
-      <>
-        The NCC unit of St. Britto Higher Secondary School, Madurai, plays a cornerstone role in cultivating discipline, national unity, and leadership among youth. Operating under the expert mentorship of <strong>4(TN) Engr Coy NCC</strong>, cadets actively participate in social service campaigns, flood relief assistance, drill competitions, and ceremonial guard-of-honor presentations.
-      </>,
+      'The NCC unit of St. Britto Higher Secondary School, Madurai, plays a cornerstone role in cultivating discipline, national unity, and leadership among youth. Operating under the expert mentorship of 4(TN) Engr Coy NCC, cadets actively participate in social service campaigns, flood relief assistance, drill competitions, and ceremonial guard-of-honour presentations.',
+      'Regular weekly parades, physical fitness sessions, and drill practices are conducted on the school grounds to build endurance, focus, and teamwork. Cadets actively attend Combined Annual Training Camps (CATC) and specialized engineering camps, where they receive hands-on training in map reading, field craft, disaster management, and weapon handling. Cadets are systematically trained and mentored to appear for and excel in the NCC “A” Certificate examination.',
     ],
-    meta: (
-      <>
-        <strong>Unit Information:</strong> Total Strength: 100 Cadets • Troop No: 355 • Motto: <em>“Unity and Discipline”</em> • Troop Commander: <strong>P. Paul Peter Arulanathan</strong>.
-      </>
-    ),
+    points: [
+      'Swachh Bharat cleanliness drives and tree plantation',
+      'Blood donation awareness, traffic control, and anti-drug rallies',
+    ],
   },
   {
     tag: 'Bharat Scouts Movement',
@@ -51,16 +45,11 @@ const YOUTH_WINGS = [
     image: scoutsImg,
     alt: 'Bharat Scouts Movement',
     paragraphs: [
-      'More than 100 Scout boys actively engage in the Bharat Scout Movement. Founded globally in 1907 by Lt. Gen. Robert Baden-Powell, scouting instills self-reliance, moral integrity, environmental care, and first-aid readiness. Regular training sessions are conducted every Friday during the 8th period.',
-      <>
-        Living by the motto <em>"Helping Others"</em>, Scouts arrive before 8:30 a.m. each morning to guide students orderly to classrooms. At noon, they supervise lunch hall cleanliness, assist school visitors, and lead march-pasts on Republic Day and Sports Day.
-      </>,
+      'At our school, more than 100 Scout boys actively participate in the Bharat Scout Movement. They receive systematic and regular training to develop their skills, discipline, leadership qualities, and character.',
+      'The Bharat Scouts and Guides is a worldwide youth movement established to promote the physical, mental, and spiritual development of young people. It was founded in 1907 in England by Lieutenant General Robert Baden-Powell.',
+      'The movement is a voluntary organization that nurtures good character, a spirit of service, discipline, leadership, and responsibility among students. Its primary objective is to develop young people into responsible and ideal citizens. Through practical training, students learn to help others, protect the environment, and build self-confidence.',
+      'The Scout Movement at our school is successfully guided and coordinated by Mr. S. Ponraj, Graduate Teacher, St. Britto Higher Secondary School, Madurai – 16.',
     ],
-    meta: (
-      <>
-        <strong>Honors & Coordination:</strong> Intensive preparation for <strong>Tritiya Sopan</strong> & the prestigious <strong>Rajya Puraskar</strong> Governor's Award. Coordinated by <strong>Mr. S. Ponraj</strong>, Graduate Teacher.
-      </>
-    ),
   },
   {
     tag: 'School Band Troupe',
@@ -68,35 +57,16 @@ const YOUTH_WINGS = [
     image: bandImg,
     alt: 'Britto Band Troupe',
     paragraphs: [
-      <>
-        Founded in <strong>1994</strong>, the Britto Band Troupe inaugurates major school functions with musical grandeur and rhythmic majesty. Welcoming eminent dignitaries, leading march-past contingents, and adding solemn glory to celebrations are the central mission of this beloved ensemble.
-      </>,
+      'The St. Britto Band Troupe was started in the year 1994 and has been functioning wonderfully until today. Our school band plays a primary role in grandly kicking off all the functions held at the school.',
+      'The main objective of the Britto Band Troupe is to welcome special guests during events and entertain them. Our Britto Band Troupe takes the lead and adds grandeur to all functions and parade events held at the school.',
+      'From the time the Britto Band Troupe was founded, the following teachers have served as secretaries and guided the troupe wonderfully:',
     ],
-    meta: (
-      <>
-        <strong>Band Master History</strong>
-        <ul className="club-meta-list">
-          <li>1994–1999: Teacher Mr. A. Stanislaus Justin</li>
-          <li>1999–2008: Teacher Mr. A. Louis Amalraj</li>
-          <li>2008–2017: Teacher Mr. M. S. Ackle Britto</li>
-          <li>2017–Present: Teacher <strong>Mr. K. Jayaseelan</strong></li>
-        </ul>
-      </>
-    ),
-  },
-  {
-    tag: 'Athletic Wings',
-    title: 'Sports, Basketball & Football',
-    image: sportsImg,
-    alt: 'Sports and Football Tournament',
-    paragraphs: [
-      'Our athletic department nurtures championship basketball squads, football teams, and track athletes. Renowned for capturing 3rd place in the State-Level Chief Minister\'s Trophy (₹3,00,000 cash prize), our athletic programs build team camaraderie, physical stamina, and competitive sportsmanship.',
+    points: [
+      '1994–1999: Teacher Mr. A. Carlos Justin',
+      '1999–2008: Teacher Mr. A. Louis Amalraj',
+      '2008–2017: Teacher Mr. M. S. Agnel Cretus',
+      '2017–present: Teacher Mr. K. Jeyaseelan has been serving as the secretary of the Britto Band Troupe and leading it wonderfully',
     ],
-    meta: (
-      <>
-        <strong>Coaching Regimen:</strong> Supervised daily by Physical Directors, conducting morning stamina workouts, tactical strategy, and inter-school matches.
-      </>
-    ),
   },
 ];
 
@@ -107,7 +77,19 @@ const SERVICE_WINGS = [
     image: jrcImg,
     alt: 'Junior Red Cross Cadets',
     paragraphs: [
-      'Cadets are formed in health awareness, disaster first-aid, sanitation, and humanitarian service — training that supports empathy and an immediate relief response in the school community.',
+      'The school-level student wing of the global Red Cross Society, known as the Junior Red Cross (JRC), has been functioning in our school since its very inception. This organization carries out various activities in our school, which are listed below.',
+      'From June to February, training classes were held three times a month depending on the circumstances. In these sessions, discussions and explanations were provided on:',
+    ],
+    points: [
+      'History of the movement',
+      'Health and first-aid training',
+      'Personal hygiene',
+      'Environmental awareness',
+      'Drug awareness and its consequences',
+      'Self-discipline, public welfare, national integration, and international friendship',
+    ],
+    closing: [
+      'All of these activities are being wonderfully implemented under the guidance of the School Correspondent Rev. Fr. A. Louis and Headmaster Rev. Fr. D. Maria Arulchelvan, by our school’s Graduate Science Teacher Mr. S. Sahaya Kumar, who serves as the school’s JRC Counsellor and the Madurai Educational District Joint Coordinator.',
     ],
   },
   {
@@ -116,7 +98,13 @@ const SERVICE_WINGS = [
     image: nssImg,
     alt: 'NSS Community Volunteers',
     paragraphs: [
-      '1. Road Safety:Students carefully provide safety assistance to ensure that fellow students cross and travel along the road safely when arriving at school in the morning.Medical Camp:They organize medical camps both at the school and during the special camp, providing various forms of assistance.Anti-Drug Awareness Camp:For school students, they collaborate with police officers and the Singapenn (Womens Safety) wing police personnel to conduct awareness programs against drug abuse..',
+      'NSS volunteers support road safety each morning so students can arrive at school safely, organise medical camps on campus and during special camps, and run anti-drug awareness programmes with police officers and the Singapenn (Women’s Safety) wing.',
+    ],
+    points: [
+      'Every morning, dedicated NSS volunteers assist with traffic regulation and road safety near the school entrance, ensuring that all students arrive at school safely and smoothly.',
+      'Volunteers actively organize and assist in general medical check-up camps on campus as well as during annual special camps, helping provide essential healthcare support to students and local residents.',
+      'Every year, a seven-day residential special camp is organized in a nearby adopted village, where students engage in community service, literacy drives, hygiene awareness, and rural development work.',
+      'Volunteers regularly participate in campus cleaning drives, tree plantation programmes, and plastic-free initiatives to maintain a green and healthy school environment.',
     ],
   },
   {
@@ -125,7 +113,9 @@ const SERVICE_WINGS = [
     image: rrcImg,
     alt: 'Red Ribbon Club',
     paragraphs: [
-      'A youth health wing that promotes positive lifestyles, health awareness, peer counselling, and adolescent hygiene on campus.',
+      'The Red Ribbon Club (RRC) is a voluntary organization formed to create awareness about HIV and AIDS among school students. This club has been actively functioning in our school to empower students with accurate health information and social responsibility.',
+      'Throughout the academic year, regular awareness sessions and peer-education classes are conducted for students. In these sessions, discussions and guidance are provided on healthy living, adolescent health, prevention of infectious diseases, blood donation awareness, and avoiding high-risk behaviors and substance abuse.',
+      'To engage students creatively, various competitions such as essay writing, drawing, elocution, and quizzes are organized on health and social awareness themes. The club also observes World AIDS Day every year on December 1st by organizing awareness rallies, human chains, and pledge-taking ceremonies to spread the message to the wider community.',
     ],
   },
 ];
@@ -149,8 +139,6 @@ const WingSlider = ({ items, ariaLabel }) => {
   const goTo = (nextIndex) => {
     setIndex((nextIndex + items.length) % items.length);
   };
-
-  const active = items[index];
 
   return (
     <div
@@ -187,22 +175,43 @@ const WingSlider = ({ items, ariaLabel }) => {
         <IconChevronLeft size={22} />
       </button>
 
-      <article className="wing-slide" key={active.tag} aria-live="polite">
-        <div className="wing-slide-media">
-          <img src={active.image} alt={active.alt} />
-        </div>
-        <div className="wing-slide-copy">
-          <span className="wing-slide-tag">{active.tag}</span>
-          <h3 className="wing-slide-title">{active.title}</h3>
-          <div className="wing-slide-rule" aria-hidden="true" />
-          {active.paragraphs.map((paragraph, paragraphIndex) => (
-            <p key={paragraphIndex} className="wing-slide-desc">
-              {paragraph}
-            </p>
-          ))}
-          {active.meta ? <div className="club-meta-box">{active.meta}</div> : null}
-        </div>
-      </article>
+      <div className="wing-stage" aria-live="polite">
+        {items.map((item, itemIndex) => (
+          <article
+            key={item.tag}
+            className={`wing-slide${itemIndex === index ? ' is-active' : ''}`}
+            aria-hidden={itemIndex !== index}
+          >
+            <div className="wing-slide-media">
+              <img src={item.image} alt={item.alt} />
+            </div>
+            <div className="wing-slide-copy">
+              <span className="wing-slide-tag">{item.tag}</span>
+              <h3 className="wing-slide-title">{item.title}</h3>
+              <div className="wing-slide-rule" aria-hidden="true" />
+              <div className="wing-slide-text">
+                {item.paragraphs.map((paragraph, paragraphIndex) => (
+                  <p key={paragraphIndex} className="wing-slide-desc">
+                    {paragraph}
+                  </p>
+                ))}
+                {item.points?.length ? (
+                  <ul className="wing-slide-list">
+                    {item.points.map((point) => (
+                      <li key={point}>{point}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {item.closing?.map((paragraph) => (
+                  <p key={paragraph} className="wing-slide-desc">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
 
       <button
         type="button"
@@ -350,69 +359,6 @@ export const FacilitiesPage = () => {
           </div>
 
           <WingSlider items={YOUTH_WINGS} ariaLabel="youth movement" />
-
-          {/* =========================================================================
-              SPORTS DEVELOPMENT & ATHLETIC ACHIEVEMENTS
-              ========================================================================= */}
-          <div className="achievements-gallery-block reveal-init">
-            <div className="section-header-center">
-              <span className="section-tag">Athletic Distinction</span>
-              <h2 className="section-heading">Sports Development & Championships</h2>
-              <p className="facilities-section-lead">
-                St. Britto has consistently dominated inter-school, zonal, district, and state athletic meets across basketball, football, and track and field.
-              </p>
-            </div>
-
-            <div className="achievements-grid">
-              <article className="achievement-card reveal-init stagger-1">
-                <img
-                  src={sportDevImg}
-                  alt="Sports Development Program and Team Felicitation"
-                  className="achievement-img"
-                  loading="lazy"
-                />
-                <div className="achievement-card-body">
-                  <span className="vibrancy-tag">Comprehensive Training</span>
-                  <h3 className="achievement-card-title">Sports Development Initiatives</h3>
-                  <p className="achievement-card-text">
-                    Daily specialized morning and evening coaching sessions overseen by qualified Physical Directors, emphasizing physical endurance, agility, and fair play.
-                  </p>
-                </div>
-              </article>
-
-              <article className="achievement-card reveal-init stagger-2">
-                <img
-                  src={districtLevImg}
-                  alt="District Level Sports Accolades"
-                  className="achievement-img"
-                  loading="lazy"
-                />
-                <div className="achievement-card-body">
-                  <span className="vibrancy-tag">District Tournaments</span>
-                  <h3 className="achievement-card-title">District Level Trophies & Medals</h3>
-                  <p className="achievement-card-text">
-                    Consistently securing top ranks in Madurai Revenue District athletic meets, inter-school tournaments, and zonal athletic championships.
-                  </p>
-                </div>
-              </article>
-
-              <article className="achievement-card reveal-init stagger-3">
-                <img
-                  src={stateLevImg}
-                  alt="State Level Commendation"
-                  className="achievement-img"
-                  loading="lazy"
-                />
-                <div className="achievement-card-body">
-                  <span className="vibrancy-tag">State Prominence</span>
-                  <h3 className="achievement-card-title">State Level Felicitations</h3>
-                  <p className="achievement-card-text">
-                    Representing Madurai district at Tamil Nadu state-level championships, earning cash prizes, government merit awards, and sports quota certificates.
-                  </p>
-                </div>
-              </article>
-            </div>
-          </div>
 
           <div className="section-header-center facilities-subhead">
             <span className="section-tag">Service Wings</span>
