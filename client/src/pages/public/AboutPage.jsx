@@ -10,7 +10,7 @@ import achievementImg from '../../assets/Sports/achivement.jpeg';
 import sideviewImg from '../../assets/Infrastracture/Schoolsideview.jpg';
 import { useScrollReveal } from '../../utils/useScrollReveal';
 import { PageHero } from '../../components/public/PageHero';
-import { IconSparkles, IconCheck, IconAward } from '../../components/common/Icons';
+import { IconSparkles, IconCheck, IconAward, IconGraduationCap, IconDownload, IconUsers } from '../../components/common/Icons';
 import './AboutPage.css';
 
 export const AboutPage = () => {
@@ -321,6 +321,224 @@ export const AboutPage = () => {
                 </p>
               </div>
             </article>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          HSC +2 RESULT ANALYSIS & TOPPERS (ACADEMIC MERIT)
+          ========================================================================= */}
+      <section className="about-results-section reveal-init" aria-label="HSC +2 Result Analysis and Toppers">
+        <div className="container">
+          <div className="section-header-center">
+            <span className="section-tag">Academic Excellence</span>
+            <h2 className="section-heading">HSC +2 Result Analysis (2025–2026)</h2>
+            <p className="about-results-lead">
+              St. Britto Higher Secondary School, Madurai – celebrating outstanding scholastic achievements, dedication, and academic brilliance.
+            </p>
+          </div>
+
+          {/* KPI Metrics Row */}
+          <div className="results-metrics-grid">
+            <div className="result-metric-card reveal-init stagger-1">
+              <div className="metric-icon-wrap">
+                <IconUsers size={24} />
+              </div>
+              <div className="metric-info">
+                <div className="metric-number">260</div>
+                <div className="metric-label">Students Appeared</div>
+              </div>
+            </div>
+
+            <div className="result-metric-card reveal-init stagger-2">
+              <div className="metric-icon-wrap">
+                <IconGraduationCap size={24} />
+              </div>
+              <div className="metric-info">
+                <div className="metric-number">255</div>
+                <div className="metric-label">Students Passed</div>
+              </div>
+            </div>
+
+            <div className="result-metric-card result-metric-highlight reveal-init stagger-3">
+              <div className="metric-icon-wrap highlight-icon">
+                <IconAward size={24} />
+              </div>
+              <div className="metric-info">
+                <div className="metric-number">98%</div>
+                <div className="metric-label">Overall Pass Percentage</div>
+              </div>
+            </div>
+          </div>
+
+          {/* School Toppers Cards */}
+          <div className="toppers-section-header">
+            <div className="toppers-header-badge">
+              <IconAward size={18} />
+              <span>Higher Secondary (+2) Merit List</span>
+            </div>
+            <h3 className="toppers-main-title">School Academic Toppers</h3>
+          </div>
+
+          <div className="toppers-cards-grid">
+            {/* Rank 1 */}
+            <div className="topper-card topper-rank-1 reveal-init stagger-1">
+              <div className="topper-badge-ribbon ribbon-gold">
+                <span className="rank-crown">🥇</span> I RANK
+              </div>
+              <div className="topper-avatar-wrap">
+                <div className="topper-avatar avatar-gold">
+                  <IconGraduationCap size={32} />
+                </div>
+                <span className="topper-position-badge badge-gold">School 1st Mark</span>
+              </div>
+              <div className="topper-details">
+                <h4 className="topper-name">AKILESHWAR R</h4>
+                <div className="topper-class-pill">Class &amp; Sec: 12C3</div>
+                <div className="topper-score-box">
+                  <span className="score-label">Mark Obtained</span>
+                  <div className="score-val">
+                    <strong>541</strong> <span>/ 600</span>
+                  </div>
+                  <span className="score-pct">(90.17%)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Rank 2 */}
+            <div className="topper-card topper-rank-2 reveal-init stagger-2">
+              <div className="topper-badge-ribbon ribbon-silver">
+                <span className="rank-crown">🥈</span> II RANK
+              </div>
+              <div className="topper-avatar-wrap">
+                <div className="topper-avatar avatar-silver">
+                  <IconGraduationCap size={32} />
+                </div>
+                <span className="topper-position-badge badge-silver">School 2nd Mark</span>
+              </div>
+              <div className="topper-details">
+                <h4 className="topper-name">PRAVEEN KUMAR M</h4>
+                <div className="topper-class-pill">Class &amp; Sec: 12C1</div>
+                <div className="topper-score-box">
+                  <span className="score-label">Mark Obtained</span>
+                  <div className="score-val">
+                    <strong>536</strong> <span>/ 600</span>
+                  </div>
+                  <span className="score-pct">(89.33%)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Rank 3 */}
+            <div className="topper-card topper-rank-3 reveal-init stagger-3">
+              <div className="topper-badge-ribbon ribbon-bronze">
+                <span className="rank-crown">🥉</span> III RANK
+              </div>
+              <div className="topper-avatar-wrap">
+                <div className="topper-avatar avatar-bronze">
+                  <IconGraduationCap size={32} />
+                </div>
+                <span className="topper-position-badge badge-bronze">School 3rd Mark</span>
+              </div>
+              <div className="topper-details">
+                <h4 className="topper-name">KISHORE RAJ S</h4>
+                <div className="topper-class-pill">Class &amp; Sec: 12A1</div>
+                <div className="topper-score-box">
+                  <span className="score-label">Mark Obtained</span>
+                  <div className="score-val">
+                    <strong>535</strong> <span>/ 600</span>
+                  </div>
+                  <span className="score-pct">(89.17%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Official Merit Table & PDF Download */}
+          <div className="results-table-card reveal-init">
+            <div className="results-table-header">
+              <div className="results-table-header-left">
+                <h4 className="table-card-title">Official Merit Summary Table</h4>
+                <p className="table-card-subtitle">
+                  St. Britto Higher Secondary School, Madurai – HSC +2 Examination
+                </p>
+              </div>
+              <a
+                href="/HSC_Result_Analysis_2025_2026.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-download-pdf"
+                download="ST_BRITTO_HSC_Result_Analysis_2025_2026.pdf"
+                title="Download Official Result Analysis PDF"
+              >
+                <IconDownload size={18} />
+                <span>Download Official PDF</span>
+              </a>
+            </div>
+
+            <div className="table-responsive">
+              <table className="results-table">
+                <thead>
+                  <tr>
+                    <th scope="col" className="col-sl">SL. NO</th>
+                    <th scope="col" className="col-rank">RANK</th>
+                    <th scope="col" className="col-name">NAME OF THE STUDENT</th>
+                    <th scope="col" className="col-marks">MARK OBTAINED</th>
+                    <th scope="col" className="col-class">CLASS &amp; SEC</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="row-gold">
+                    <td className="cell-center font-bold">1</td>
+                    <td>
+                      <span className="rank-badge rank-1-badge">I RANK</span>
+                    </td>
+                    <td className="student-name-cell">
+                      <strong>AKILESHWAR R</strong>
+                      <span className="distinction-tag">School Topper</span>
+                    </td>
+                    <td className="cell-center mark-highlight">
+                      <span className="mark-bold">541</span> / 600
+                    </td>
+                    <td className="cell-center">
+                      <span className="class-pill">12C3</span>
+                    </td>
+                  </tr>
+                  <tr className="row-silver">
+                    <td className="cell-center font-bold">2</td>
+                    <td>
+                      <span className="rank-badge rank-2-badge">II RANK</span>
+                    </td>
+                    <td className="student-name-cell">
+                      <strong>PRAVEEN KUMAR M</strong>
+                      <span className="distinction-tag">Distinction</span>
+                    </td>
+                    <td className="cell-center mark-highlight">
+                      <span className="mark-bold">536</span> / 600
+                    </td>
+                    <td className="cell-center">
+                      <span className="class-pill">12C1</span>
+                    </td>
+                  </tr>
+                  <tr className="row-bronze">
+                    <td className="cell-center font-bold">3</td>
+                    <td>
+                      <span className="rank-badge rank-3-badge">III RANK</span>
+                    </td>
+                    <td className="student-name-cell">
+                      <strong>KISHORE RAJ S</strong>
+                      <span className="distinction-tag">Distinction</span>
+                    </td>
+                    <td className="cell-center mark-highlight">
+                      <span className="mark-bold">535</span> / 600
+                    </td>
+                    <td className="cell-center">
+                      <span className="class-pill">12A1</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

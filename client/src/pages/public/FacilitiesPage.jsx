@@ -5,6 +5,9 @@ import classroomImg from '../../assets/School/classrooms.jpg';
 import officeImg from '../../assets/School/office.avif';
 import prayerImg from '../../assets/School/prayers.jpg';
 import studentsImg from '../../assets/School/students.jpg';
+import footballImg from '../../assets/Sports/Football.jpg';
+import basketballImg from '../../assets/Sports/basketball.jpg';
+import hockeyImg from '../../assets/Sports/Hocky.jpg';
 import nccImg from '../../assets/NCC/ncc.jpeg';
 import scoutsImg from '../../assets/Scouts/Scouts.jpg';
 import bandImg from '../../assets/Band/Band.jpeg';
@@ -338,6 +341,42 @@ export const FacilitiesPage = () => {
                 <h3 className="infra-title">United Student Community</h3>
                 <p className="infra-desc">
                   A united fraternity of 2,100 young boys growing together in human dignity, mutual respect, teamwork, and lifelong fellowship.
+                </p>
+              </div>
+            </article>
+
+            <article className="infra-card reveal-init stagger-1">
+              <div className="infra-img-wrapper">
+                <img src={footballImg} alt="Football Field and Training" className="infra-img" loading="lazy" />
+              </div>
+              <div className="infra-body">
+                <h3 className="infra-title">Football Arena & Training</h3>
+                <p className="infra-desc">
+                  Full-sized dedicated football ground hosting inter-school tournaments, daily morning and evening tactical drills, team practice, and state-level coaching.
+                </p>
+              </div>
+            </article>
+
+            <article className="infra-card reveal-init stagger-2">
+              <div className="infra-img-wrapper">
+                <img src={basketballImg} alt="Basketball Court" className="infra-img" loading="lazy" />
+              </div>
+              <div className="infra-body">
+                <h3 className="infra-title">Basketball Court & Coaching</h3>
+                <p className="infra-desc">
+                  Regulation basketball court fostering agility, competitive team spirit, regular inter-school league championships, and specialized skills coaching.
+                </p>
+              </div>
+            </article>
+
+            <article className="infra-card reveal-init stagger-3">
+              <div className="infra-img-wrapper">
+                <img src={hockeyImg} alt="Hockey Ground and Practice" className="infra-img" loading="lazy" />
+              </div>
+              <div className="infra-body">
+                <h3 className="infra-title">Hockey Ground & Practice Field</h3>
+                <p className="infra-desc">
+                  Spacious dedicated hockey practice field providing professional stick handling, endurance training, team coordination, and district tournament preparation.
                 </p>
               </div>
             </article>

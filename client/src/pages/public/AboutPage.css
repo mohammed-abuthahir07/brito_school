@@ -542,6 +542,503 @@
 }
 
 /* ==========================================================================
+   HSC +2 RESULT ANALYSIS & TOPPERS (ACADEMIC MERIT)
+   ========================================================================== */
+.about-results-section {
+  padding: 5rem 0 5.5rem;
+  background: linear-gradient(180deg, #fbf9f5 0%, #f7f3ec 100%);
+  border-top: 1.5px solid var(--sandal-200);
+  border-bottom: 1.5px solid var(--sandal-200);
+  position: relative;
+}
+
+.about-results-lead {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0.75rem auto 0;
+  max-width: 44rem;
+  text-align: center;
+}
+
+/* Metric KPI Cards */
+.results-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.75rem;
+}
+
+.result-metric-card {
+  background: #ffffff;
+  border: 1.5px solid var(--sandal-200);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.result-metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--brown-400);
+}
+
+.result-metric-highlight {
+  background: linear-gradient(135deg, #fffdfa 0%, #fef8ee 100%);
+  border-color: #d4af37;
+}
+
+.metric-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--sandal-100);
+  color: var(--brown-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.highlight-icon {
+  background: #fff1c2;
+  color: #996515;
+}
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-number {
+  font-size: 2.25rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--brown-900);
+  letter-spacing: -0.02em;
+}
+
+.metric-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+}
+
+/* Toppers Section Header */
+.toppers-section-header {
+  text-align: center;
+  margin-top: 3.5rem;
+  margin-bottom: 2rem;
+}
+
+.toppers-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  background: #ffffff;
+  border: 1px solid var(--sandal-300);
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brown-700);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-xs);
+  margin-bottom: 0.75rem;
+}
+
+.toppers-main-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #000000;
+  margin: 0;
+}
+
+/* Toppers Cards Grid */
+.toppers-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  margin-bottom: 3.5rem;
+}
+
+.topper-card {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 1.5px solid var(--sandal-200);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.topper-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Ribbon header */
+.topper-badge-ribbon {
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.ribbon-gold {
+  background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(170, 130, 10, 0.3);
+}
+
+.ribbon-silver {
+  background: linear-gradient(135deg, #78828a 0%, #4f5860 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(80, 90, 100, 0.25);
+}
+
+.ribbon-bronze {
+  background: linear-gradient(135deg, #b86b35 0%, #8c4819 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(140, 72, 25, 0.25);
+}
+
+.topper-rank-1 {
+  border-color: #d4af37;
+  background: linear-gradient(180deg, #fffdf8 0%, #ffffff 100%);
+}
+
+.topper-rank-2 {
+  border-color: #8c969e;
+}
+
+.topper-rank-3 {
+  border-color: #c9804e;
+}
+
+.topper-avatar-wrap {
+  padding: 2rem 1.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.topper-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.avatar-gold {
+  background: #fff8e1;
+  color: #b8860b;
+  border: 2px solid #ffd54f;
+}
+
+.avatar-silver {
+  background: #f1f3f5;
+  color: #495057;
+  border: 2px solid #ced4da;
+}
+
+.avatar-bronze {
+  background: #faede6;
+  color: #934614;
+  border: 2px solid #e0a37e;
+}
+
+.topper-position-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.badge-gold {
+  background: #fff1c2;
+  color: #855700;
+}
+
+.badge-silver {
+  background: #e9ecef;
+  color: #343a40;
+}
+
+.badge-bronze {
+  background: #fbe2d3;
+  color: #793407;
+}
+
+.topper-details {
+  padding: 1.25rem 1.75rem 2rem;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.topper-name {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #000000;
+  margin: 0 0 0.45rem;
+  letter-spacing: -0.01em;
+}
+
+.topper-class-pill {
+  display: inline-block;
+  align-self: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brown-700);
+  background: var(--sandal-100);
+  padding: 0.25rem 0.85rem;
+  border-radius: 6px;
+  margin-bottom: 1.25rem;
+}
+
+.topper-score-box {
+  background: #faf7f2;
+  border: 1px solid var(--sandal-200);
+  border-radius: var(--radius-md);
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.score-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.score-val {
+  font-size: 1.75rem;
+  color: var(--brown-900);
+  line-height: 1.1;
+}
+
+.score-val strong {
+  font-weight: 900;
+}
+
+.score-val span {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.score-pct {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #1b5e20;
+}
+
+/* Merit Table Card */
+.results-table-card {
+  background: #ffffff;
+  border: 1.5px solid var(--sandal-200);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.results-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--sandal-200);
+  background: #fdfcf9;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.table-card-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 0.25rem;
+}
+
+.table-card-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.btn-download-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--brown-700);
+  color: #ffffff !important;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(56, 26, 5, 0.2);
+  white-space: nowrap;
+}
+
+.btn-download-pdf:hover {
+  background-color: var(--brown-900);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(56, 26, 5, 0.3);
+}
+
+/* Table styling */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.results-table thead tr {
+  background-color: #f6efe6;
+  border-bottom: 2px solid var(--sandal-300);
+}
+
+.results-table th {
+  padding: 1rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brown-900);
+}
+
+.results-table td {
+  padding: 1.15rem 1.25rem;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--sandal-200);
+  color: #1a1a1a;
+  vertical-align: middle;
+}
+
+.results-table tbody tr:hover {
+  background-color: #faf7f2;
+}
+
+.cell-center {
+  text-align: center;
+}
+
+.font-bold {
+  font-weight: 800;
+}
+
+.rank-badge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.rank-1-badge {
+  background-color: #fff1c2;
+  color: #855700;
+  border: 1px solid #ffd54f;
+}
+
+.rank-2-badge {
+  background-color: #e9ecef;
+  color: #343a40;
+  border: 1px solid #ced4da;
+}
+
+.rank-3-badge {
+  background-color: #fbe2d3;
+  color: #793407;
+  border: 1px solid #e0a37e;
+}
+
+.student-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.student-name-cell strong {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #000000;
+}
+
+.distinction-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  border: 1px solid #c8e6c9;
+}
+
+.mark-highlight {
+  font-size: 1.05rem;
+  color: #381a05;
+}
+
+.mark-bold {
+  font-weight: 900;
+  font-size: 1.15rem;
+  color: #000000;
+}
+
+.class-pill {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  background: var(--sandal-100);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brown-800);
+}
+
+/* ==========================================================================
    RESPONSIVE DESIGN (320px - 1920px)
    ========================================================================== */
 @media (max-width: 1024px) {
@@ -556,6 +1053,14 @@
   }
   .about-values-grid {
     grid-template-columns: 1fr;
+  }
+  .results-metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .toppers-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
   }
   .about-patron-photos img:last-child {
     margin-top: 0;
@@ -585,6 +1090,34 @@
 
   .about-sports-img {
     height: 190px;
+  }
+
+  .about-results-section {
+    padding: 3.5rem 0 4rem;
+  }
+
+  .results-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .toppers-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .results-table-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-download-pdf {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .toppers-main-title {
+    font-size: 1.45rem;
   }
 }
 
@@ -616,6 +1149,28 @@
   .faculty-img {
     height: 280px;
   }
+
+  .about-results-section {
+    padding: 2.75rem 0 3.25rem;
+  }
+
+  .result-metric-card {
+    padding: 1.25rem;
+  }
+
+  .metric-number {
+    font-size: 1.85rem;
+  }
+
+  .topper-name {
+    font-size: 1.2rem;
+  }
+
+  .results-table th,
+  .results-table td {
+    padding: 0.85rem 0.65rem;
+    font-size: 0.84rem;
+  }
 }
 
 @media (max-width: 360px) {
@@ -628,7 +1183,9 @@
 }
 
 @media (hover: none) {
-  .about-sports-card:hover {
+  .about-sports-card:hover,
+  .topper-card:hover,
+  .result-metric-card:hover {
     transform: none;
   }
 }
