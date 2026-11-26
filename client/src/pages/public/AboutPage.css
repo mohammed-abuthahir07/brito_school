@@ -482,8 +482,8 @@
 
 .about-sports-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
   margin-top: 2.5rem;
 }
 
@@ -512,7 +512,7 @@
 }
 
 .about-sports-card-body {
-  padding: 1.75rem;
+  padding: 1.5rem 1.25rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -528,16 +528,16 @@
 }
 
 .about-sports-card h3 {
-  font-size: 1.2rem;
+  font-size: 1.12rem;
   font-weight: 800;
   color: #000000;
   margin: 0 0 0.5rem;
 }
 
 .about-sports-card p {
-  font-size: 0.94rem;
+  font-size: 0.9rem;
   color: #3b3b3b;
-  line-height: 1.65;
+  line-height: 1.6;
   margin: 0;
 }
 
@@ -1046,10 +1046,13 @@
   .spotlight-card,
   .faculty-grid,
   .about-patron-grid,
-  .about-leaders-grid,
-  .about-sports-grid {
+  .about-leaders-grid {
     grid-template-columns: 1fr;
     gap: 2.5rem;
+  }
+  .about-sports-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
   }
   .about-values-grid {
     grid-template-columns: 1fr;
@@ -1086,6 +1089,11 @@
 
   .about-sports-section {
     padding: 3.25rem 0 3.5rem;
+  }
+
+  .about-sports-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .about-sports-img {

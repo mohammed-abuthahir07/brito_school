@@ -7,6 +7,7 @@ import sportDevImg from '../../assets/Achievements/SportDev.png';
 import districtLevImg from '../../assets/Achievements/DistrictLevel.jpeg';
 import stateLevImg from '../../assets/Achievements/StateLev.png';
 import achievementImg from '../../assets/Sports/achivement.jpeg';
+import basketballTourneyImg from '../../assets/Sports/basketball.png';
 import sideviewImg from '../../assets/Infrastracture/Schoolsideview.jpg';
 import { useScrollReveal } from '../../utils/useScrollReveal';
 import { PageHero } from '../../components/public/PageHero';
@@ -277,15 +278,15 @@ export const AboutPage = () => {
             <article className="about-sports-card reveal-init stagger-1">
               <img
                 src={sportDevImg}
-                alt="Sports Development Program and Team Felicitation"
+                alt="St. Britto SDAT Athlete on Championship Podium"
                 className="about-sports-img"
                 loading="lazy"
               />
               <div className="about-sports-card-body">
                 <span className="about-sports-tag">Comprehensive Training</span>
-                <h3>Sports Development Initiatives</h3>
+                <h3>Sports Development &amp; Podiums</h3>
                 <p>
-                  Daily specialized morning and evening coaching sessions overseen by qualified Physical Directors, emphasizing physical endurance, agility, and fair play.
+                  Structured daily coaching by Physical Directors builds endurance and skill, propelling our SDAT athletes onto state championship podiums with medals and certificates.
                 </p>
               </div>
             </article>
@@ -293,15 +294,15 @@ export const AboutPage = () => {
             <article className="about-sports-card reveal-init stagger-2">
               <img
                 src={districtLevImg}
-                alt="District Level Sports Accolades"
+                alt="District Inter-School Tournament Trophy Presentation"
                 className="about-sports-img"
                 loading="lazy"
               />
               <div className="about-sports-card-body">
                 <span className="about-sports-tag">District Tournaments</span>
-                <h3>District Level Trophies & Medals</h3>
+                <h3>District Trophies &amp; Medals</h3>
                 <p>
-                  Consistently securing top ranks in Madurai Revenue District athletic meets, inter-school tournaments, and zonal athletic championships.
+                  Consistently securing top ranks and championship trophies in Madurai District inter-school tournaments and athletic meets through disciplined teamwork and spirit.
                 </p>
               </div>
             </article>
@@ -309,15 +310,31 @@ export const AboutPage = () => {
             <article className="about-sports-card reveal-init stagger-3">
               <img
                 src={stateLevImg}
-                alt="State Level Commendation"
+                alt="State Level Villupattu Cultural Performance"
                 className="about-sports-img"
                 loading="lazy"
               />
               <div className="about-sports-card-body">
                 <span className="about-sports-tag">State Prominence</span>
-                <h3>State Level Felicitations</h3>
+                <h3>State Cultural &amp; Arts Honors</h3>
                 <p>
-                  Representing Madurai district at Tamil Nadu state-level championships, earning cash prizes, government merit awards, and sports quota certificates.
+                  Showcasing Tamil heritage through traditional Villupattu performances at state-level youth festivals, earning government merit awards, cash prizes, and state recognition.
+                </p>
+              </div>
+            </article>
+
+            <article className="about-sports-card reveal-init stagger-4">
+              <img
+                src={basketballTourneyImg}
+                alt="Champions on the Court - St. Britto Basketball Team"
+                className="about-sports-img"
+                loading="lazy"
+              />
+              <div className="about-sports-card-body">
+                <span className="about-sports-tag">Basketball Championship</span>
+                <h3>Champions on the Court! 🏀🏆</h3>
+                <p>
+                  Congratulations to our St. Britto Basketball Team on winning the tournament! Hard work, teamwork, and coach guidance brought home victory and certificates.
                 </p>
               </div>
             </article>

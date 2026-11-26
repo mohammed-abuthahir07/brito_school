@@ -9,7 +9,7 @@ import britoPortraitImg from '../../assets/Brito/img4.jpg';
 import independenceImg from '../../assets/School/independenceday.jpg';
 import prayerImg from '../../assets/School/prayers.jpg';
 import classroomImg from '../../assets/School/classrooms.jpg';
-import basketballImg from '../../assets/Sports/basketball.jpg';
+import basketballImg from '../../assets/Sports/image.png';
 import nccImg from '../../assets/NCC/ncc.jpeg';
 import bandImg from '../../assets/Band/Band.jpeg';
 import groundImg from '../../assets/Infrastracture/Ground.jpg';
@@ -399,12 +399,12 @@ export const HomePage = () => {
 
             <div className="vibrancy-card reveal-init stagger-2">
               <div className="vibrancy-img-frame">
-                <img src={basketballImg} alt="Athletic Sports and Basketball" loading="lazy" />
+                <img src={basketballImg} alt="School Basketball Court and Sports Facility" loading="lazy" />
               </div>
               <div className="vibrancy-card-body">
-                <span className="vibrancy-tag">State-Level Champions</span>
-                <h4>Sports & CM Trophy Basketball</h4>
-                <p>3rd Place State-Level Champions with ₹3,00,000 in government awards, cultivating resilience and team spirit.</p>
+                <span className="vibrancy-tag">Sports Infrastructure</span>
+                <h4>Basketball Court &amp; Sports Ground</h4>
+                <p>Spacious outdoor basketball court and athletic grounds fostering daily practice, physical fitness, discipline, and team spirit.</p>
               </div>
             </div>
 

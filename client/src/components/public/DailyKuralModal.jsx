@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useDailyKural } from '../../context/DailyKuralContext';
 import { IconBookOpen, IconX } from '../common/Icons';
 import thiruImg from '../../assets/thiru.webp';
@@ -27,7 +28,7 @@ export const DailyKuralModal = () => {
 
   if (!modalOpen || !kural) return null;
 
-  return (
+  return createPortal(
     <div
       className="kural-overlay"
       role="dialog"
@@ -95,6 +96,7 @@ export const DailyKuralModal = () => {
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

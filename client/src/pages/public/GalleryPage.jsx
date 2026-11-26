@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { publicService } from '../../services/publicService';
 import { API_BASE_URL } from '../../services/api';
 import { isAbortError } from '../../utils/userFacingError';
@@ -198,67 +199,69 @@ export const GalleryPage = () => {
         </div>
       </section>
 
-      {currentItem && (
-        <div
-          className="lightbox-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label={currentItem.title || 'School photograph'}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setActiveIndex(null);
-          }}
-        >
-          <div className="lightbox-content">
-            <button
-              type="button"
-              className="lightbox-close-btn"
-              onClick={() => setActiveIndex(null)}
-              aria-label="Close image lightbox"
-            >
-              <IconX size={22} />
-            </button>
+      {currentItem &&
+        createPortal(
+          <div
+            className="lightbox-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label={currentItem.title || 'School photograph'}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setActiveIndex(null);
+            }}
+          >
+            <div className="lightbox-content">
+              <button
+                type="button"
+                className="lightbox-close-btn"
+                onClick={() => setActiveIndex(null)}
+                aria-label="Close image lightbox"
+              >
+                <IconX size={22} />
+              </button>
 
-            {galleries.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  className="lightbox-nav-btn prev"
-                  onClick={() => setActiveIndex((prev) => (prev - 1 + galleries.length) % galleries.length)}
-                  aria-label="Previous image"
-                >
-                  <IconChevronLeft size={24} />
-                </button>
-                <button
-                  type="button"
-                  className="lightbox-nav-btn next"
-                  onClick={() => setActiveIndex((prev) => (prev + 1) % galleries.length)}
-                  aria-label="Next image"
-                >
-                  <IconChevronRight size={24} />
-                </button>
-              </>
-            )}
-
-            <div className="lightbox-image-container">
-              <SafeImage
-                src={getImageSrc(currentItem)}
-                alt={currentItem.title || 'School photograph'}
-                className="lightbox-img"
-              />
-            </div>
-
-            <div className="lightbox-caption">
-              <div className="lightbox-counter">
-                {activeIndex + 1} / {galleries.length}
-              </div>
-              <h3 className="lightbox-title">{currentItem.title || 'School photograph'}</h3>
-              {currentItem.description && (
-                <p className="lightbox-desc">{currentItem.description}</p>
+              {galleries.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    className="lightbox-nav-btn prev"
+                    onClick={() => setActiveIndex((prev) => (prev - 1 + galleries.length) % galleries.length)}
+                    aria-label="Previous image"
+                  >
+                    <IconChevronLeft size={24} />
+                  </button>
+                  <button
+                    type="button"
+                    className="lightbox-nav-btn next"
+                    onClick={() => setActiveIndex((prev) => (prev + 1) % galleries.length)}
+                    aria-label="Next image"
+                  >
+                    <IconChevronRight size={24} />
+                  </button>
+                </>
               )}
+
+              <div className="lightbox-image-container">
+                <SafeImage
+                  src={getImageSrc(currentItem)}
+                  alt={currentItem.title || 'School photograph'}
+                  className="lightbox-img"
+                />
+              </div>
+
+              <div className="lightbox-caption">
+                <div className="lightbox-counter">
+                  {activeIndex + 1} / {galleries.length}
+                </div>
+                <h3 className="lightbox-title">{currentItem.title || 'School photograph'}</h3>
+                {currentItem.description && (
+                  <p className="lightbox-desc">{currentItem.description}</p>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
