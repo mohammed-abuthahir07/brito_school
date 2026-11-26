@@ -331,7 +331,7 @@ export const AboutPage = () => {
                 loading="lazy"
               />
               <div className="about-sports-card-body">
-                <span className="about-sports-tag">Basketball Championship</span>
+                <span className="about-sports-tag">Revenue District Winner in basketball</span>
                 <h3>Champions on the Court! 🏀🏆</h3>
                 <p>
                   Congratulations to our St. Britto Basketball Team on winning the tournament! Hard work, teamwork, and coach guidance brought home victory and certificates.
